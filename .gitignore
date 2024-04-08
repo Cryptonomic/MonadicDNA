@@ -1,0 +1,6 @@
+.venv
+.venv/**
+dataset/input/**
+dataset/processed/**
+**/__pycache__
+**/__pycache__/**
