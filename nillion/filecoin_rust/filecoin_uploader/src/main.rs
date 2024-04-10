@@ -10,8 +10,7 @@ const FILE_PATH: &str = "src/Combined_Genome.txt";
 #[derive(serde::Deserialize)]
 struct FilecoinUploadResponse {
     Name: String,
-    Hash: String,
-    Size: String,
+    Size: String
 }
 
 #[tokio::main]
@@ -45,9 +44,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let body = response.bytes().await?;
         let upload_info: FilecoinUploadResponse = serde_json::from_slice(&body)?;
-        println!("Chunk uploaded! Name: {}, Hash: {}, Size: {}", upload_info.Name, upload_info.Hash, upload_info.Size);
+        println!("Chunk uploaded! Name: {}, Size: {}", upload_info.Name, upload_info.Size);
     }
 
-    // ... (rest of your handling and parsing logic)
+    
     Ok(())
 }
