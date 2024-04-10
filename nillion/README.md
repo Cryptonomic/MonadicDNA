@@ -1,9 +1,9 @@
-# MondadicDNA - Nillion
-Nillion code for the MondadicDNA project.
+# MondadicDNA
+Secure personal genomics using cryptography
 
-## Environment Quickstart 
 
-1. run `create_venv.sh`
-1. run `bootstrap-local-environment.sh`
-1. Re-run the bootstrap script to kill the existing environment and start a new one.
-1. run `killall nillion-devnet` to stop existing nodes.
+This branch contain code for splitting genome data into 110KB chunks and storing them on filecoin via lighthouse.
+
+cd into filecoin_rust directory to check the code for splitting the genome data text file into 110kb chunks and then storing them on the lighthouse.
+
+You can retrive chunk one at a time with the code in the store_retrive directory. the filename is nillion_lighthouse.py
