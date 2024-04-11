@@ -1,7 +1,9 @@
+import Onboarding from "@/components/onboarding";
+
 export default function Home() {
   return (
     <main>
-      <p className="text-[green]"> Monadic DNA </p>
+      <Onboarding />
     </main>
   );
 }
