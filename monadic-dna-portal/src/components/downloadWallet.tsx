@@ -21,7 +21,7 @@ export default function DownLoadWallet({ passport }: {passport: any}) {
       </p>
       <button
         onClick={() => downloadPassportData(passport)}
-        className='bg-[#E1E1E1] flex m-auto sm:text-2xl justify-center items-center'
+        className='bg-[#E1E1E1] flex m-auto justify-center items-center'
       >
         passportData.json
       </button>
