@@ -2,3 +2,4 @@
 Cargo.lock
 methods/guest/Cargo.lock
 target/
+res/genome_data.json
