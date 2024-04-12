@@ -3,9 +3,13 @@ from nada_dsl import *
 
 def nada_main():
     party1 = Party(name="Party1")
-    my_int1 = SecretInteger(Input(name="my_int1", party=party1))
-    my_int2 = SecretInteger(Input(name="my_int2", party=party1))
+    snp = SecretInteger(Input(name="snp", party=party1))
+    genotype = SecretInteger(Input(name="genotype", party=party1))
 
-    new_int = my_int1 + my_int2
+    target_snp = Integer(6)
+    target_genotype = Integer(9)
 
-    return [Output(new_int, "my_output", party1)]
+    eq1 = (snp >= target_snp).if_else((target_snp >= snp).if_else(Integer(1), Integer(0)), Integer(0))
+    eq2 = (genotype >= target_genotype).if_else((target_genotype >= genotype).if_else(Integer(1), Integer(0)), Integer(0))
+
+    return [Output(Tuple.new(eq1,eq2), "Result", party1)]
