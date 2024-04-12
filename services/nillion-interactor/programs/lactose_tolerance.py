@@ -12,4 +12,7 @@ def nada_main():
     eq1 = (snp >= target_snp).if_else((target_snp >= snp).if_else(Integer(1), Integer(0)), Integer(0))
     eq2 = (genotype >= target_genotype).if_else((target_genotype >= genotype).if_else(Integer(1), Integer(0)), Integer(0))
 
-    return [Output(Tuple.new(eq1,eq2), "Result", party1)]
+    isSuccess = (eq1 >= Integer(1)).if_else((eq2 >= Integer(1)).if_else(Integer(1), Integer(0)), Integer(0))
+    result = isSuccess.reveal()
+
+    return [Output(result, "Result", party1)]
