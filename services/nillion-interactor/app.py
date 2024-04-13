@@ -18,7 +18,8 @@ def read_and_filter_23andme(file_storage):
     # Define the SNPs of interest and their deterministic integer values
     snps_of_interest = {
         'rs4402960': 1, 'rs7754840': 2, 'rs10811661': 3, 'rs9300039': 4, 'rs8050136': 5,
-        'rs1801282': 6, 'rs13266634': 7, 'rs1111875': 8, 'rs7903146': 9, 'rs5219': 10
+        'rs1801282': 6, 'rs13266634': 7, 'rs1111875': 8, 'rs7903146': 9, 'rs5219': 10,
+        'rs1815739': 11, 'rs6025': 12
     }
     
     # Genotype to integer mapping
