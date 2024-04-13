@@ -7,6 +7,8 @@ import uploadIcon from '../../public/upload.svg';
 import Modal from './modal';
 import Loading from './loading';
 import DownLoadWallet from './downloadWallet';
+import { createNotaryAttestation } from '@/utils/sdkattestations';
+import { createNotaryAttestation2 } from '@/utils/attestations';
 
 export default function Onboarding() {
   const [file, setFile] = useState<File | null>(null);
@@ -15,7 +17,7 @@ export default function Onboarding() {
   const [isPassport, setIsPassport] = useState(false);
   const [fileErrorText, setFileErrorText] = useState('');
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
@@ -56,8 +58,20 @@ export default function Onboarding() {
     return <DownLoadWallet passport={passportData} />
   }
 
+  const createAttestation = async () => {
+    // const res = await createNotaryAttestation()
+    const res = await createNotaryAttestation2()
+    console.log('res', res)
+  }
+
   return (
     <>
+      <br />
+      <button
+        onClick={ () => createAttestation()}
+      >
+        Create Attestation
+      </button>
       <Modal open={isEncryptingFile}>
         <Loading />
       </Modal>

@@ -9,7 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
+    "@ethsign/sign-protocol-evm": "^1.1.1",
+    "@ethsign/sp-sdk": "^0.3.18",
+    "axios": "^1.6.8",
     "crypto-js": "^4.2.0",
+    "ethers": "^6.11.1",
     "next": "14.1.4",
     "react": "^18",
     "react-dom": "^18"
