@@ -6,8 +6,10 @@ Microservice and API for encapsulating Nillion interactions for Monadic DNA.
 
 For local development, don't forget to: 
 - Install Nillion using the instruction at https://docs.nillion.com/nillion-sdk-and-tools and https://docs.nillion.com/nillion-devnet
+- Run `nada-devnet` to run a local Nillion network
 - Run inside a Python virtual environment
 - Update the path of `NILLION_USERKEY_PATH_PARTY_1` and `NILLION_NODEKEY_PATH_PARTY_1` in `.env` to reflect the local file system
+- Run `python nadatest.py` to both register the required Nada programs with the local node and perform an end to end test
 
 ## Commands
 
