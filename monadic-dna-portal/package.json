@@ -9,10 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethsign/sign-protocol-evm": "^1.1.1",
     "@ethsign/sp-sdk": "^0.3.18",
+    "@heroicons/react": "^2.1.1",
+    "@mui/icons-material": "^5.15.10",
+    "@mui/lab": "^5.0.0-alpha.170",
+    "@mui/material-nextjs": "^5.15.9",
     "axios": "^1.6.8",
+    "clsx": "^2.1.0",
     "crypto-js": "^4.2.0",
     "ethers": "^6.11.1",
     "next": "14.1.4",

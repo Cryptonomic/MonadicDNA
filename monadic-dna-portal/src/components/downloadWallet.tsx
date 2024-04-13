@@ -1,13 +1,23 @@
 'use client';
 
-export default function DownLoadWallet({ passport }: {passport: any}) {
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import { blue } from '@mui/material/colors';
+
+import DownloadIcon from '@mui/icons-material/Download';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+export default function DownLoadWallet({ passport }: {passport: any}) { // todo: pass schema
+  const fileName = `dna_passport_${passport?.fileHash}`
 
   const downloadPassportData = (data: any) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'passportData.json';
+    link.download = `${fileName}.json`;
     document.body.appendChild(link);
     link.click();
     URL.revokeObjectURL(url);
@@ -15,16 +25,29 @@ export default function DownLoadWallet({ passport }: {passport: any}) {
   };
 
   return (
-    <div className='flex flex-col justify-center items-center'>
-      <p className="sm:text-2xl mb-[28px]">
-        Your Encrypted Genomic Wallet
-      </p>
-      <button
-        onClick={() => downloadPassportData(passport)}
-        className='bg-[#E1E1E1] flex m-auto justify-center items-center'
-      >
-        passportData.json
-      </button>
-    </div>
+    <Box className='w-fit'>
+      <Typography variant='h5'> Your DNA Passport </Typography>
+
+      <Box className='flex items-center p-6 mt-6 bg-[#f7f7f7]'>
+        <Typography color={blue[500]}> {`${fileName}.JSON`} </Typography>
+
+        <IconButton
+          onClick={() => downloadPassportData(passport)}
+          className='ml-6'
+          aria-label="download DNA passport"
+        >
+          <DownloadIcon />
+        </IconButton>
+
+      </Box>
+      <Typography> Your genomic data is now encrypted with your passport! </Typography>
+      <Typography className='pt-7'> Your DNA passport includes: </Typography>
+      <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1' />
+      <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1' />
+      <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1 mb-6' />
+      <Button startIcon={<ArrowBackIcon />}>
+        Go back
+      </Button>
+    </Box>
   );
 }
