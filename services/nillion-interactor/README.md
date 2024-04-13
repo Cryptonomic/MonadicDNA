@@ -26,4 +26,4 @@ Compile:
 
 Testing example:
 
-```nada-run -i snp=6 -i genotype=9  binaries/lactose_tolerance.nada.bin`
+`nada-run -i snp=6 -i genotype=12  binaries/thrombosis.nada.bin`

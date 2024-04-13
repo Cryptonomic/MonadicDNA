@@ -16,5 +16,5 @@ nillion \
     --blinding-factors-manager-sc-address $NILLION_BLINDING_FACTORS_MANAGER_SC_ADDRESS \
     store-program \
     --cluster-id $NILLION_CLUSTER_ID \
-    binaries/lactose_tolerance.nada.bin \
-    lactose_tolerance
+    binaries/thrombosis.nada.bin \
+    thrombosis

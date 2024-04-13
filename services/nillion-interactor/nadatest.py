@@ -22,8 +22,8 @@ async def main():
     party_id = client.party_id()
     user_id = client.user_id()
     party_name = "Party1"
-    program_name = "lactose_tolerance"
-    program_mir_path = f"binaries/lactose_tolerance.nada.bin"
+    program_name = "thrombosis"
+    program_mir_path = f"binaries/thrombosis.nada.bin"
 
     # store program
     action_id = await client.store_program(

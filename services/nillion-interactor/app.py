@@ -59,8 +59,8 @@ async def store_on_nillion(gene_data):
     user_id = client.user_id()
     party_name = "Party1"
 
-    program_name = "lactose_tolerance"
-    program_mir_path = f"binaries/lactose_tolerance.nada.bin"
+    program_name = "thrombosis"
+    program_mir_path = f"binaries/thrombosis.nada.bin"
     program_id = f"{user_id}/{program_name}"
 
     secret_bindings = nillion.ProgramBindings(program_id)
@@ -91,8 +91,8 @@ async def compute_on_nillion(store_id):
     party_id = client.party_id()
     user_id = client.user_id()
     party_name = "Party1"
-    program_name = "lactose_tolerance"
-    program_mir_path = f"binaries/lactose_tolerance.nada.bin"
+    program_name = "thrombosis"
+    program_mir_path = f"binaries/thrombosis.nada.bin"
 
     program_id = f"{user_id}/{program_name}"
 
@@ -136,7 +136,7 @@ async def handle_dataset():
         return jsonify({'error': 'No selected file'}), 400
     if file:
         filtered_data = read_and_filter_23andme(file)
-        results = await asyncio.wait_for(store_on_nillion(filtered_data), timeout=30)
+        results = await asyncio.wait_for(store_on_nillion(filtered_data), timeout=120)
         return jsonify(results)
     return jsonify({'error': 'File processing failed'}), 500
 
@@ -147,7 +147,7 @@ async def thrombosis():
     if store_id is None:
         return jsonify({'error': 'Missing store_id'}), 400
 
-    result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=30)
+    result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=120)
     return jsonify(result)
 
 
