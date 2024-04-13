@@ -22,7 +22,7 @@ def read_and_filter_23andme(file_storage):
         'rs1801282': 6, 'rs13266634': 7, 'rs1111875': 8, 'rs7903146': 9, 'rs5219': 10,
         'rs1815739': 11, 'rs6025': 12
     }
-    
+
     # Genotype to integer mapping
     genotype_to_int = {
         "AA": 0, "AC": 1, "AG": 2, "AT": 3,
@@ -30,7 +30,7 @@ def read_and_filter_23andme(file_storage):
         "GG": 7, "GT": 8,
         "TT": 9
     }
-    
+
     results = []
     for line in file_storage:
         line = line.decode('utf-8')
@@ -39,15 +39,15 @@ def read_and_filter_23andme(file_storage):
         parts = line.strip().split('\t')
         if len(parts) < 4:
             continue
-        
+
         rsid, chromosome, position, genotype = parts
-        
+
         # Convert rsid to integer if it's one of the desired SNPs
         if rsid in snps_of_interest:
             rsid_int = snps_of_interest[rsid]
             genotype_int = genotype_to_int.get(genotype, -1)  # Use -1 for unrecognized genotypes
             results.append({'rsid': rsid, 'rsid_int': rsid_int, 'genotype_int': genotype_int})
-    
+
     return results
 
 async def store_on_nillion(gene_data):
@@ -156,4 +156,4 @@ def hello_world():
     return "Hello, world!"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
