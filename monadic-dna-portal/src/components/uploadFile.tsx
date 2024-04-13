@@ -15,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisuallyHiddenInput from './visuallyHiddenInput';
 import { formatFileSize } from '@/utils/formatting';
 import DownLoadWallet from './downloadWallet';
+import { createAttestation, IPassportData } from '@/utils/attestations';
 
 const UploadFile = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -28,7 +29,7 @@ const UploadFile = () => {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    console.log(selectedFile)
+
     if (selectedFile) {
       setIsFileLoading(true);
       setFile(selectedFile);
@@ -42,7 +43,7 @@ const UploadFile = () => {
 
     setIsCreatingPassport(true);
 
-    reader.onload = (e) => {
+    reader.onload = async(e) => {
       const fileBuffer = e.target?.result as ArrayBuffer;
       const byteArray = Array.from(new Uint8Array(fileBuffer));
       const binaryString = String.fromCharCode.apply(null, byteArray);
@@ -50,9 +51,20 @@ const UploadFile = () => {
       const fileHash = MD5(binaryString).toString();
       const passportId = MD5(file.name).toString();
 
-      setPassportData( { passportId, fileHash });
+      // TODO: upload file on NIllion
+
+      const data: IPassportData = {
+          passportId,
+          fileHash,
+          dataHash: 'ccc',
+          valid: 'yes',
+      }
+
+      await createAttestation(data);
+
       setIsCreatingPassport(false);
       setIsPassport(true);
+      setPassportData( { passportId, fileHash });
     }
 
     reader.readAsArrayBuffer(file);

@@ -1,56 +1,80 @@
 import { Contract, ethers } from 'ethers';
+import { decodeEventLog, numberToHex } from 'viem';
 
-const ISPABI = require('../lib/abi.json')
+const SignProtocol = require('../lib/abi/SignProtocol.json');
 
-export async function createNotaryAttestation2() {
-  // let address = "0x4b"; // Alice's address. Will need Alice's account to send the tx.
+const config = require('../config.json');
+
+export interface IPassportData {
+    passportId: string;
+    fileHash: string;
+    dataHash: string;
+    valid: 'yes' | 'no';
+}
+
+export async function createAttestation(data: IPassportData) {
+
+  // let schemaData = ethers.AbiCoder.defaultAbiCoder().encode(
+  //     ['string', 'string'],
+  //     ['passportId', 'fileHash']
+  // )
+
   let schemaData = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["string", "string"],
-    ['passportId', 'fileHash']
+      ['string', 'string', 'string', 'string'],
+      [data.passportId, data.fileHash, data.dataHash, data.valid]
   )
-  console.log('schemaData', schemaData)
 
   const provider = new ethers.BrowserProvider(window.ethereum)
 
-  const contract = new Contract('0x878c92FD89d8E0B93Dc0a3c907A2adc7577e39c5', ISPABI.abi, provider);
+  const contract = new Contract(config.contractAddress, SignProtocol.abi, provider);
 
   const JsonRpcSigner = await provider.getSigner();
 
   const instance = contract.connect(JsonRpcSigner) as Contract;
 
+  const address = JsonRpcSigner.address
+
   // Send the attestation transaction
   try {
-    await instance[
-      "attest((uint64,uint64,uint64,uint64,address,uint64,uint8,bool,bytes[],bytes),string,bytes,bytes)"
-    ](
-      {
-        schemaId: BigInt("0x8"), // The final number from our schema's ID.
-        linkedAttestationId: 0, // We are not linking an attestation.
-        attestTimestamp: 0, // Will be generated for us.
-        revokeTimestamp: 0, // Attestation is not revoked.
-        attester: '0x2207fDD917051B7c8b44F7b5AA00cEfe2ef6B1B9', // Alice's address.
-        validUntil: 0, // We are not setting an expiry date.
-        dataLocation: 0, // We are placing data on-chain.
-        revoked: false, // The attestation is not revoked.
-        recipients: ['0xDf233a7EA1386b2F97e9F7d7e528170dd459D1AB'], // Bob is our recipient.
-        data: schemaData, // The encoded schema data.
-      },
-      "0xDf233a7EA1386b2F97e9F7d7e528170dd459D1AB".toLowerCase(), // Bob's lowercase address will be our indexing key.
-      "0x", // No delegate signature.
-      "0x00" // No extra data.
-    )
-      .then(
-        async (tx: any) =>
-          await tx.wait(1).then((res: any) => {
-            console.log("success", res);
-            // You can find the attestation's ID using the following path:
-            // res.events[0].args.attestationId
-          })
-      )
-      .catch((err: any) => {
-        console.log(err?.message ? err.message : err);
+      const tx = await instance[
+          'attest((uint64,uint64,uint64,uint64,address,uint64,uint8,bool,bytes[],bytes),string,bytes,bytes)'
+      ](
+          {
+              schemaId: BigInt(config.schemaId), // The final number from our schema's ID.
+              linkedAttestationId: 0, // We are not linking an attestation.
+              attestTimestamp: 0, // Will be generated for us.
+              revokeTimestamp: 0, // Attestation is not revoked.
+              attester: address,
+              validUntil: 0, // We are not setting an expiry date.
+              dataLocation: 0, // We are placing data on-chain.
+              revoked: false, // The attestation is not revoked.
+              recipients: [config.signer], // The signer's address.
+              data: schemaData, // The encoded schema data.
+          },
+          config.signer.toLowerCase(), // The indexing key.
+          '0x', // No delegate signature.
+          '0x00' // No extra data.
+      );
+
+      const res = await tx.wait(1)
+
+      console.log('success', res);
+
+      const decodedLog: any = decodeEventLog<any, any, any, any>({
+          abi: SignProtocol.abi,
+          topics: res.logs[0].topics,
+          data: res.logs[0].data,
       });
+
+      const attestationId = numberToHex(decodedLog.args.attestationId);
+      const txHash = res.hash;
+
+      return {
+          attestationId,
+          txHash,
+          indexingValue: decodedLog.args.indexingKey,
+      };
   } catch (err: any) {
-    console.log(err?.message ? err.message : err);
+      console.log(err?.message ? err.message : err);
   }
 }

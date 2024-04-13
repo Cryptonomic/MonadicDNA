@@ -25,7 +25,8 @@
     "ethers": "^6.11.1",
     "next": "14.1.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "viem": "^2.9.16"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
