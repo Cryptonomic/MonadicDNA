@@ -2,6 +2,7 @@ import asyncio
 from flask import Flask, request, jsonify
 import os
 import py_nillion_client as nillion
+import sys
 import werkzeug
 
 from dotenv import load_dotenv
@@ -80,7 +81,7 @@ async def store_on_nillion(gene_data):
         )
         store_ids[rsid] = store_id
 
-    return rsid
+    return store_ids
 
 async def compute_on_nillion(store_id):
     cluster_id = os.getenv("NILLION_CLUSTER_ID")
@@ -127,7 +128,7 @@ async def compute_on_nillion(store_id):
 
 
 @app.route('/dataset', methods=['PUT'])
-def handle_dataset():
+async def handle_dataset():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
@@ -135,9 +136,20 @@ def handle_dataset():
         return jsonify({'error': 'No selected file'}), 400
     if file:
         filtered_data = read_and_filter_23andme(file)
-        results = store_on_nillion(filtered_data)
+        results = await asyncio.wait_for(store_on_nillion(filtered_data), timeout=30)
         return jsonify(results)
     return jsonify({'error': 'File processing failed'}), 500
+
+@app.route('/computations/thrombosis', methods=['POST'])
+async def thrombosis():
+    store_id = request.json.get('store_id')
+
+    if store_id is None:
+        return jsonify({'error': 'Missing store_id'}), 400
+
+    result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=30)
+    return jsonify(result)
+
 
 @app.route('/')
 def hello_world():
