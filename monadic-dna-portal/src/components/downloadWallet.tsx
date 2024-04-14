@@ -8,8 +8,16 @@ import { blue } from '@mui/material/colors';
 
 import DownloadIcon from '@mui/icons-material/Download';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { IPassportData } from '@/utils/attestations';
 
-export default function DownLoadWallet({ passport }: {passport: any}) { // todo: pass schema
+export default function DownLoadWallet({
+  passport,
+  goBack,
+}: {
+  passport: IPassportData;
+  goBack: () => void;
+}) {
+
   const fileName = `dna_passport_${passport?.fileHash}`
 
   const downloadPassportData = (data: any) => {
@@ -45,7 +53,10 @@ export default function DownLoadWallet({ passport }: {passport: any}) { // todo:
       <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1' />
       <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1' />
       <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1 mb-6' />
-      <Button startIcon={<ArrowBackIcon />}>
+      <Button
+        onClick={goBack}
+        startIcon={<ArrowBackIcon />}
+      >
         Go back
       </Button>
     </Box>

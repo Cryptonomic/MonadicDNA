@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from 'react';
 
-import { MD5 } from 'crypto-js';
+import SparkMD5 from 'spark-md5';
 
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
@@ -19,8 +19,8 @@ import { createAttestation, IPassportData } from '@/utils/attestations';
 
 const UploadFile = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [passportData, setPassportData] = useState<{ passportId: string; fileHash: string } | null>(null);
-  const [isPassport, setIsPassport] = useState(false);
+  const [passportData, setPassportData] = useState<IPassportData>();
+  const [isWallet, setIsWallet] = useState(false);
   const [isFileLoading, setIsFileLoading] = useState(false);
   const [fileProgress, setFileProgress] = React.useState(0);
   const [isCreatingPassport, setIsCreatingPassport] = useState(false);
@@ -43,28 +43,40 @@ const UploadFile = () => {
 
     setIsCreatingPassport(true);
 
+    // TODO: upload file on NIllion
+
     reader.onload = async(e) => {
       const fileBuffer = e.target?.result as ArrayBuffer;
-      const byteArray = Array.from(new Uint8Array(fileBuffer));
-      const binaryString = String.fromCharCode.apply(null, byteArray);
+      // Convert file name to ArrayBuffer
+      const fileNameArrayBuffer = new TextEncoder().encode(file.name);
 
-      const fileHash = MD5(binaryString).toString();
-      const passportId = MD5(file.name).toString();
+      const spark = new SparkMD5.ArrayBuffer();
 
-      // TODO: upload file on NIllion
+      // Calculate file name hash
+      spark.append(fileNameArrayBuffer);
+      const passportId = spark.end();
+
+      // Reset SparkMD5 instance for file content hashing
+      spark.reset();
+      spark.append(fileBuffer);
+      const fileHash = spark.end();
 
       const data: IPassportData = {
           passportId,
           fileHash,
-          dataHash: 'ccc',
-          valid: 'yes',
+          dataHash: '',
+          valid: true,
       }
 
-      await createAttestation(data);
-
-      setIsCreatingPassport(false);
-      setIsPassport(true);
-      setPassportData( { passportId, fileHash });
+      try {
+          await createAttestation(data);
+          setPassportData(data);
+          setIsWallet(true);
+      } catch (error) {
+          console.error('Failed to create attestation:', error);
+      } finally {
+        setIsCreatingPassport(false);
+      }
     }
 
     reader.readAsArrayBuffer(file);
@@ -81,8 +93,11 @@ const UploadFile = () => {
 
   console.log('passportData', passportData)
 
-  if(isPassport) {
-    return <DownLoadWallet passport={passportData} />
+  if(isWallet && passportData) {
+    return <DownLoadWallet
+      passport={passportData}
+      goBack={() => setIsWallet(false)}
+    />
   }
 
   return (
