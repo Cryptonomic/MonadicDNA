@@ -36,7 +36,7 @@ export async function createAttestation(data: IPassportData) {
     const tx = await client.createAttestation({
         schemaId: config.schemaId,
         data: schemaData,
-        indexingValue: account.address.toLowerCase(),
+        indexingValue: data.passportId,
         recipients: [config.signer], // The signer's address.
     });
 
