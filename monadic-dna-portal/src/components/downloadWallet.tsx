@@ -18,7 +18,7 @@ export default function DownLoadWallet({
     goBack: () => void;
 }) {
 
-    const fileName = `dna_passport_${passport?.fileHash}`
+    const fileName = `monadicdna_passport_${passport?.fileHash}`
 
     const downloadPassportData = (data: any) => {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
