@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import PageTabs from '@/components/tabs';
-import UploadFile from '@/dump/uploadFile';
+import UploadFile from '@/components/uploadFile';
 
 export default function Home() {
     const [value, setValue] = useState('one');
