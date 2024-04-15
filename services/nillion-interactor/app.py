@@ -5,6 +5,8 @@ import py_nillion_client as nillion
 import sys
 import werkzeug
 
+import socket
+
 from dotenv import load_dotenv
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -14,6 +16,17 @@ from helpers.nillion_keypath_helper import getUserKeyFromFile, getNodeKeyFromFil
 load_dotenv()
 
 app = Flask(__name__)
+
+def get_random_node_key():
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        result = hostname + "_" + ip_address
+        print("Node key: ", result)
+        return result
+
+_userkey = getUserKeyFromFile(os.getenv("NILLION_USERKEY_PATH_PARTY_1"))
+_nodekey = nillion.NodeKey.from_seed(get_random_node_key())
+_client = create_nillion_client(_userkey, _nodekey)
 
 def read_and_filter_23andme(file_storage):
     # Define the SNPs of interest and their deterministic integer values
@@ -52,11 +65,8 @@ def read_and_filter_23andme(file_storage):
 
 async def store_on_nillion(gene_data):
     cluster_id = os.getenv("NILLION_CLUSTER_ID")
-    userkey = getUserKeyFromFile(os.getenv("NILLION_USERKEY_PATH_PARTY_1"))
-    nodekey = getNodeKeyFromFile(os.getenv("NILLION_NODEKEY_PATH_PARTY_1"))
-    client = create_nillion_client(userkey, nodekey)
-    party_id = client.party_id()
-    user_id = client.user_id()
+    party_id = _client.party_id()
+    user_id = _client.user_id()
     party_name = "Party1"
 
     program_name = "thrombosis"
@@ -76,7 +86,7 @@ async def store_on_nillion(gene_data):
         "snp": nillion.SecretInteger(6),
         "genotype": nillion.SecretInteger(9),
          })
-        store_id = await client.store_secrets(
+        store_id = await _client.store_secrets(
             cluster_id, secret_bindings, stored_secret, None
         )
         store_ids[rsid] = store_id
@@ -85,22 +95,13 @@ async def store_on_nillion(gene_data):
 
 async def compute_on_nillion(store_id):
     cluster_id = os.getenv("NILLION_CLUSTER_ID")
-    userkey = getUserKeyFromFile(os.getenv("NILLION_USERKEY_PATH_PARTY_1"))
-    nodekey = getNodeKeyFromFile(os.getenv("NILLION_NODEKEY_PATH_PARTY_1"))
-    client = create_nillion_client(userkey, nodekey)
-    party_id = client.party_id()
-    user_id = client.user_id()
+    party_id = _client.party_id()
+    user_id = _client.user_id()
     party_name = "Party1"
     program_name = "thrombosis"
     program_mir_path = f"binaries/thrombosis.nada.bin"
 
     program_id = f"{user_id}/{program_name}"
-
-    result_tuple1 = await client.retrieve_secret(cluster_id, store_id, "snp")
-    snp = result_tuple1[1].value
-
-    result_tuple2 = await client.retrieve_secret(cluster_id, store_id, "genotype")
-    genotype = result_tuple2[1].value
 
     compute_bindings = nillion.ProgramBindings(program_id)
     compute_bindings.add_input_party(party_name, party_id)
@@ -109,7 +110,7 @@ async def compute_on_nillion(store_id):
     computation_time_secrets = nillion.Secrets({})
 
     # Compute on the secret
-    compute_id = await client.compute(
+    compute_id = await _client.compute(
         cluster_id,
         compute_bindings,
         [store_id],
@@ -120,7 +121,7 @@ async def compute_on_nillion(store_id):
     # Print compute result
     print(f"The computation was sent to the network. compute_id: {compute_id}")
     while True:
-        compute_event = await client.next_compute_event()
+        compute_event = await _client.next_compute_event()
         if isinstance(compute_event, nillion.ComputeFinishedEvent):
             print(f"✅  Compute complete for compute_id {compute_event.uuid}")
             print(f"🖥️  The result is {compute_event.result.value}")
@@ -156,4 +157,4 @@ def hello_world():
     return "Hello, world!"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, port=8732)

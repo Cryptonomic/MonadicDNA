@@ -4,6 +4,8 @@ import os
 import sys
 import pytest
 
+import socket
+
 from dotenv import load_dotenv
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -15,10 +17,17 @@ load_dotenv()
 
 # 1 Party running simple addition on 1 stored secret and 1 compute time secret
 async def main():
-    cluster_id = os.getenv("NILLION_CLUSTER_ID")
+    def get_random_node_key():
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        result = hostname + "_" + ip_address
+        print("Node key: ", result)
+        return result
+    
     userkey = getUserKeyFromFile(os.getenv("NILLION_USERKEY_PATH_PARTY_1"))
-    nodekey = getNodeKeyFromFile(os.getenv("NILLION_NODEKEY_PATH_PARTY_1"))
+    nodekey = nillion.NodeKey.from_seed(get_random_node_key())
     client = create_nillion_client(userkey, nodekey)
+    cluster_id = os.getenv("NILLION_CLUSTER_ID")
     party_id = client.party_id()
     user_id = client.user_id()
     party_name = "Party1"

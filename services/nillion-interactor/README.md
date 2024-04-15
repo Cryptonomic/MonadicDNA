@@ -21,7 +21,7 @@ For local development, don't forget to:
 
 To provide a 23andMe dataset to the API to register secrets as appripriate on the Nillion network, run:
 
-`curl -i -X PUT -F "file=@testdata/hu278AF5_20210124151934.txt" http://127.0.0.1:5000/dataset`
+`curl -i -X PUT -F "file=@testdata/hu278AF5_20210124151934.txt" http://127.0.0.1:8732/dataset`
 
 This will return Nillion store IDs for all the SNPs of interest:
 
@@ -44,7 +44,7 @@ This will return Nillion store IDs for all the SNPs of interest:
 
 To run a Nillion computation to fetch a genomic result, run the following and provide a store ID from above corresponding to the SNP of interest. For example, for evaluating thrombosis we care about the SNP rs6025:
 
-`curl -i -X POST http://127.0.0.1:5000/computations/thrombosis -H "Content-Type: application/json" -d '{"store_id": "87253aa0-d93b-4897-aad2-689c270134e1"}'`
+`curl -i -X POST http://127.0.0.1:8732/computations/thrombosis -H "Content-Type: application/json" -d '{"store_id": "87253aa0-d93b-4897-aad2-689c270134e1"}'`
 
 This will return a result of either 0 or 1, with the former corresponding to the absence of disease risk and the latter corresponding to the presence of diasease risk. 
 
