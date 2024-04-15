@@ -1,0 +1,26 @@
+{
+  "$schema": "https://testnet-scan.sign.global/schema/onchain_evm_84532_0x4e",
+  "$id": "0x4e",
+  "title": "MonadicDNA-ValidDataset",
+  "type": "object",
+  "properties": {
+    "Passport ID": {
+      "type": "string",
+      "description": "The passport ID"
+    },
+    "File Name Hash": {
+      "type": "string",
+      "description": "The hash of the file containing passport ID information"
+    },
+    "Data Hash": {
+      "type": "string",
+      "description": "The hash of the passport ID data"
+    },
+    "Valid": {
+      "type": "boolean",
+      "description": "Indicates whether the passport ID is valid",
+      "default": false
+    }
+  },
+  "required": ["Passport ID", "File Name Hash", "Data Hash", "Valid"]
+}
