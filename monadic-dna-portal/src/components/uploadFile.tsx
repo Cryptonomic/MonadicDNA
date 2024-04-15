@@ -21,174 +21,174 @@ import ViewAttestations from './viewAttestations';
 
 
 const UploadFile = ({ type }: { type: ActionType } ) => {
-  const currentAction = ActionData[type];
+    const currentAction = ActionData[type];
 
-  const [file, setFile] = useState<File | null>(null);
-  const [isFileLoading, setIsFileLoading] = useState(false);
-  const [fileProgress, setFileProgress] = React.useState(0);
-  const [isWallet, setIsWallet] = useState(false);
-  const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
-  const [passportData, setPassportData] = useState<IPassportData>();
-  const [isAttestation, setIsAttestation] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [isFileLoading, setIsFileLoading] = useState(false);
+    const [fileProgress, setFileProgress] = React.useState(0);
+    const [isWallet, setIsWallet] = useState(false);
+    const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
+    const [passportData, setPassportData] = useState<IPassportData>();
+    const [isAttestation, setIsAttestation] = useState(false);
 
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
 
-    if (selectedFile) {
-      setIsFileLoading(true);
-      setFile(selectedFile);
-      reader.onprogress = updateProgress;
-      reader.readAsArrayBuffer(selectedFile);
+        if (selectedFile) {
+            setIsFileLoading(true);
+            setFile(selectedFile);
+            reader.onprogress = updateProgress;
+            reader.readAsArrayBuffer(selectedFile);
+        }
+    };
+
+    const updateProgress = (e: ProgressEvent<FileReader>) => {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            console.log(`File upload fileProgress: ${percentComplete}%`);
+            setFileProgress(percentComplete)
+            setIsFileLoading(percentComplete < 100)
+        }
+    };
+
+    const createDNAPassport = () => {
+        if (!file) { return };
+
+        setIsProcessingTransaction(true);
+
+        // TODO: upload file on NIllion
+
+        reader.onload = async(e) => {
+            const fileBuffer = e.target?.result as ArrayBuffer;
+            // Convert file name to ArrayBuffer
+            const fileNameArrayBuffer = new TextEncoder().encode(file.name);
+
+            const spark = new SparkMD5.ArrayBuffer();
+
+            // Calculate file name hash
+            spark.append(fileNameArrayBuffer);
+            const passportId = spark.end();
+
+            // Reset SparkMD5 instance for file content hashing
+            spark.reset();
+            spark.append(fileBuffer);
+            const fileHash = spark.end();
+
+            const data: IPassportData = {
+                passportId,
+                fileHash,
+                dataHash: '',
+                valid: true,
+            }
+
+            try {
+                await createAttestation(data);
+                setPassportData(data);
+                setIsWallet(true);
+            } catch (error) {
+                console.error('Failed to create attestation:', error);
+            } finally {
+              setIsProcessingTransaction(false);
+            }
+        }
+
+        reader.readAsArrayBuffer(file);
     }
-  };
 
-  const updateProgress = (e: ProgressEvent<FileReader>) => {
-    if (e.lengthComputable) {
-      const percentComplete = (e.loaded / e.total) * 100;
-      console.log(`File upload fileProgress: ${percentComplete}%`);
-      setFileProgress(percentComplete)
-      setIsFileLoading(percentComplete < 100)
-    }
-  };
-
-  const createDNAPassport = () => {
-    if (!file) { return };
-
-    setIsProcessingTransaction(true);
-
-    // TODO: upload file on NIllion
-
-    reader.onload = async(e) => {
-      const fileBuffer = e.target?.result as ArrayBuffer;
-      // Convert file name to ArrayBuffer
-      const fileNameArrayBuffer = new TextEncoder().encode(file.name);
-
-      const spark = new SparkMD5.ArrayBuffer();
-
-      // Calculate file name hash
-      spark.append(fileNameArrayBuffer);
-      const passportId = spark.end();
-
-      // Reset SparkMD5 instance for file content hashing
-      spark.reset();
-      spark.append(fileBuffer);
-      const fileHash = spark.end();
-
-      const data: IPassportData = {
-          passportId,
-          fileHash,
-          dataHash: '',
-          valid: true,
-      }
-
-      try {
-          await createAttestation(data);
-          setPassportData(data);
-          setIsWallet(true);
-      } catch (error) {
-          console.error('Failed to create attestation:', error);
-      } finally {
-        setIsProcessingTransaction(false);
-      }
+    const viewAttestation = async() => {
+        setIsProcessingTransaction(true);
+        console.log('viewing attestation')
+        setTimeout(() => {
+            setIsAttestation(true);
+        }, 3000);
     }
 
-    reader.readAsArrayBuffer(file);
-  }
+    // Mapping of function names to functions
+    const actionFunctions: Record<string, () => void> = {
+        'createDNAPassport': () => createDNAPassport(),
+        'viewAttestation': () => viewAttestation(),
+    }
+    const currentActionFunction = actionFunctions[currentAction.buttonAction];
 
-  const viewAttestation = async() => {
-      setIsProcessingTransaction(true);
-      console.log('viewing attestation')
-      setTimeout(() => {
-        setIsAttestation(true);
-      }, 3000);
-  }
+    console.log('passportData', passportData)
 
-  // Mapping of function names to functions
-  const actionFunctions: Record<string, () => void> = {
-    'createDNAPassport': () => createDNAPassport(),
-    'viewAttestation': () => viewAttestation(),
-  }
-  const currentActionFunction = actionFunctions[currentAction.buttonAction];
+    if(ActionData[type].type === 'createPassport' && isWallet && passportData) {
+        return <DownLoadWallet
+            passport={passportData}
+            goBack={() => {
+                setIsWallet(false);
+                setPassportData(undefined);
+                setFile(null)
+            }}
+        />
+    }
 
-  console.log('passportData', passportData)
+    if(ActionData[type].type === 'viewAttestation' && isAttestation) {
+        return <ViewAttestations />
+    }
 
-  if(ActionData[type].type === 'createPassport' && isWallet && passportData) {
-    return <DownLoadWallet
-      passport={passportData}
-      goBack={() => {
-        setIsWallet(false);
-        setPassportData(undefined);
-        setFile(null)
-      }}
-    />
-  }
-
-  if(ActionData[type].type === 'viewAttestation' && isAttestation) {
-    return <ViewAttestations />
-  }
-
-  return (
-    <div className='sm:w-[552px]'>
-      <Typography variant='h5'>
-          { currentAction.title }
-      </Typography>
-      <Box
-        className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
-        sx={{ borderColor: 'error'}}
-      >
-        <UploadFileIcon className='w-10 h-10' />
-        <div>
-          <Link
-            className='p-0 cursor-pointer'
-            component="label"
-            variant='inherit'
-            color='text.primary'
-          >
-            Click to upload
-            <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
-          </Link>
-          {' '}
-          or drag and drop
-        </div>
-
-        <Typography color='text.secondary'> Exome sequencing or genotyping data (Max X GB) </Typography>
-      </Box>
-      {file &&
-        <>
-          <Box className='flex justify-between mt-4 mb-10'>
-            <div className='flex items-center gap-3'>
-              <UploadFileIcon className='w-10 h-10' />
-              <div>
-                <Typography color='text.primary'> { file.name } </Typography>
-                <Typography color='text.secondary' variant='subtitle2'> {formatFileSize(file?.size ?? 0)} . Loading </Typography>
-                <Box sx={{ width: '200px' }}>
-                  <LinearProgress variant='determinate' value={fileProgress} />
-                </Box>
-              </div>
-            </div>
-            <IconButton
-              onClick={() => console.log('delete file')}
-              aria-label="remove file"
+    return (
+        <div className='sm:w-[552px]'>
+            <Typography variant='h5'>
+                { currentAction.title }
+            </Typography>
+            <Box
+                className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
+                sx={{ borderColor: 'error'}}
             >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
+                <UploadFileIcon className='w-10 h-10' />
+                <div>
+                    <Link
+                        className='p-0 cursor-pointer'
+                        component="label"
+                        variant='inherit'
+                        color='text.primary'
+                    >
+                        Click to upload
+                        <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
+                    </Link>
+                    {' '}
+                    or drag and drop
+                </div>
 
-          <LoadingButton
-            variant='contained'
-            loading={isProcessingTransaction}
-            disabled={fileProgress < 100}
-            onClick={() => currentActionFunction()}
-            className='w-[400px]'
-          >
-            {currentAction.buttonTitle}
-          </LoadingButton>
-        </>
-      }
-    </div>
-  )
+                <Typography color='text.secondary'> Exome sequencing or genotyping data (Max X GB) </Typography>
+            </Box>
+            {file &&
+                <>
+                    <Box className='flex justify-between mt-4 mb-10'>
+                        <div className='flex items-center gap-3'>
+                            <UploadFileIcon className='w-10 h-10' />
+                            <div>
+                                <Typography color='text.primary'> { file.name } </Typography>
+                                <Typography color='text.secondary' variant='subtitle2'> {formatFileSize(file?.size ?? 0)} . Loading </Typography>
+                                <Box sx={{ width: '200px' }}>
+                                    <LinearProgress variant='determinate' value={fileProgress} />
+                                </Box>
+                            </div>
+                        </div>
+                        <IconButton
+                            onClick={() => console.log('delete file')}
+                            aria-label="remove file"
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    </Box>
+
+                    <LoadingButton
+                        variant='contained'
+                        loading={isProcessingTransaction}
+                        disabled={fileProgress < 100}
+                        onClick={() => currentActionFunction()}
+                        className='w-[400px]'
+                    >
+                        {currentAction.buttonTitle}
+                    </LoadingButton>
+                </>
+            }
+        </div>
+    )
 }
 
 export default UploadFile;
