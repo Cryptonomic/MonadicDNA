@@ -1,7 +1,8 @@
 const {
-  SignProtocolClient,
-  SpMode,
-  EvmChains
+    SignProtocolClient,
+    SpMode,
+    EvmChains,
+    IndexService
 } = require('@ethsign/sp-sdk');
 
 const { privateKeyToAccount } = require('viem/accounts');
@@ -15,15 +16,15 @@ export interface IPassportData {
     valid: boolean;
 }
 
-const PRIVATE_KEY=config.privateKey; // process.env.PRIVATE_KEY
-const account = privateKeyToAccount(PRIVATE_KEY);
-
-const client = new SignProtocolClient(SpMode.OnChain, {
-    chain: EvmChains[config.network],
-    account
-});
-
 export async function createAttestation(data: IPassportData) {
+
+    const PRIVATE_KEY=config.privateKey; // process.env.PRIVATE_KEY
+    const account = privateKeyToAccount(PRIVATE_KEY);
+
+    const client = new SignProtocolClient(SpMode.OnChain, {
+        chain: EvmChains[config.network],
+        account
+    });
 
     const schemaData = {
         "Passport ID": data.passportId,
@@ -41,4 +42,15 @@ export async function createAttestation(data: IPassportData) {
 
     console.log('tx', tx);
     return tx;
+}
+
+export async function queryAttestationById(attesstationId: string) {
+    const indexService = new IndexService('testnet');
+    try {
+        const res = await indexService.queryAttestation(attesstationId);
+
+        console.log(`Attestation Result for ${attesstationId}: ${res}`);
+    } catch (error) {
+        console.error('Error uploading file:', error);
+    }
 }

@@ -16,14 +16,20 @@ import VisuallyHiddenInput from './visuallyHiddenInput';
 import { formatFileSize } from '@/utils/formatting';
 import DownLoadWallet from './downloadWallet';
 import { createAttestation, IPassportData } from '@/utils/attestations';
+import { ActionType, ActionData } from '@/types/uploadFile';
+import ViewAttestations from './viewAttestations';
 
-const UploadFile = () => {
+
+const UploadFile = ({ type }: { type: ActionType } ) => {
+  const currentAction = ActionData[type];
+
   const [file, setFile] = useState<File | null>(null);
-  const [passportData, setPassportData] = useState<IPassportData>();
-  const [isWallet, setIsWallet] = useState(false);
   const [isFileLoading, setIsFileLoading] = useState(false);
   const [fileProgress, setFileProgress] = React.useState(0);
-  const [isCreatingPassport, setIsCreatingPassport] = useState(false);
+  const [isWallet, setIsWallet] = useState(false);
+  const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
+  const [passportData, setPassportData] = useState<IPassportData>();
+  const [isAttestation, setIsAttestation] = useState(false);
 
   const reader = new FileReader();
 
@@ -38,10 +44,19 @@ const UploadFile = () => {
     }
   };
 
+  const updateProgress = (e: ProgressEvent<FileReader>) => {
+    if (e.lengthComputable) {
+      const percentComplete = (e.loaded / e.total) * 100;
+      console.log(`File upload fileProgress: ${percentComplete}%`);
+      setFileProgress(percentComplete)
+      setIsFileLoading(percentComplete < 100)
+    }
+  };
+
   const createDNAPassport = () => {
     if (!file) { return };
 
-    setIsCreatingPassport(true);
+    setIsProcessingTransaction(true);
 
     // TODO: upload file on NIllion
 
@@ -75,34 +90,50 @@ const UploadFile = () => {
       } catch (error) {
           console.error('Failed to create attestation:', error);
       } finally {
-        setIsCreatingPassport(false);
+        setIsProcessingTransaction(false);
       }
     }
 
     reader.readAsArrayBuffer(file);
   }
 
-  const updateProgress = (e: ProgressEvent<FileReader>) => {
-    if (e.lengthComputable) {
-      const percentComplete = (e.loaded / e.total) * 100;
-      console.log(`File upload fileProgress: ${percentComplete}%`);
-      setFileProgress(percentComplete)
-      setIsFileLoading(percentComplete < 100)
-    }
-  };
+  const viewAttestation = async() => {
+      setIsProcessingTransaction(true);
+      console.log('viewing attestation')
+      setTimeout(() => {
+        setIsAttestation(true);
+      }, 3000);
+  }
+
+  // Mapping of function names to functions
+  const actionFunctions: Record<string, () => void> = {
+    'createDNAPassport': () => createDNAPassport(),
+    'viewAttestation': () => viewAttestation(),
+  }
+  const currentActionFunction = actionFunctions[currentAction.buttonAction];
 
   console.log('passportData', passportData)
 
-  if(isWallet && passportData) {
+  if(ActionData[type].type === 'createPassport' && isWallet && passportData) {
     return <DownLoadWallet
       passport={passportData}
-      goBack={() => setIsWallet(false)}
+      goBack={() => {
+        setIsWallet(false);
+        setPassportData(undefined);
+        setFile(null)
+      }}
     />
+  }
+
+  if(ActionData[type].type === 'viewAttestation' && isAttestation) {
+    return <ViewAttestations />
   }
 
   return (
     <div className='sm:w-[552px]'>
-      <Typography variant='h5'> Upload Raw DNA File </Typography>
+      <Typography variant='h5'>
+          { currentAction.title }
+      </Typography>
       <Box
         className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
         sx={{ borderColor: 'error'}}
@@ -147,12 +178,12 @@ const UploadFile = () => {
 
           <LoadingButton
             variant='contained'
-            loading={isCreatingPassport}
+            loading={isProcessingTransaction}
             disabled={fileProgress < 100}
-            onClick={() => createDNAPassport()}
+            onClick={() => currentActionFunction()}
             className='w-[400px]'
           >
-            Create DNA PAssport
+            {currentAction.buttonTitle}
           </LoadingButton>
         </>
       }

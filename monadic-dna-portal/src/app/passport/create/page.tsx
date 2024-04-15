@@ -22,10 +22,10 @@ export default function Home() {
       <PageTabs { ...{ value, handleChange, tabs }}/>
       <div className='w-full mt-10'>
         {value === 'one' &&
-          <UploadFile />
+          <UploadFile type='createPassport' />
         }
         {value === 'two' &&
-          <p> View Attestation</p>
+          <UploadFile type='viewAttestation' />
         }
       </div>
     </>
