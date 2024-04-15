@@ -12,7 +12,7 @@ import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 const Header = () => {
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position='static' color='transparent' className='shadow-none'>
+            <AppBar position='static' color='transparent' sx={{ boxShadow: 0 }}>
                 <Toolbar variant='dense' className='p-0'>
                     <IconButton
                         size='large'
