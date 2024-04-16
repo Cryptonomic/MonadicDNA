@@ -16,9 +16,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisuallyHiddenInput from './visuallyHiddenInput';
 import { formatFileSize } from '@/utils/formatting';
 import DownLoadWallet from './downloadWallet';
-import { createAttestation, IPassportData } from '@/utils/attestations';
+import { createAttestation } from '@/utils/attestations';
 import { ActionType, ActionData } from '@/types/uploadFile';
 import ViewAttestations from './viewAttestations';
+import { storeOnNillion } from '@/utils/nillion';
+import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
 
 
 const UploadFile = ({ type }: { type: ActionType } ) => {
@@ -29,7 +31,7 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
     const [fileProgress, setFileProgress] = React.useState(0);
     const [isWallet, setIsWallet] = useState(false);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
-    const [passportData, setPassportData] = useState<IPassportData>();
+    const [passport, setPassport] = useState<IMonadicDNAPassport>();
     const [isAttestation, setIsAttestation] = useState(false);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -54,49 +56,66 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
         }
     };
 
-    const createDNAPassport = () => {
+    const createDNAPassport = async() => {
         if (!file) { return };
 
-        setIsProcessingTransaction(true);
+        try {
+            setIsProcessingTransaction(true);
 
-        // TODO: upload file on NIllion
+            const nillionData = await storeOnNillion(file);
 
-        const reader = new FileReader();
-        reader.onload = async(e) => {
-            const fileBuffer = e.target?.result as ArrayBuffer;
-            // Convert file name to ArrayBuffer
-            const fileNameArrayBuffer = new TextEncoder().encode(file.name);
+            const reader = new FileReader();
+            reader.onload = async(e) => {
+                const fileBuffer = e.target?.result as ArrayBuffer;
+                const nillionDataBuffer = nillionData as ArrayBuffer;
+                // Convert file name to ArrayBuffer
+                const fileNameArrayBuffer = new TextEncoder().encode(file.name);
 
-            const spark = new SparkMD5.ArrayBuffer();
+                const spark = new SparkMD5.ArrayBuffer();
 
-            // Calculate file name hash
-            spark.append(fileNameArrayBuffer);
-            const passportId = spark.end();
+                // Calculate file name hash
+                spark.append(fileNameArrayBuffer);
+                const fileHash = spark.end();
 
-            // Reset SparkMD5 instance for file content hashing
-            spark.reset();
-            spark.append(fileBuffer);
-            const fileHash = spark.end();
+                // Reset SparkMD5 instance for file content hashing
+                spark.reset();
+                spark.append(fileBuffer);
+                const passportId = spark.end();
 
-            const data: IPassportData = {
-                passportId,
-                fileHash,
-                dataHash: '',
-                valid: true,
+                // Reset SparkMD5 instance for nillion data hashing
+                spark.reset();
+                spark.append(nillionDataBuffer);
+                const dataHash = spark.end();
+
+                const passportData: IMonadicDNAPassport = {
+                    passport_id: passportId,
+                    filename_hash: fileHash,
+                    data_hash: dataHash,
+                    nillion_data: nillionData,
+                }
+
+                const data: IMonadicDNAValidDataset = {
+                    passportId,
+                    fileHash,
+                    dataHash,
+                    valid: true,
+                }
+
+                try {
+                    await createAttestation(data);
+                    setPassport(passportData);
+                    setIsWallet(true);
+                } catch (error) {
+                    console.error('Failed to create attestation:', error);
+                } finally {
+                  setIsProcessingTransaction(false);
+                }
             }
 
-            try {
-                await createAttestation(data);
-                setPassportData(data);
-                setIsWallet(true);
-            } catch (error) {
-                console.error('Failed to create attestation:', error);
-            } finally {
-              setIsProcessingTransaction(false);
-            }
+            reader.readAsArrayBuffer(file);
+        } catch (error) {
+            console.error('Failed to store file on Nillion:', error);
         }
-
-        reader.readAsArrayBuffer(file);
     }
 
     const viewAttestation = async() => {
@@ -112,16 +131,17 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
         'createDNAPassport': () => createDNAPassport(),
         'viewAttestation': () => viewAttestation(),
     }
+
     const currentActionFunction = actionFunctions[currentAction.buttonAction];
 
-    console.log('passportData', passportData)
+    console.log('passport', passport)
 
-    if(ActionData[type].type === 'createPassport' && isWallet && passportData) {
+    if(ActionData[type].type === 'createPassport' && isWallet && passport) {
         return <DownLoadWallet
-            passport={passportData}
+            passport={passport}
             goBack={() => {
                 setIsWallet(false);
-                setPassportData(undefined);
+                setPassport(undefined);
                 setFile(null)
             }}
         />

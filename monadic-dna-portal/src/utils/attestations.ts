@@ -1,3 +1,5 @@
+import { IMonadicDNAValidDataset } from "@/types";
+
 const {
     SignProtocolClient,
     SpMode,
@@ -9,14 +11,7 @@ const { privateKeyToAccount } = require('viem/accounts');
 
 const config = require('../config.json');
 
-export interface IPassportData {
-    passportId: string;
-    fileHash: string;
-    dataHash: string;
-    valid: boolean;
-}
-
-export async function createAttestation(data: IPassportData) {
+export async function createAttestation(data: IMonadicDNAValidDataset) {
 
     const PRIVATE_KEY=config.privateKey; // process.env.PRIVATE_KEY
     const account = privateKeyToAccount(PRIVATE_KEY);
@@ -50,6 +45,7 @@ export async function queryAttestationById(attesstationId: string) {
         const res = await indexService.queryAttestation(attesstationId);
 
         console.log(`Attestation Result for ${attesstationId}: ${res}`);
+        return res;
     } catch (error) {
         console.error('Error uploading file:', error);
     }
