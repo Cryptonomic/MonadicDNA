@@ -25,7 +25,7 @@ const UploadFile = () => {
     const [fileProgress, setFileProgress] = React.useState(0);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [jsonData, setJsonData] = useState<IMonadicDNAPassport | null>(null);
-    const [attestationId, setAttestationId] = useState<string | undefined>('0xb1');
+    const [attestationId, setAttestationId] = useState<string | undefined>();
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
