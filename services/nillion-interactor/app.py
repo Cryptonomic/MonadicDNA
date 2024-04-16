@@ -1,11 +1,14 @@
 import asyncio
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 import py_nillion_client as nillion
 import sys
 import werkzeug
 
 import socket
+import random
+import string
 
 from dotenv import load_dotenv
 
@@ -16,11 +19,14 @@ from helpers.nillion_keypath_helper import getUserKeyFromFile, getNodeKeyFromFil
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 def get_random_node_key():
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
-        result = hostname + "_" + ip_address
+        # hostname = socket.gethostname()
+        # ip_address = socket.gethostbyname(hostname)
+        # result = hostname + "_" + ip_address
+        chars = string.ascii_letters + string.digits
+        result = ''.join(random.choice(chars) for i in range(10))
         print("Node key: ", result)
         return result
 

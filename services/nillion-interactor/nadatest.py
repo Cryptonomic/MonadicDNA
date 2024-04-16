@@ -6,6 +6,9 @@ import pytest
 
 import socket
 
+import random
+import string
+
 from dotenv import load_dotenv
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -18,9 +21,11 @@ load_dotenv()
 # 1 Party running simple addition on 1 stored secret and 1 compute time secret
 async def main():
     def get_random_node_key():
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
-        result = hostname + "_" + ip_address
+        # hostname = socket.gethostname()
+        # ip_address = socket.gethostbyname(hostname)
+        # result = hostname + "_" + ip_address
+        chars = string.ascii_letters + string.digits
+        result = ''.join(random.choice(chars) for i in range(10))
         print("Node key: ", result)
         return result
     
