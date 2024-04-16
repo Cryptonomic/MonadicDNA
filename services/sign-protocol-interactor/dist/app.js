@@ -41,7 +41,6 @@ app.post('/sign/VerifiedTrait', (req, res) => __awaiter(void 0, void 0, void 0, 
         });
         console.log('tx', tx);
         return tx;
-        res.json({ attestationId: tx.transactionHash });
     }
     catch (error) {
         console.error('Error creating attestation:', error);
