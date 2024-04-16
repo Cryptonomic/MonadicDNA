@@ -10,7 +10,6 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "@ethsign/sp-sdk": "^0.3.23",
     "body-parser": "^1.20.2",
