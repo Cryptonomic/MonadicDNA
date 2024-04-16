@@ -1,3 +1,4 @@
+'use client';
 import React, { ChangeEvent, useState } from 'react';
 
 import SparkMD5 from 'spark-md5';
@@ -31,14 +32,14 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
     const [passportData, setPassportData] = useState<IPassportData>();
     const [isAttestation, setIsAttestation] = useState(false);
 
-    const reader = new FileReader();
-
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
         if (selectedFile) {
             setIsFileLoading(true);
             setFile(selectedFile);
+
+            const reader = new FileReader();
             reader.onprogress = updateProgress;
             reader.readAsArrayBuffer(selectedFile);
         }
@@ -60,6 +61,7 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
 
         // TODO: upload file on NIllion
 
+        const reader = new FileReader();
         reader.onload = async(e) => {
             const fileBuffer = e.target?.result as ArrayBuffer;
             // Convert file name to ArrayBuffer

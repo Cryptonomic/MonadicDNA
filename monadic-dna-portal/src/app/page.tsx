@@ -10,8 +10,8 @@ export default function Home() {
             </div>
 
             <div className='flex items-center justify-center gap-2'>
-                <Button variant='contained' href='/passport/create'> Create DNA PAssport </Button>
-                <Button color='inherit' href='attestations/view'> View Attestations </Button>
+                <Button variant='contained' href='/passport'> Create DNA PAssport </Button>
+                <Button color='inherit' href='/passport'> View Attestations </Button>
             </div>
 
             <div className='mt-[79px] mb-[59px]'>
