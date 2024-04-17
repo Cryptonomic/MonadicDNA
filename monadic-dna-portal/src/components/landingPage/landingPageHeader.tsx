@@ -8,7 +8,7 @@ import { blueGrey, lime } from '@mui/material/colors';
 const LandingPageHeader = () => {
   return (
     <>
-        <Box className='flex flex-col items-center mt-16 sm:mt-[108px] pl-4 xl:pl-[71px]'>
+        <Box className='flex flex-col items-center mt-16 sm:mt-[118px] pl-4 xl:pl-[71px]'>
             <Typography variant='h3' color='text.primary'>
                 Monadic DNA lets you encrypt your DNA data to use with privacy-respecting genomic sequencing services
             </Typography>

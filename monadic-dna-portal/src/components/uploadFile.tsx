@@ -12,6 +12,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 
 import VisuallyHiddenInput from './visuallyHiddenInput';
 import { formatFileSize, generateRandomUID } from '@/utils/formatting';
@@ -149,12 +150,12 @@ const UploadFile = ({ type, fileTypeText }: { type: ActionType; fileTypeText?: s
     }
 
     return (
-        <div className='sm:w-[552px]'>
+        <div>
             <Typography variant='h5'>
                 { currentAction.title }
             </Typography>
             <Box
-                className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
+                className='flex flex-col gap-2 sm:w-[552px] px-4 py-6 mt-2 justify-center items-center border border-dashed'
                 sx={{ borderColor: 'error'}}
             >
                 <UploadFileIcon className='w-10 h-10' />
@@ -193,6 +194,15 @@ const UploadFile = ({ type, fileTypeText }: { type: ActionType; fileTypeText?: s
                         >
                             <DeleteIcon />
                         </IconButton>
+                    </Box>
+
+                    <Box className='flex items-center justify-center gap-2'>
+                        <span>
+                            <InfoIcon />
+                        </span>
+                        <Typography>
+                            Don’t have your own 23andMe data? Use this link to find example datasets.
+                        </Typography>
                     </Box>
 
                     <LoadingButton

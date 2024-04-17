@@ -18,7 +18,7 @@ const Header = () => {
 
     return (
         <Box
-            className='px-2 sm:p-5 lg:px-20 lg:pt-5 lg:pb-[90px] bg-opacity-75'
+            className='px-2 sm:p-5 lg:px-20 lg:py-5 bg-opacity-75'
             sx={{
                 flexGrow: 1,
                 background: `${isLandingPage && lime[50]}59`

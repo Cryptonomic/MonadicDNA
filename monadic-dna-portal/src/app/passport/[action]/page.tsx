@@ -26,7 +26,7 @@ export default function Home() {
     ];
 
     return (
-        <div className='p-4 sm:p-5 lg:px-20 lg:pt-20'>
+        <div className='p-4 sm:p-5 lg:pl-[130px] lg:pt-[50px]'>
             <PageTabs { ...{ value, handleChange, tabs }}/>
             <div className='w-full mt-10'>
                 {value === 'create' &&
