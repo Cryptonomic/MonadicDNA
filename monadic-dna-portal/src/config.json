@@ -4,5 +4,6 @@
   "network":"baseSepolia",
   "signer": "0x66BFdE9963Fa3091bbc0559C9cBd48a88c765809",
   "privateKey": "0x9d6037e195d9ec06c2412832b2ac04a3dacd5aacabb3ffe93843c6547cd4aca7",
-  "baseUrl": "http://127.0.0.1:8732"
+  "baseUrl": "http://127.0.0.1:8732",
+  "dataSetUrl": "https://my.pgp-hms.org/public_genetic_data?utf8=%E2%9C%93&data_type=23andMe&commit=Search"
 }

@@ -32,7 +32,7 @@ export default function Home() {
                 {value === 'create' &&
                     <UploadFile
                         type='createPassport'
-                        fileTypeText='Exome sequencing or genotyping data (Max X GB)'
+                        isTypeCreate
                     />
                 }
                 {value === 'results' &&

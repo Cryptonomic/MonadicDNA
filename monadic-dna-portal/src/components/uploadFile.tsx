@@ -13,6 +13,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
+import { lime } from '@mui/material/colors';
 
 import VisuallyHiddenInput from './visuallyHiddenInput';
 import { formatFileSize, generateRandomUID } from '@/utils/formatting';
@@ -23,8 +24,9 @@ import ViewAttestations from './viewAttestations';
 import { storeOnNillion } from '@/utils/nillion';
 import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
 
+const config = require('../config.json');
 
-const UploadFile = ({ type, fileTypeText }: { type: ActionType; fileTypeText?: string; } ) => {
+const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: boolean; } ) => {
     const currentAction = ActionData[type];
 
     const [file, setFile] = useState<File | null>(null);
@@ -172,12 +174,16 @@ const UploadFile = ({ type, fileTypeText }: { type: ActionType; fileTypeText?: s
                     {' '}
                     or drag and drop
                 </div>
+                {isTypeCreate &&
+                    <Typography color='text.secondary'>
+                        Exome sequencing or genotyping data (Max X GB)
+                    </Typography>
+                }
 
-                <Typography color='text.secondary'> { fileTypeText } </Typography>
             </Box>
             {file &&
                 <>
-                    <Box className='flex justify-between mt-4 mb-10'>
+                    <Box className='flex justify-between sm:w-[552px] mt-4 mb-10'>
                         <div className='flex items-center gap-3'>
                             <UploadFileIcon className='w-10 h-10' />
                             <div>
@@ -195,22 +201,24 @@ const UploadFile = ({ type, fileTypeText }: { type: ActionType; fileTypeText?: s
                             <DeleteIcon />
                         </IconButton>
                     </Box>
-
-                    <Box className='flex items-center justify-center gap-2'>
-                        <span>
-                            <InfoIcon />
-                        </span>
-                        <Typography>
-                            Don’t have your own 23andMe data? Use this link to find example datasets.
-                        </Typography>
-                    </Box>
+                    {isTypeCreate &&
+                        <Box className='flex items-center gap-2 pb-14'>
+                            <span>
+                                <InfoIcon sx={{color: lime[400]}} />
+                            </span>
+                            <Typography className='text-xs sm:text-base '>
+                                Don’t have your own 23andMe data? Use this
+                                <Link target="_blank" rel="noopener noreferrer" color="inherit" href={config.dataSetUrl} > link </Link> to find example datasets.
+                            </Typography>
+                        </Box>
+                    }
 
                     <LoadingButton
                         variant='contained'
                         loading={isProcessingTransaction}
                         disabled={fileProgress < 100}
                         onClick={() => currentActionFunction()}
-                        className='w-[400px]'
+                        className='sm:w-[400px]'
                     >
                         {currentAction.buttonTitle}
                     </LoadingButton>
