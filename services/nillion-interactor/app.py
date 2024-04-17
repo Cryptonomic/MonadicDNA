@@ -157,6 +157,13 @@ async def thrombosis():
     result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=120)
     return jsonify(result)
 
+@app.route('/computations/muscle-perform', methods=['POST'])
+async def muscle_perform():
+    store_id = request.json.get('store_id')
+    if store_id is None:
+        return jsonify({'error': 'Missing store_id'}), 400
+    result = await asyncio.wait_for(compute_on_nillion( store_id), timeout=120)
+    return jsonify(result)
 
 @app.route('/')
 def hello_world():
