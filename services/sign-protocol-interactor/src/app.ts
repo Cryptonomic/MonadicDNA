@@ -43,10 +43,9 @@ app.post('/sign/VerifiedTrait', async (req: Request, res: Response) => {
       data: schemaData,
       indexingValue:passport_id,
       recipients: [config.signer], // The signer's address.
-  });
-  console.log('tx', tx);
-  return tx;
-    
+    });
+    console.log('tx', tx);
+    res.status(200).json(tx);
   } catch (error) {
     console.error('Error creating attestation:', error);
     if (error instanceof Error) {
@@ -56,6 +55,16 @@ app.post('/sign/VerifiedTrait', async (req: Request, res: Response) => {
     }
   }
 });
+
+app.get('/sign/VerifiedTrait', (req, res) => {
+  res.send('Use HTTP POST please');
+});
+
+
+app.get('/', (req, res) => {
+  res.send('Hello, world');
+});
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
