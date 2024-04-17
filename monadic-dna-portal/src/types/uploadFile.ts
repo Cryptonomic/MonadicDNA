@@ -21,3 +21,9 @@ export const ActionData: Record<ActionType, IActionData> = {
         type: 'viewResults'
     }
 }
+
+export interface IError {
+    isError: boolean;
+    title: string;
+    text?: string;
+}

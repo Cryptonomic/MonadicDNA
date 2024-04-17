@@ -22,6 +22,7 @@ export const parsePassportFile = (fileContent: string) => {
         return jsonContent;
     } catch (error) {
         console.error('Error parsing JSON file:', error);
+        throw error;
     }
 };
 

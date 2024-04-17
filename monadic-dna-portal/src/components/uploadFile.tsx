@@ -19,8 +19,9 @@ import { createAttestation, getAttestationId } from '@/utils/signProtocol';
 import { generateRandomUID, parsePassportFile } from '@/utils';
 import { storeOnNillion } from '@/utils/nillion';
 
-import { ActionType, ActionData } from '@/types/uploadFile';
+import { ActionType, ActionData, IError } from '@/types/uploadFile';
 import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
+import ErrorModal from './errorModal';
 
 const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: boolean; } ) => {
     const currentAction = ActionData[type];
@@ -32,27 +33,35 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [passport, setPassport] = useState<IMonadicDNAPassport>();
     const [attestationId, setAttestationId] = useState<string | undefined>();
+    const [error, setError] = useState<IError | null>(null);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
         if (!selectedFile) return;
 
-        // if (selectedFile) {
         setIsFileLoading(true);
         setFile(selectedFile);
 
         const reader = new FileReader();
         reader.onprogress = updateProgress;
         reader.readAsArrayBuffer(selectedFile);
-        // }
 
         if(currentAction.type === 'viewResults') {
             const reader = new FileReader();
             reader.onload = (e: ProgressEvent<FileReader>) => {
-                const fileContent = e.target?.result as string;
-                const parsedContent = parsePassportFile(fileContent);
-                setPassport(parsedContent);
+                try {
+                    const fileContent = e.target?.result as string;
+                    const parsedContent = parsePassportFile(fileContent);
+                    setPassport(parsedContent);
+                } catch (e) {
+                    console.error('Error parsing passport file', e)
+                    setError({
+                        isError: true,
+                        title: 'Error parsing passport file',
+                        text: 'Please ensure it is a Monadic DNA passport file in JSON format.'
+                    });
+                }
             };
             reader.readAsText(selectedFile);
         }
@@ -113,16 +122,27 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                     await createAttestation(data);
                     setPassport(passportData);
                     setIsWallet(true);
-                } catch (error) {
-                    console.error('Failed to create attestation:', error);
+                } catch (e: any) {
+                    console.error('Failed to create attestation:', e);
+                    setError({
+                        isError: true,
+                        title: 'Failed to create attestation',
+                        text: e.message ?? ''
+                    });
                 } finally {
                   setIsProcessingTransaction(false);
                 }
             }
 
             reader.readAsArrayBuffer(file);
-        } catch (error) {
-            console.error('Failed to store file on Nillion:', error);
+        } catch (e: any) {
+            console.error('Failed to store file on Nillion:', e);
+            setError({
+                isError: true,
+                title: 'Failed to store file on Nillion',
+                text: e.message ?? ''
+            });
+            setIsProcessingTransaction(false);
         }
     }
 
@@ -134,8 +154,13 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         try {
             const attestationId = await getAttestationId(passport.passport_id);
             setAttestationId(attestationId);
-        } catch (error) {
-            console.error('Failed to retreive attestation ID:', error);
+        } catch (e: any) {
+            console.error('Failed to retreive attestation ID:', e);
+            setError({
+                isError: true,
+                title: 'Failed to retreive attestation ID',
+                text: e.message ?? ''
+            });
         } finally {
             setIsProcessingTransaction(false);
         }
@@ -167,54 +192,60 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
     }
 
     return (
-        <div>
-            <Typography variant='h5'>
-                { currentAction.title }
-            </Typography>
-            <Box
-                className='flex flex-col gap-2 sm:w-[552px] px-4 py-6 mt-2 justify-center items-center border border-dashed'
-                sx={{ borderColor: 'error'}}
-            >
-                <UploadFileIcon className='w-10 h-10' />
-                <div>
-                    <Link
-                        className='p-0 cursor-pointer'
-                        component="label"
-                        variant='inherit'
-                        color='text.primary'
-                    >
-                        Click to upload
-                        <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
-                    </Link>
-                    {' '}
-                    or drag and drop
-                </div>
-                {isTypeCreate &&
-                    <Typography color='text.secondary'>
-                        Exome sequencing or genotyping data (Max X GB)
-                    </Typography>
-                }
-
-            </Box>
-            {file &&
-                <>
-                    <FileProgressDetails {...{ file, fileProgress }}  />
+        <>
+            {error?.isError &&
+                <ErrorModal error={error} setError={setError} />
+            }
+            <div>
+                <Typography variant='h5'>
+                    { currentAction.title }
+                </Typography>
+                <Box
+                    className='flex flex-col gap-2 sm:w-[552px] px-4 py-6 mt-2 justify-center items-center border border-dashed'
+                    sx={{ borderColor: 'error'}}
+                >
+                    <UploadFileIcon className='w-10 h-10' />
+                    <div>
+                        <Link
+                            className='p-0 cursor-pointer'
+                            component="label"
+                            variant='inherit'
+                            color='text.primary'
+                        >
+                            Click to upload
+                            <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
+                        </Link>
+                        {' '}
+                        or drag and drop
+                    </div>
                     {isTypeCreate &&
-                        <GetExternalDataset />
+                        <Typography color='text.secondary'>
+                            Exome sequencing or genotyping data (Max X GB)
+                        </Typography>
                     }
 
-                    <LoadingButton
-                        variant='contained'
-                        loading={isProcessingTransaction}
-                        disabled={fileProgress < 100}
-                        onClick={() => currentActionFunction()}
-                        className='sm:w-[400px]'
-                    >
-                        {currentAction.buttonTitle}
-                    </LoadingButton>
-                </>
-            }
-        </div>
+                </Box>
+                {file &&
+                    <>
+                        <FileProgressDetails {...{ file, fileProgress }} />
+                        {isTypeCreate &&
+                            <GetExternalDataset />
+                        }
+
+                        <LoadingButton
+                            variant='contained'
+                            loading={isProcessingTransaction}
+                            disabled={fileProgress < 100 || error?.isError}
+                            onClick={() => currentActionFunction()}
+                            className='sm:w-[400px]'
+                            sx={{ zIndex: error?.isError ? -5 : 1}}
+                        >
+                            {currentAction.buttonTitle}
+                        </LoadingButton>
+                    </>
+                }
+            </div>
+        </>
     )
 }
 

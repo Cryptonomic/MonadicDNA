@@ -28,15 +28,19 @@ export async function createAttestation(data: IMonadicDNAValidDataset) {
         "Valid": data.valid,
     };
 
-    const tx = await client.createAttestation({
-        schemaId: config.schemaId,
-        data: schemaData,
-        indexingValue: data.passportId,
-        recipients: [config.signer], // The signer's address.
-    });
+    try {
+        const tx = await client.createAttestation({
+            schemaId: config.schemaId,
+            data: schemaData,
+            indexingValue: data.passportId,
+            recipients: [config.signer], // The signer's address.
+        });
 
-    console.log('tx', tx);
-    return tx;
+        console.log('tx', tx);
+        return tx;
+    } catch (error) {
+        throw error
+    }
 }
 
 export async function getAttestationId(indexingValue: string) {
@@ -53,6 +57,7 @@ export async function getAttestationId(indexingValue: string) {
         return attestationId;
     } catch (error) {
         console.error('Error viewing results:', error);
+        throw error;
     }
 }
 
@@ -79,5 +84,6 @@ export async function getResultsById(attestationId: string) {
         return results;
     } catch (error) {
         console.error('Error viewing results:', error);
+        throw error;
     }
 }
