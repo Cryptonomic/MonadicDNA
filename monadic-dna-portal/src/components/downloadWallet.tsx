@@ -8,17 +8,17 @@ import { blue } from '@mui/material/colors';
 
 import DownloadIcon from '@mui/icons-material/Download';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { IPassportData } from '@/utils/attestations';
+import { IMonadicDNAPassport } from '@/types';
 
 export default function DownLoadWallet({
     passport,
     goBack,
 }: {
-    passport: IPassportData;
+    passport: IMonadicDNAPassport;
     goBack: () => void;
 }) {
 
-    const fileName = `monadicdna_passport_${passport?.fileHash}`
+    const fileName = `monadicdna_passport_${passport.filename_hash}`
 
     const downloadPassportData = (data: any) => {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

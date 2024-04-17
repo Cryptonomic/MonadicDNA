@@ -1,8 +1,13 @@
 {
-  "schemaId":"0x4e",
+  "schemaId":"0x4f",
   "contractAddress": "0x4e4af2a21ebf62850fD99Eb6253E1eFBb56098cD",
   "network":"baseSepolia",
   "signer": "0x66BFdE9963Fa3091bbc0559C9cBd48a88c765809",
   "privateKey": "0x9d6037e195d9ec06c2412832b2ac04a3dacd5aacabb3ffe93843c6547cd4aca7",
+  "provider": "SnipperBot",
+  "trait": {
+    "name": "Thrombosis",
+    "id": "rs6025"
+  },
   "baseUrl": "http://127.0.0.1:8732"
 }
