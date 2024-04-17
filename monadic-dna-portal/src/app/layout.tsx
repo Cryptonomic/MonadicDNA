@@ -26,9 +26,9 @@ export default function RootLayout({
         <html lang="en">
             <body className={roboto.className}>
                 <ThemeProvider theme={theme}>
-                    <div className="w-screen px-2 sm:p-5 lg:px-20 py-5 flex flex-col min-h-screen">
+                    <div className="w-screen flex flex-col min-h-screen">
                         <Header />
-                        <div className="flex min-h-screen flex-col items-center mt-[115px]">
+                        <div className="flex min-h-screen flex-col items-center">
                             {children}
                         </div>
                     </div>

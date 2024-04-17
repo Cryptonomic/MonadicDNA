@@ -23,7 +23,7 @@ import { storeOnNillion } from '@/utils/nillion';
 import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
 
 
-const UploadFile = ({ type }: { type: ActionType } ) => {
+const UploadFile = ({ type, fileTypeText }: { type: ActionType; fileTypeText?: string; } ) => {
     const currentAction = ActionData[type];
 
     const [file, setFile] = useState<File | null>(null);
@@ -172,7 +172,7 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
                     or drag and drop
                 </div>
 
-                <Typography color='text.secondary'> Exome sequencing or genotyping data (Max X GB) </Typography>
+                <Typography color='text.secondary'> { fileTypeText } </Typography>
             </Box>
             {file &&
                 <>
