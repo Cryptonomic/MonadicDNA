@@ -43,10 +43,9 @@ app.post('/sign/VerifiedTrait', async (req: Request, res: Response) => {
       data: schemaData,
       indexingValue:passport_id,
       recipients: [config.signer], // The signer's address.
-  });
-  console.log('tx', tx);
-  return tx;
-    
+    });
+    console.log('tx', tx);
+    res.status(200).json(tx);
   } catch (error) {
     console.error('Error creating attestation:', error);
     if (error instanceof Error) {
