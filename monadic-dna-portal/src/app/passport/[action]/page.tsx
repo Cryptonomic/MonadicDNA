@@ -22,7 +22,7 @@ export default function Home() {
 
     const tabs = [
         { value: 'create', label: 'Create DNA Passport' },
-        { value: 'results', label: 'View Attestations' }
+        { value: 'results', label: 'View Results' }
     ];
 
     return (
