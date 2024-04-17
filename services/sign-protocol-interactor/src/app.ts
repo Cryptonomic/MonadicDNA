@@ -56,6 +56,16 @@ app.post('/sign/VerifiedTrait', async (req: Request, res: Response) => {
   }
 });
 
+app.get('/sign/VerifiedTrait', (req, res) => {
+  res.send('Use HTTP POST please');
+});
+
+
+app.get('/', (req, res) => {
+  res.send('Hello, world');
+});
+
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
