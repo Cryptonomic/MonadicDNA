@@ -5,26 +5,22 @@ import SparkMD5 from 'spark-md5';
 
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
-import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
 
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import DeleteIcon from '@mui/icons-material/Delete';
-import InfoIcon from '@mui/icons-material/Info';
-import { lime } from '@mui/material/colors';
-
 import VisuallyHiddenInput from './visuallyHiddenInput';
-import { formatFileSize, generateRandomUID } from '@/utils/formatting';
 import DownLoadWallet from './downloadWallet';
-import { createAttestation } from '@/utils/attestations';
-import { ActionType, ActionData } from '@/types/uploadFile';
-import ViewAttestations from './viewAttestations';
-import { storeOnNillion } from '@/utils/nillion';
-import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
+import ViewResults from './viewResults';
+import GetExternalDataset from './getExternalDataset';
+import FileProgressDetails from './fileProgressDetails';
 
-const config = require('../config.json');
+import { createAttestation, getAttestationId } from '@/utils/signProtocol';
+import { generateRandomUID, parsePassportFile } from '@/utils';
+import { storeOnNillion } from '@/utils/nillion';
+
+import { ActionType, ActionData } from '@/types/uploadFile';
+import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
 
 const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: boolean; } ) => {
     const currentAction = ActionData[type];
@@ -35,18 +31,30 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
     const [isWallet, setIsWallet] = useState(false);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [passport, setPassport] = useState<IMonadicDNAPassport>();
-    const [isAttestation, setIsAttestation] = useState(false);
+    const [attestationId, setAttestationId] = useState<string | undefined>();
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
-        if (selectedFile) {
-            setIsFileLoading(true);
-            setFile(selectedFile);
+        if (!selectedFile) return;
 
+        // if (selectedFile) {
+        setIsFileLoading(true);
+        setFile(selectedFile);
+
+        const reader = new FileReader();
+        reader.onprogress = updateProgress;
+        reader.readAsArrayBuffer(selectedFile);
+        // }
+
+        if(currentAction.type === 'viewResults') {
             const reader = new FileReader();
-            reader.onprogress = updateProgress;
-            reader.readAsArrayBuffer(selectedFile);
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+                const fileContent = e.target?.result as string;
+                const parsedContent = parsePassportFile(fileContent);
+                setPassport(parsedContent);
+            };
+            reader.readAsText(selectedFile);
         }
     };
 
@@ -118,18 +126,25 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         }
     }
 
-    const viewAttestation = async() => {
+    const viewResults = async() => {
+        if(!passport) return;
+
         setIsProcessingTransaction(true);
-        console.log('viewing attestation')
-        setTimeout(() => {
-            setIsAttestation(true);
-        }, 3000);
+
+        try {
+            const attestationId = await getAttestationId(passport.passport_id);
+            setAttestationId(attestationId);
+        } catch (error) {
+            console.error('Failed to retreive attestation ID:', error);
+        } finally {
+            setIsProcessingTransaction(false);
+        }
     }
 
     // Mapping of function names to functions
     const actionFunctions: Record<string, () => void> = {
         'createDNAPassport': () => createDNAPassport(),
-        'viewAttestation': () => viewAttestation(),
+        'viewResults': () => viewResults(),
     }
 
     const currentActionFunction = actionFunctions[currentAction.buttonAction];
@@ -147,8 +162,8 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         />
     }
 
-    if(ActionData[type].type === 'viewAttestation' && isAttestation) {
-        return <ViewAttestations />
+    if(currentAction.type === 'viewResults' && attestationId) {
+        return <ViewResults id={attestationId} />
     }
 
     return (
@@ -183,34 +198,9 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
             </Box>
             {file &&
                 <>
-                    <Box className='flex justify-between sm:w-[552px] mt-4 mb-10'>
-                        <div className='flex items-center gap-3'>
-                            <UploadFileIcon className='w-10 h-10' />
-                            <div>
-                                <Typography color='text.primary'> { file.name } </Typography>
-                                <Typography color='text.secondary' variant='subtitle2'> {formatFileSize(file?.size ?? 0)} . Loading </Typography>
-                                <Box sx={{ width: '200px' }}>
-                                    <LinearProgress variant='determinate' value={fileProgress} />
-                                </Box>
-                            </div>
-                        </div>
-                        <IconButton
-                            onClick={() => console.log('delete file')}
-                            aria-label="remove file"
-                        >
-                            <DeleteIcon />
-                        </IconButton>
-                    </Box>
+                    <FileProgressDetails {...{ file, fileProgress }}  />
                     {isTypeCreate &&
-                        <Box className='flex items-center gap-2 pb-14'>
-                            <span>
-                                <InfoIcon sx={{color: lime[400]}} />
-                            </span>
-                            <Typography className='text-xs sm:text-base '>
-                                Don’t have your own 23andMe data? Use this
-                                <Link target="_blank" rel="noopener noreferrer" color="inherit" href={config.dataSetUrl} > link </Link> to find example datasets.
-                            </Typography>
-                        </Box>
+                        <GetExternalDataset />
                     }
 
                     <LoadingButton

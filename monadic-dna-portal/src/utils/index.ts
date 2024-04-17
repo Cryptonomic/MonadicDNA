@@ -1,3 +1,5 @@
+import { IMonadicDNAPassport } from "@/types";
+
 export const formatFileSize = (size: number): string => {
     const units = ['bytes', 'KB', 'MB', 'GB'];
     let unitIndex = 0;
@@ -13,4 +15,13 @@ export function generateRandomUID(digits: number): number {
     const max = Math.pow(10, digits) - 1;
     return Math.floor(min + Math.random() * (max - min + 1));
 }
+
+export const parsePassportFile = (fileContent: string) => {
+    try {
+        const jsonContent = JSON.parse(fileContent) as IMonadicDNAPassport;
+        return jsonContent;
+    } catch (error) {
+        console.error('Error parsing JSON file:', error);
+    }
+};
 

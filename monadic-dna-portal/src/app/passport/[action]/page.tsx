@@ -36,7 +36,7 @@ export default function Home() {
                     />
                 }
                 {value === 'results' &&
-                    <UploadFile type='viewAttestation' />
+                    <UploadFile type='viewResults' />
                 }
             </div>
         </div>

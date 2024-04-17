@@ -1,11 +1,23 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { teal, grey } from '@mui/material/colors';
 import CheckIcon from '@mui/icons-material/CheckCircle';
+import { IMonadicDNAVerifiedTrait } from '@/types';
+import { getResultsById } from '@/utils/signProtocol';
 
-const ViewAttestations = () => {
+const ViewResults = ({ id }: { id: string; }) => {
+
+    const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait | null>();
+
+    useEffect(() => {
+        (async() => {
+            const result = await getResultsById(id)
+            setAttestationData(result);
+        })()
+    }, [id])
 
     return (
         <Box
@@ -16,13 +28,14 @@ const ViewAttestations = () => {
               className={`w-full h-[55px] rounded-t-[18px] pt-3 pl-5 mb-11 text-white`}
               sx={{ background: teal[900] }}
           >
-              <Typography> { 'Type-2 Diabetes' } </Typography>
+              <Typography> { attestationData?.Trait } </Typography>
           </Box>
 
-          <Typography className='pl-5'> Result: {' High Risk' }</Typography>
+          <Typography className='pl-5'> Result: {attestationData?.Value?.toLowerCase() === 'yes' ? ' High Risk' : ' Low Risk'}</Typography>
+          <Typography className='pl-5'> ID: {id}</Typography>
 
           <Box className='mt-14 pb-3 pl-5 rounded-b-[19px]' sx={{ background: grey[50] }}>
-              <Typography> Provided by: SnipperBot </Typography>
+              <Typography> Provided by: {attestationData?.Provider} </Typography>
               <Typography className='flex items-center gap-1' color='success.main'>
                   <span> Authorized Provider </span>
                   <CheckIcon sx={{ width:16, height: 16 }}/>
@@ -33,4 +46,4 @@ const ViewAttestations = () => {
     )
 }
 
-export default ViewAttestations;
+export default ViewResults;
