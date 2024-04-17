@@ -14,7 +14,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import VisuallyHiddenInput from './visuallyHiddenInput';
-import { formatFileSize } from '@/utils/formatting';
+import { formatFileSize, generateRandomUID } from '@/utils/formatting';
 import DownLoadWallet from './downloadWallet';
 import { createAttestation } from '@/utils/attestations';
 import { ActionType, ActionData } from '@/types/uploadFile';
@@ -67,7 +67,6 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
             const reader = new FileReader();
             reader.onload = async(e) => {
                 const fileBuffer = e.target?.result as ArrayBuffer;
-                const nillionDataBuffer = nillionData as ArrayBuffer;
                 // Convert file name to ArrayBuffer
                 const fileNameArrayBuffer = new TextEncoder().encode(file.name);
 
@@ -80,12 +79,10 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
                 // Reset SparkMD5 instance for file content hashing
                 spark.reset();
                 spark.append(fileBuffer);
-                const passportId = spark.end();
-
-                // Reset SparkMD5 instance for nillion data hashing
-                spark.reset();
-                spark.append(nillionDataBuffer);
                 const dataHash = spark.end();
+
+                const UID = generateRandomUID(6);
+                const passportId = `monadicdna_${fileHash}_${UID}`
 
                 const passportData: IMonadicDNAPassport = {
                     passport_id: passportId,
