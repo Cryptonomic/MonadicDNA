@@ -15,7 +15,7 @@ import ViewResults from './viewResults';
 import GetExternalDataset from './getExternalDataset';
 import FileProgressDetails from './fileProgressDetails';
 
-import { createAttestation, getAttestationId } from '@/utils/signProtocol';
+import { createAttestation, getAllAttestationIds } from '@/utils/signProtocol';
 import { generateRandomUID, parsePassportFile } from '@/utils';
 import { storeOnNillion } from '@/utils/nillion';
 
@@ -32,13 +32,22 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
     const [isWallet, setIsWallet] = useState(false);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [passport, setPassport] = useState<IMonadicDNAPassport>();
-    const [attestationId, setAttestationId] = useState<string | undefined>();
+    const [attestationIds, setAttestationIds] = useState<string[] | undefined>();
     const [error, setError] = useState<IError | null>(null);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
-        if (!selectedFile) return;
+        if(!selectedFile) return;
+
+        if(currentAction.type === 'createPassport' && selectedFile.type !== 'text/plain') {
+            setError({
+                isError: true,
+                title: 'Invalid File',
+                text: 'Please ensure it is a genetic data.txt file'
+            });
+            return;
+        }
 
         setIsFileLoading(true);
         setFile(selectedFile);
@@ -152,8 +161,8 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         setIsProcessingTransaction(true);
 
         try {
-            const attestationId = await getAttestationId(passport.passport_id);
-            setAttestationId(attestationId);
+            const retreivedIds = await getAllAttestationIds(passport.passport_id);
+            setAttestationIds(retreivedIds);
         } catch (e: any) {
             console.error('Failed to retreive attestation ID:', e);
             setError({
@@ -165,6 +174,13 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
             setIsProcessingTransaction(false);
         }
     }
+
+    const handleClickDelete = () => {
+        setFile(null);
+        setFileProgress(0);
+        setIsFileLoading(false);
+    }
+
 
     // Mapping of function names to functions
     const actionFunctions: Record<string, () => void> = {
@@ -187,8 +203,8 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         />
     }
 
-    if(currentAction.type === 'viewResults' && attestationId) {
-        return <ViewResults id={attestationId} />
+    if(currentAction.type === 'viewResults' && attestationIds) {
+        return <ViewResults ids={attestationIds} />
     }
 
     return (
@@ -220,30 +236,28 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                     </div>
                     {isTypeCreate &&
                         <Typography color='text.secondary'>
-                            Exome sequencing or genotyping data (Max X GB)
+                            23andMe genetic data.txt file
                         </Typography>
                     }
 
                 </Box>
                 {file &&
-                    <>
-                        <FileProgressDetails {...{ file, fileProgress }} />
-                        {isTypeCreate &&
-                            <GetExternalDataset />
-                        }
-
-                        <LoadingButton
-                            variant='contained'
-                            loading={isProcessingTransaction}
-                            disabled={fileProgress < 100 || error?.isError}
-                            onClick={() => currentActionFunction()}
-                            className='sm:w-[400px]'
-                            sx={{ zIndex: error?.isError ? -5 : 1}}
-                        >
-                            {currentAction.buttonTitle}
-                        </LoadingButton>
-                    </>
+                    <FileProgressDetails {...{ file, fileProgress, handleClickDelete }} />
                 }
+
+                <Box className={`${file ? 'mt-0' : 'mt-10'}`} />
+                {isTypeCreate && <GetExternalDataset /> }
+
+                <LoadingButton
+                    variant='contained'
+                    loading={isProcessingTransaction}
+                    disabled={fileProgress < 100 || error?.isError || !file}
+                    onClick={() => currentActionFunction()}
+                    className='sm:w-[400px]'
+                    sx={{ zIndex: error?.isError ? -5 : 1}}
+                >
+                    {currentAction.buttonTitle}
+                </LoadingButton>
             </div>
         </>
     )
