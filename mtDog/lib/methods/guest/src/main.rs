@@ -1,11 +1,9 @@
 #![no_main]
-mod common;
-use std::collections::HashMap;
+use std::vec::Vec;
 
 use risc0_zkvm::guest::env;
 risc0_zkvm::guest::entry!(main);
 
-use common::{GenotypeRisk, Inputs, SnpRaw, SnpRiskMap};
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Inputs2 {
