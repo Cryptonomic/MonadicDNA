@@ -220,30 +220,27 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                     </div>
                     {isTypeCreate &&
                         <Typography color='text.secondary'>
-                            Exome sequencing or genotyping data (Max X GB)
+                            23andMe genetic data.txt file
                         </Typography>
                     }
 
                 </Box>
-                {file &&
-                    <>
-                        <FileProgressDetails {...{ file, fileProgress }} />
-                        {isTypeCreate &&
-                            <GetExternalDataset />
-                        }
-
-                        <LoadingButton
-                            variant='contained'
-                            loading={isProcessingTransaction}
-                            disabled={fileProgress < 100 || error?.isError}
-                            onClick={() => currentActionFunction()}
-                            className='sm:w-[400px]'
-                            sx={{ zIndex: error?.isError ? -5 : 1}}
-                        >
-                            {currentAction.buttonTitle}
-                        </LoadingButton>
-                    </>
+                {file && <FileProgressDetails {...{ file, fileProgress }} /> }
+                {isTypeCreate &&
+                    <Box className={`${file ? 'mt-0' : 'mt-10'}`}>
+                      <GetExternalDataset />
+                    </Box>
                 }
+                <LoadingButton
+                    variant='contained'
+                    loading={isProcessingTransaction}
+                    disabled={fileProgress < 100 || error?.isError || !file}
+                    onClick={() => currentActionFunction()}
+                    className='sm:w-[400px]'
+                    sx={{ zIndex: error?.isError ? -5 : 1}}
+                >
+                    {currentAction.buttonTitle}
+                </LoadingButton>
             </div>
         </>
     )
