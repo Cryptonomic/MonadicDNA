@@ -1,5 +1,5 @@
-use crate::common::GenotypeRisk;
-use crate::common::SnpRiskMap;
+use crate::app::common::GenotypeRisk;
+use crate::app::common::SnpRiskMap;
 
 pub fn get_diabetes_risk_map() -> [SnpRiskMap; 10] {
     return [
