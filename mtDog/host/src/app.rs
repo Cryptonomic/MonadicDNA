@@ -348,7 +348,7 @@ impl eframe::App for TemplateApp {
                     let image = egui::Image::new(egui::include_image!("../../assets/blank.png"))
                         .rounding(10.0)
                         .fit_to_original_size(1.0)
-                        .max_size(Vec2::new(66.0, 88.0));
+                        .max_size(Vec2::new(66.0, 90.0));
                     ui.add(image);                      
                     egui::Frame::default()  
                     .stroke(egui::Stroke::new(1.0, egui::Color32::GRAY))
