@@ -13,10 +13,12 @@ import { formatFileSize } from '@/utils';
 
 const FileProgressDetails = ({
     file,
-    fileProgress
+    fileProgress,
+    handleClickDelete
 }: {
     file: File;
     fileProgress: number;
+    handleClickDelete: () => void;
 }) => {
     return (
         <>
@@ -32,7 +34,7 @@ const FileProgressDetails = ({
                     </div>
                 </div>
                 <IconButton
-                    onClick={() => console.log('delete file')}
+                    onClick={handleClickDelete}
                     aria-label="remove file"
                 >
                     <DeleteIcon />

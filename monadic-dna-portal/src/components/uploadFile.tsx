@@ -166,6 +166,14 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         }
     }
 
+    const handleClickDelete = () => {
+        setFile(null);
+
+        setFileProgress(0);
+        setIsFileLoading(false);
+    }
+
+
     // Mapping of function names to functions
     const actionFunctions: Record<string, () => void> = {
         'createDNAPassport': () => createDNAPassport(),
@@ -225,7 +233,9 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                     }
 
                 </Box>
-                {file && <FileProgressDetails {...{ file, fileProgress }} /> }
+                {file &&
+                    <FileProgressDetails {...{ file, fileProgress, handleClickDelete }} />
+                }
                 {isTypeCreate &&
                     <Box className={`${file ? 'mt-0' : 'mt-10'}`}>
                       <GetExternalDataset />
