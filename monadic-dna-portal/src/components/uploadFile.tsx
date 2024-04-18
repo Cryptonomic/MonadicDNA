@@ -15,7 +15,7 @@ import ViewResults from './viewResults';
 import GetExternalDataset from './getExternalDataset';
 import FileProgressDetails from './fileProgressDetails';
 
-import { createAttestation, getAttestationId } from '@/utils/signProtocol';
+import { createAttestation, getAllAttestationIds } from '@/utils/signProtocol';
 import { generateRandomUID, parsePassportFile } from '@/utils';
 import { storeOnNillion } from '@/utils/nillion';
 
@@ -32,13 +32,22 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
     const [isWallet, setIsWallet] = useState(false);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [passport, setPassport] = useState<IMonadicDNAPassport>();
-    const [attestationId, setAttestationId] = useState<string | undefined>();
+    const [attestationIds, setAttestationIds] = useState<string[] | undefined>();
     const [error, setError] = useState<IError | null>(null);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
-        if (!selectedFile) return;
+        if(!selectedFile) return;
+
+        if(currentAction.type === 'createPassport' && selectedFile.type !== 'text/plain') {
+            setError({
+                isError: true,
+                title: 'Invalid File',
+                text: 'Please ensure it is a genetic data.txt file'
+            });
+            return;
+        }
 
         setIsFileLoading(true);
         setFile(selectedFile);
@@ -152,8 +161,8 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         setIsProcessingTransaction(true);
 
         try {
-            const attestationId = await getAttestationId(passport.passport_id);
-            setAttestationId(attestationId);
+            const retreivedIds = await getAllAttestationIds(passport.passport_id);
+            setAttestationIds(retreivedIds);
         } catch (e: any) {
             console.error('Failed to retreive attestation ID:', e);
             setError({
@@ -168,7 +177,6 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
 
     const handleClickDelete = () => {
         setFile(null);
-
         setFileProgress(0);
         setIsFileLoading(false);
     }
@@ -195,8 +203,8 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         />
     }
 
-    if(currentAction.type === 'viewResults' && attestationId) {
-        return <ViewResults id={attestationId} />
+    if(currentAction.type === 'viewResults' && attestationIds) {
+        return <ViewResults ids={attestationIds} />
     }
 
     return (
@@ -236,11 +244,10 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                 {file &&
                     <FileProgressDetails {...{ file, fileProgress, handleClickDelete }} />
                 }
-                {isTypeCreate &&
-                    <Box className={`${file ? 'mt-0' : 'mt-10'}`}>
-                      <GetExternalDataset />
-                    </Box>
-                }
+
+                <Box className={`${file ? 'mt-0' : 'mt-10'}`} />
+                {isTypeCreate && <GetExternalDataset /> }
+
                 <LoadingButton
                     variant='contained'
                     loading={isProcessingTransaction}

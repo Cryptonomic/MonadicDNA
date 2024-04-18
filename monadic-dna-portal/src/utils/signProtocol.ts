@@ -30,7 +30,7 @@ export async function createAttestation(data: IMonadicDNAValidDataset) {
 
     try {
         const tx = await client.createAttestation({
-            schemaId: config.schemaId,
+            schemaId: config.validDataschemaId,
             data: schemaData,
             indexingValue: data.passportId,
             recipients: [config.signer], // The signer's address.
@@ -43,18 +43,25 @@ export async function createAttestation(data: IMonadicDNAValidDataset) {
     }
 }
 
-export async function getAttestationId(indexingValue: string) {
+export async function getAllAttestationIds(indexingValue: string) {
     const indexService = new IndexService('testnet');
 
     try {
         const res = await indexService.queryAttestationList( {
             indexingValue
         });
-        const attestationId =  res.rows[0].id
 
-        console.log(`Attestation ID for ${indexingValue}: ${attestationId}`);
+        config.verifiedTraitSchemaId
 
-        return attestationId;
+        // const attestationIds: string[] = res.rows.map((row: { id: string }) => row.id);
+
+        const attestationIds: string[] = res.rows
+            .filter((row: { schemaId: string }) => row.schemaId === config.verifiedTraitSchemaId)
+            .map((row: { id: string }) => row.id);
+
+        console.log(`Attestation IDs for ${indexingValue}: ${attestationIds}`);
+
+        return attestationIds;
     } catch (error) {
         console.error('Error viewing results:', error);
         throw error;

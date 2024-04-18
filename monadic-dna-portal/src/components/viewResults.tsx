@@ -13,31 +13,16 @@ import ErrorModal from './errorModal';
 
 const config = require('../config.json');
 
-const ViewResults = ({ id }: { id: string; }) => {
-
-    const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait | null>();
-    const [error, setError] = useState<IError | null>(null);
-
-    useEffect(() => {
-        (async() => {
-            try {
-                const result = await getResultsById(id)
-                setAttestationData(result);
-            } catch (error) {
-                setError({
-                    isError: true,
-                    title: 'Failed to retreive results',
-                    text: 'Please ensure that an attestation has been added to this passport. Contact support if issue persits.'
-                });
-            }
-        })()
-    }, [id])
+const ResultsCard = ({
+    id,
+    attestationData
+}: {
+    id: string;
+    attestationData: IMonadicDNAVerifiedTrait
+}) => {
 
     return (
         <>
-            {error?.isError &&
-                <ErrorModal error={error} setError={setError} />
-            }
             <Box
                 className={`w-[296px] h-[247px] flex flex-col justify-between border rounded-[20px] p-0`}
                 sx={{ borderColor: teal[900] }}
@@ -70,6 +55,44 @@ const ViewResults = ({ id }: { id: string; }) => {
 
             </Box>
         </>
+    )
+}
+
+
+const ViewResults = ({ ids }: { ids: string[]; }) => {
+
+    const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait[] | null>();
+    const [error, setError] = useState<IError | null>(null);
+
+    useEffect(() => {
+        (async() => {
+            try {
+                const promises = ids.map(id => getResultsById(id));
+                const results = await Promise.all(promises);
+                console.log("ALL results", results)
+                setAttestationData(results);
+
+                console.log('Results for all attestation IDs:', results);
+            } catch (error) {
+                setError({
+                    isError: true,
+                    title: 'Failed to retreive results',
+                    text: 'Please ensure that an attestation has been added to this passport. Contact support if issue persits.'
+                });
+            }
+        })()
+    }, [ids])
+
+    return (
+        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6 gap-4'>
+            {error?.isError &&
+                <ErrorModal error={error} setError={setError} />
+            }
+            {attestationData && attestationData?.map((x, index) => (
+              <ResultsCard key={ids[index]} id={ids[index]} attestationData={x} />
+            ))}
+
+        </div>
     )
 }
 
