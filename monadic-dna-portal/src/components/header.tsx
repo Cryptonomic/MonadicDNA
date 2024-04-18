@@ -25,31 +25,22 @@ const Header = () => {
             }}
         >
             <AppBar position='static' color='transparent' sx={{ boxShadow: 0 }}>
-                <Toolbar variant='dense' className='p-0'>
+                <Toolbar variant='dense' className='p-0 justify-between'>
                     <IconButton
                         edge='start'
                         color='inherit'
                         href='/'
                         aria-label='menu'
-                        className='p-0 w-[48px] h-[48px]'
+                        className='p-0 w-[197px] h-[48px]'
+                        disableRipple
                     >
                         <Image
-                            src={'/logo.png'}
-                            width={48}
-                            height={48}
+                            src={'/logo.svg'}
+                            layout='fill'
+                            objectFit='contain'
                             alt="Monadic DNA App Logo"
                         />
                     </IconButton>
-                    <Typography
-                        variant='h5'
-                        className={`font-light text-2xl ml-2 font-['Inria_Sans']`}
-                        sx={{
-                            flexGrow: 1,
-                            color: teal[900]
-                        }}
-                    >
-                        Monadic DNA
-                    </Typography>
                     {isLandingPage &&
                         <Button
                             variant='contained'

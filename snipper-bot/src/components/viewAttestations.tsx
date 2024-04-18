@@ -1,53 +1,79 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import Link from '@mui/material/Link';
 
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { teal, grey } from '@mui/material/colors';
+import { teal, grey, pink } from '@mui/material/colors';
 import CheckIcon from '@mui/icons-material/CheckCircle';
-import { queryAttestationById } from '@/utils/attestations';
 import { IMonadicDNAVerifiedTrait } from '@/types';
 
+const config = require('../config.json');
+
+interface IResultData {
+    title: string;
+    description: string;
+    color: any;
+    getFooterText(result: string): string;
+}
+
+const resultData: Record<string, IResultData> = {
+  'thrombosis': {
+      title: 'Genetic risk for thrombophilia',
+      description: 'Thrombophilia is a predisposition to developing harmful blood clots. The two most common genetic variants linked to an increased risk for thrombophilia are found in two genes called F5 and F2.',
+      color: pink,
+      getFooterText(result: string): string {
+          return `You have a ${result === 'no' ? 'Low' : 'High'} likelihood of genetic thrombophilia.`;
+      }
+  },
+};
+
+
 const ViewAttestations = ({
-    id
+    id,
+    attestationData
 }: {
-    id: string
+    id: string,
+    attestationData: IMonadicDNAVerifiedTrait
 }) => {
 
-    const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait | null>();
+    console.log('attestationData', attestationData);
+    const trait = attestationData.Trait.toLowerCase();
 
-    useEffect(() => {
-        (async() => {
-            const result = await queryAttestationById(id)
-            setAttestationData(result)
-            console.log("aidr", result)
-        })()
-    }, [id])
-
+    const title = resultData[trait].title;
+    const description = resultData[trait].description;
+    const footerText = resultData[trait].getFooterText(attestationData.Value);
+    const color = resultData[trait].color;
 
     return (
-        <Box
-            className={`w-[296px] h-[247px] flex flex-col justify-between border rounded-[20px] p-0`}
-            sx={{ borderColor: teal[900] }}
-        >
-          <Box
-              className={`w-full h-[55px] rounded-t-[18px] pt-3 pl-5 mb-11 text-white`}
-              sx={{ background: teal[900] }}
-          >
-              <Typography> { attestationData?.Trait } </Typography>
-          </Box>
+        <Box className='pl-4 pt-11 lg:pl-[372px]'>
+            <Typography variant='h6'> Your Results </Typography>
+            <Typography paddingY={4} > Attestations of these results have been added to your DNA Passport. </Typography>
+            <Box
+                className={`sm:w-[698px] flex flex-col justify-between border p-0`}
+                sx={{ borderColor: color[900] }}
+            >
+            <Box
+                className={`w-full h-[55px] pt-3 pl-5 mb-11 text-white`}
+                sx={{ background: color[900] }}
+            >
+                <Typography> { title } </Typography>
+            </Box>
 
-          <Typography className='pl-5'> Result: {attestationData?.Value.toLowerCase() === 'no' ? ' Low Risk' :  ' High Risk'}</Typography>
-          <Typography className='pl-5'> Attestation ID: {id}</Typography>
+            <Typography className='pl-5'> { description } </Typography>
 
-          <Box className='mt-14 pb-3 pl-5 rounded-b-[19px]' sx={{ background: grey[50] }}>
-              <Typography> Provided by: SnipperBot </Typography>
-              <Typography className='flex items-center gap-1' color='success.main'>
-                  <span> Authorized Provider </span>
-                  <CheckIcon sx={{ width:16, height: 16 }}/>
-              </Typography>
-          </Box>
-
+            <Box className='flex justify-between mt-14 pb-3 p-4' sx={{ background: `${color[900]}0D` }}>
+                <Typography>  { footerText } </Typography>
+                <Link
+                    href={`${config.signUrl}/${id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color='inherit'
+                >
+                    View on SignScan
+                </Link>
+            </Box>
+            </Box>
         </Box>
     )
 }

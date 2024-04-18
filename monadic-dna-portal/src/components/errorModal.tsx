@@ -19,12 +19,12 @@ const ErrorModal = ({
 
     return (
         <>
-            <Modal open={error.isError}>
+            <Modal open={error.isError ?? true}>
                 <Box
                     className='sm:w-[400px] flex flex-col items-center justify-between p-5 rounded-lg'
                     sx={{ background: `${lime[50]}59`, zIndex: 20 }}
                 >
-                    <Typography color='error.main' variant='h6' className='pb-4'> { error.title } </Typography>
+                    <Typography color='error.main' variant='h6' className='pb-4 capitalize'> { error.title } </Typography>
                     <Typography> { error.text } </Typography>
                     <Button
                         className='mt-4 ml-auto'
