@@ -99,9 +99,12 @@ async def main():
 
     # Create secrets
     stored_secret = nillion.Secrets({
+        "snp": nillion.SecretInteger(12),
+        "genotype": nillion.SecretInteger(7),
         "snp1": nillion.SecretInteger(11),
         "genotype1": nillion.SecretInteger(9),
-    })
+         })
+
 
     secret_bindings = nillion.ProgramBindings(program_id)
     secret_bindings.add_input_party(party_name, party_id)
@@ -139,10 +142,7 @@ async def main():
             if compute_event.uuid == compute_id:
                 print(f"✅ Compute complete for compute_id {compute_event.uuid}")
                 print(f"🖥️ The result is {compute_event.result.value}")
-                muscle_perform_result = compute_event.result.value
-                break
-
-    return thrombosis_result, muscle_perform_result
+                return compute_event.result.value
 
 if __name__ == "__main__":
     asyncio.run(main())

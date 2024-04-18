@@ -157,7 +157,7 @@ async def handle_dataset():
     return jsonify({'error': 'File processing failed'}), 500
 
 @app.route('/computations/thrombosis', methods=['POST'])
-async def thrombosis_computation():
+async def thrombosis():
     store_id = request.json.get('store_id')
     if store_id is None:
         return jsonify({'error': 'Missing store_id'}), 400
@@ -166,7 +166,7 @@ async def thrombosis_computation():
     return jsonify(result)
 
 @app.route('/computations/muscle-performance', methods=['POST'])
-async def muscle_perform_computation():
+async def muscle_perform():
     store_id = request.json.get('store_id')
     if store_id is None:
         return jsonify({'error': 'Missing store_id'}), 400
