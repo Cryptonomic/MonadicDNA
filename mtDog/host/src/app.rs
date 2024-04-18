@@ -424,7 +424,9 @@ impl eframe::App for TemplateApp {
                     egui::CentralPanel::default()                    
                     .show_inside(ui, |ui| {
                         ui. horizontal_wrapped( |ui| {
-                            ui.label("Upload your results to add attestations to your passport");
+                            ui.label("Upload your results to add attestations to your passport. You can view these results on the");
+                            ui.hyperlink_to("MonadicDNA", "https://github.com/Cryptonomic/MonadicDNA");
+                            ui.label("website.");
                         });
                     });
                 });           
