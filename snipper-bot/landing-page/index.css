@@ -153,8 +153,8 @@
   line-height: 2.625rem;
   display: inline-block;
   min-width: 2.125rem;
-  
- 
+
+
 }
 .icon-area {
   display: flex;
@@ -235,6 +235,10 @@
   font-family: var(--typography-h6);
   color: var(--primary-contrast);
   text-align: left;
+}
+.button5 a {
+  color: #fff;
+  text-decoration: none;
 }
 .masked-icon5 {
   height: 1.375rem;
