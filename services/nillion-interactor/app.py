@@ -75,6 +75,7 @@ async def store_on_nillion(gene_data):
     user_id = _client.user_id()
     party_name = "Party1"
 
+    # Store thrombosis data
     program_name = "thrombosis"
     program_mir_path = f"binaries/thrombosis.nada.bin"
     program_id = f"{user_id}/{program_name}"
@@ -82,56 +83,136 @@ async def store_on_nillion(gene_data):
     secret_bindings = nillion.ProgramBindings(program_id)
     secret_bindings.add_input_party(party_name, party_id)
 
-    store_ids = {}
+    thrombosis_store_ids = {}
 
     for row in gene_data:
         rsid = row['rsid']
         rsid_int = row['rsid_int']
         genotype_int = row['genotype_int']
-        stored_secret = nillion.Secrets({
-        "snp": nillion.SecretInteger(6),
-        "genotype": nillion.SecretInteger(9),
-         })
-        store_id = await _client.store_secrets(
-            cluster_id, secret_bindings, stored_secret, None
+
+        thrombosis_secret = nillion.Secrets({
+            "snp": nillion.SecretInteger(12),
+            "genotype": nillion.SecretInteger(7),
+        })
+        thrombosis_store_id = await _client.store_secrets(
+            cluster_id, secret_bindings, thrombosis_secret, None
         )
-        store_ids[rsid] = store_id
+        thrombosis_store_ids[rsid] = thrombosis_store_id
 
-    return store_ids
+    # Store muscle-perform data
+    program_name = "muscle-perform"
+    program_mir_path = f"binaries/muscle-perform.nada.bin"
+    program_id = f"{user_id}/{program_name}"
 
-async def compute_on_nillion(store_id):
+    secret_bindings = nillion.ProgramBindings(program_id)
+    secret_bindings.add_input_party(party_name, party_id)
+
+    muscle_perform_store_ids = {}
+
+    for row in gene_data:
+        rsid = row['rsid']
+        rsid_int = row['rsid_int']
+        genotype_int = row['genotype_int']
+
+        muscle_perform_secret = nillion.Secrets({
+            "snp": nillion.SecretInteger(11),
+            "genotype": nillion.SecretInteger(9),
+        })
+        muscle_perform_store_id = await _client.store_secrets(
+            cluster_id, secret_bindings, muscle_perform_secret, None
+        )
+        muscle_perform_store_ids[rsid] = muscle_perform_store_id
+
+    return {
+        "thrombosis_store_ids": thrombosis_store_ids,
+        "muscle_perform_store_ids": muscle_perform_store_ids
+    }
+
+async def compute_on_nillion(thrombosis_store_id, muscle_perform_store_id):
     cluster_id = os.getenv("NILLION_CLUSTER_ID")
     party_id = _client.party_id()
     user_id = _client.user_id()
     party_name = "Party1"
-    program_name = "thrombosis"
-    program_mir_path = f"binaries/thrombosis.nada.bin"
 
-    program_id = f"{user_id}/{program_name}"
+    # Compute thrombosis
+    results = {}
 
-    compute_bindings = nillion.ProgramBindings(program_id)
-    compute_bindings.add_input_party(party_name, party_id)
-    compute_bindings.add_output_party(party_name, party_id)
+    store_ids = []
+    if thrombosis_store_id:
+        store_ids.append(thrombosis_store_id)
 
-    computation_time_secrets = nillion.Secrets({})
+    if muscle_perform_store_id:
+        store_ids.append(muscle_perform_store_id)
 
-    # Compute on the secret
-    compute_id = await _client.compute(
-        cluster_id,
-        compute_bindings,
-        [store_id],
-        computation_time_secrets,
-        nillion.PublicVariables({}),
-    )
+    if not store_ids:
+        return {}  # Return an empty dictionary if no store IDs are provided
 
-    # Print compute result
-    print(f"The computation was sent to the network. compute_id: {compute_id}")
-    while True:
-        compute_event = await _client.next_compute_event()
-        if isinstance(compute_event, nillion.ComputeFinishedEvent):
-            print(f"✅  Compute complete for compute_id {compute_event.uuid}")
-            print(f"🖥️  The result is {compute_event.result.value}")
-            return compute_event.result.value
+    for store_id in store_ids:
+        if thrombosis_store_id:
+            program_name = "thrombosis"
+            program_mir_path = f"binaries/thrombosis.nada.bin"
+            program_id = f"{user_id}/{program_name}"
+
+            compute_bindings = nillion.ProgramBindings(program_id)
+            compute_bindings.add_input_party(party_name, party_id)
+            compute_bindings.add_output_party(party_name, party_id)
+
+            print(f"Computing using program {program_id}")
+            print(f"Use secret store_id: {thrombosis_store_id}")
+
+            computation_time_secrets = nillion.Secrets({})
+
+            compute_id = await _client.compute(
+                cluster_id,
+                compute_bindings,
+                [thrombosis_store_id],
+                computation_time_secrets,
+                nillion.PublicVariables({}),
+            )
+
+            print(f"The {program_name} computation was sent to the network. compute_id: {compute_id}")
+
+            while True:
+                compute_event = await _client.next_compute_event()
+                if isinstance(compute_event, nillion.ComputeFinishedEvent):
+                    if compute_event.uuid == compute_id:
+                        print(f"✅ {program_name} compute complete for compute_id {compute_event.uuid}")
+                        results["thrombosis_result"] = compute_event.result.value
+                        break
+
+        if muscle_perform_store_id:
+            program_name = "muscle-perform"
+            program_mir_path = f"binaries/muscle-perform.nada.bin"
+            program_id = f"{user_id}/{program_name}"
+
+            compute_bindings = nillion.ProgramBindings(program_id)
+            compute_bindings.add_input_party(party_name, party_id)
+            compute_bindings.add_output_party(party_name, party_id)
+
+            print(f"Computing using program {program_id}")
+            print(f"Use secret store_id: {muscle_perform_store_id}")
+
+            computation_time_secrets = nillion.Secrets({})
+
+            compute_id = await _client.compute(
+                cluster_id,
+                compute_bindings,
+                [muscle_perform_store_id],
+                computation_time_secrets,
+                nillion.PublicVariables({}),
+            )
+
+            print(f"The {program_name} computation was sent to the network. compute_id: {compute_id}")
+
+            while True:
+                compute_event = await _client.next_compute_event()
+                if isinstance(compute_event, nillion.ComputeFinishedEvent):
+                    if compute_event.uuid == compute_id:
+                        print(f"✅ {program_name} compute complete for compute_id {compute_event.uuid}")
+                        results["muscle_perform_result"] = compute_event.result.value
+                        break
+
+    return results
 
 
 @app.route('/dataset', methods=['PUT'])
@@ -149,20 +230,19 @@ async def handle_dataset():
 
 @app.route('/computations/thrombosis', methods=['POST'])
 async def thrombosis():
-    store_id = request.json.get('store_id')
+    thrombosis_store_id = request.json.get('thrombosis_store_id')
+    if thrombosis_store_id is None:
+        return jsonify({'error': 'Missing thrombosis store_id'}), 400
 
-    if store_id is None:
-        return jsonify({'error': 'Missing store_id'}), 400
-
-    result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=120)
+    result = await asyncio.wait_for(compute_on_nillion(thrombosis_store_id, None), timeout=120)
     return jsonify(result)
 
-@app.route('/computations/muscle-perform', methods=['POST'])
+@app.route('/computations/muscle-performance', methods=['POST'])
 async def muscle_perform():
-    store_id = request.json.get('store_id')
-    if store_id is None:
-        return jsonify({'error': 'Missing store_id'}), 400
-    result = await asyncio.wait_for(compute_on_nillion( store_id), timeout=120)
+    muscle_performance_store_id = request.json.get('muscle_performance_store_id')
+    if muscle_performance_store_id is None:
+        return jsonify({'error': 'Missing muscle-performance store_id'}), 400
+    result = await asyncio.wait_for(compute_on_nillion(None, muscle_performance_store_id), timeout=120)
     return jsonify(result)
 
 @app.route('/')
