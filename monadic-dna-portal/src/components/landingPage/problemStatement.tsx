@@ -22,7 +22,7 @@ const ProblemStatement = () => {
 
             <Box className='flex-none w-[301px] h-[244px] xl:mr-[126px] '>
                 <Image
-                    src={'/privacy.png'}
+                    src={'/privacy.svg'}
                     width={301}
                     height={244}
                     alt="Monadic DNA App Logo"

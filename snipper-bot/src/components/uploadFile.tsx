@@ -1,5 +1,5 @@
 'use client';
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
@@ -10,11 +10,15 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 import VisuallyHiddenInput from './visuallyHiddenInput';
 
-import { createAttestation } from '@/utils/attestations';
+import { createAttestation, getAttestationId, getResultsById } from '@/utils/attestations';
 import { computeOnNillion } from '@/utils/nillion';
 import FileProgressIndicator from './fileProgressIndicator';
-import { IMonadicDNAPassport } from '@/types';
+import { IMonadicDNAPassport, IMonadicDNAVerifiedTrait } from '@/types';
 import ViewAttestations from './viewAttestations';
+import AnalysisInsights from './analysisInsights';
+import AnalysisStepper from './analysisStepper';
+import ErrorModal from './errorModal';
+import { CustomError, invalidFileError } from '@/types/customError';
 
 const config = require('../config.json');
 
@@ -24,8 +28,12 @@ const UploadFile = () => {
     const [isFileLoading, setIsFileLoading] = useState(false);
     const [fileProgress, setFileProgress] = React.useState(0);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
-    const [jsonData, setJsonData] = useState<IMonadicDNAPassport | null>(null);
+    const [passport, setPassport] = useState<IMonadicDNAPassport | null>(null);
     const [attestationId, setAttestationId] = useState<string | undefined>();
+    const [activeStep, setActiveStep] = React.useState(-1);
+    const [error, setError] = useState<CustomError>();
+    const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait | null>();
+
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
@@ -54,78 +62,103 @@ const UploadFile = () => {
         const fileContent = e.target?.result as string;
         try {
             const jsonContent = JSON.parse(fileContent) as IMonadicDNAPassport;
-            setJsonData(jsonContent);
-        } catch (error) {
-            console.error('Error parsing JSON file:', error);
+            setPassport(jsonContent);
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+          } catch (e) {
+            console.error('Error parsing JSON file:', e);
+            setError(invalidFileError);
         }
     };
 
-    const computePassport = async() => {
-        if (!jsonData) { return };
+    const analyseData = async() => {
+        if (!passport) { return };
 
         setIsProcessingTransaction(true);
 
         try {
             const traitId = config.trait.id
-            const storeId = jsonData.nillion_data[traitId];
+            const storeId = passport.nillion_data[traitId];
             const res = await computeOnNillion(storeId);
             const interpretation = res?.result ? 'yes' : 'no';
 
-            const tx = await createAttestation(jsonData.passport_id, interpretation);
-            setAttestationId(tx.attestationId);
-        } catch (error) {
-            console.error('Failed to compute passport:', error);
+            const tx = await createAttestation(passport.passport_id, interpretation);
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
+            const attestationId = await getAttestationId(passport.passport_id);
+            setAttestationId(attestationId);
+
+            const result = await getResultsById(attestationId)
+            setAttestationData(result.data);
+
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+          } catch (e) {
+            console.error('Failed to Analyse DNA Passport:', e);
+            setError(e as CustomError);
         } finally {
           setIsProcessingTransaction(false);
         }
     }
 
-
-    if(attestationId !== undefined ) {
-        return <ViewAttestations id={attestationId} />
+    if(activeStep >= 2 ) {
+        return (
+            <Box className='pt-4 sm:pt-11'>
+                <AnalysisStepper {...{ activeStep, setActiveStep }} />
+                <ViewAttestations id={attestationId!} attestationData={attestationData!} />
+            </Box>
+        );
     }
 
     return (
-        <div className='sm:w-[552px]'>
-            <Typography variant='h5'>
-                Upload Your DNA Passport
-            </Typography>
-            <Box
-                className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
-                sx={{ borderColor: 'error'}}
-            >
-                <UploadFileIcon className='w-10 h-10' />
-                <div>
-                    <Link
-                        className='p-0 cursor-pointer'
-                        component='label'
-                        variant='inherit'
-                        color='text.primary'
-                    >
-                        Click to upload
-                        <VisuallyHiddenInput type='file' onChange={handleFileChange} disabled={isFileLoading} />
-                    </Link>
-                    {' '}
-                    or drag and drop
-                </div>
+        <Box className='pt-4 sm:pt-11'>
+            {error && <ErrorModal error={error} setError={setError} /> }
+            <AnalysisStepper {...{ activeStep, setActiveStep }} />
+            <div className='sm:w-[552px] mt-12 mx-auto'>
+                <Typography variant='h5'>
+                    Upload Your DNA Passport
+                </Typography>
+                {!file &&
+                    <Typography className='pb-4'>
+                            Upload your DNA Passport to run an analysis. Attestations of the results will be added to your DNA passport.
+                    </Typography>
+                }
+                <Box
+                    className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
+                    sx={{ borderColor: 'error'}}
+                >
+                    <UploadFileIcon className='w-10 h-10' />
+                    <div>
+                        <Link
+                            className='p-0 cursor-pointer'
+                            component='label'
+                            variant='inherit'
+                            color='text.primary'
+                        >
+                            Click to upload
+                            <VisuallyHiddenInput type='file' onChange={handleFileChange} disabled={isFileLoading} />
+                        </Link>
+                        {' '}
+                        or drag and drop
+                    </div>
 
-                <Typography color='text.secondary'> Exome sequencing or genotyping data (Max X GB) </Typography>
-            </Box>
-            {file &&
-                <>
+                    <Typography color='text.secondary'> DNA Passport JSON </Typography>
+                </Box>
+                {file &&
                     <FileProgressIndicator {...{file, fileProgress}} />
-                    <LoadingButton
-                        variant='contained'
-                        loading={isProcessingTransaction}
-                        disabled={fileProgress < 100}
-                        onClick={() => computePassport()}
-                        className='w-[400px]'
-                    >
-                        Compute Passport
-                    </LoadingButton>
-                </>
-            }
-        </div>
+                }
+
+                <AnalysisInsights />
+
+                <LoadingButton
+                    variant='contained'
+                    loading={isProcessingTransaction}
+                    disabled={fileProgress < 100}
+                    onClick={() => analyseData()}
+                    className={`w-full sm:w-[400px] ${file ? 'mt-8' : 'mt-20' }`}
+                >
+                    Analyse Data
+                </LoadingButton>
+            </div>
+        </Box>
     )
 }
 

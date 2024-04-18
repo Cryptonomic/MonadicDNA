@@ -1,4 +1,6 @@
+import { ethers } from "ethers";
 import { IMonadicDNAVerifiedTrait } from "@/types";
+import { createAttestationError, retreiveResultsError } from "@/types/customError";
 
 const {
     SignProtocolClient,
@@ -28,27 +30,93 @@ export async function createAttestation(passportId: string, value: string) {
         'Value': value,
     }
 
-    const tx = await client.createAttestation({
-        schemaId: config.schemaId,
-        data: schemaData,
-        indexingValue: passportId,
-        recipients: [config.signer]
-    });
+    try {
+        const tx = await client.createAttestation({
+            schemaId: config.schemaId,
+            data: schemaData,
+            indexingValue: passportId,
+            recipients: [config.signer]
+        });
 
-
-    console.log('tx', tx);
-    return tx;
+        console.log('tx', tx);
+        return tx;
+    } catch (error) {
+        console.error('Error Creating Attestation:', error as Error);
+        throw createAttestationError;
+    }
 }
 
-export async function queryAttestationById(attesstationId: string) {
+
+export async function getAttestationId(indexingValue: string) {
     const indexService = new IndexService('testnet');
 
     try {
-        const res = await indexService.queryAttestation(attesstationId);
+        const res = await indexService.queryAttestationList( {
+            indexingValue
+        });
+        console.log('res.rows', res.rows)
+        const attestationId =  res.rows[0].id
 
-        console.log(`Attestation Result for ${attesstationId}: ${res}`);
-        return res;
+        console.log(`Attestation ID for ${indexingValue}: ${attestationId}`);
+
+        return attestationId;
     } catch (error) {
-        console.error('Error uploading file:', error);
+        console.error('Error viewing results:', error);
+        throw retreiveResultsError; // todo
     }
 }
+
+export async function getResultsById(attestationId: string) {
+    const indexService = new IndexService('testnet');
+
+    // const id = `${config.networkId}_${attestationId}`
+    console.log("attestationId", attestationId)
+    // console.log("fullID", id);
+
+
+    try {
+        const res = await indexService.queryAttestation(attestationId);
+        const encodedData = res.data
+        console.log("res", res)
+
+        let decodedData = ethers.AbiCoder.defaultAbiCoder().decode(
+            ['string', 'string', 'string', 'string'],
+            encodedData
+        );
+
+        console.log("decodedData", decodedData)
+
+        const results: IMonadicDNAVerifiedTrait = {
+          "Passport ID": decodedData[0],
+          Provider: decodedData[1],
+          Trait: decodedData[2],
+          Value: decodedData[3]
+        };
+
+        console.log(`Attestation Result for ${attestationId}: ${results}`);
+        return {
+            id: res.id,
+            data: results
+        };
+        // return results;
+    } catch (error) {
+        console.error('Error viewing results:', error);
+        throw retreiveResultsError; // todo
+    }
+}
+
+// export async function queryAttestationById(attestationId: string) {
+//     const indexService = new IndexService('testnet');
+
+//     console.log()
+
+//     try {
+//         const res = await indexService.queryAttestation(attestationId);
+
+//         console.log(`Attestation Result for ${attestationId}: ${res}`);
+//         return res;
+//     } catch (error) {
+//         console.error('Error uploading file:', error);
+//         throw retreiveResultsError;
+//     }
+// }

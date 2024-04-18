@@ -10,5 +10,6 @@
     "name": "Thrombosis",
     "id": "rs6025"
   },
-  "baseUrl": "http://165.232.74.173:8732"
+  "baseUrl": "http://165.232.74.173:8732",
+  "signUrl": "https://testnet-scan.sign.global/attestation"
 }

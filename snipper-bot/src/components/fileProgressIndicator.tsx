@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
-import { formatFileSize } from '@/utils/formatting';
+import { formatFileSize } from '@/utils';
 
 const FileProgressIndicator = ({
     file,

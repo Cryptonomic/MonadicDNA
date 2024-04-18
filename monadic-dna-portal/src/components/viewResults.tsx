@@ -8,52 +8,68 @@ import { lime, teal, grey } from '@mui/material/colors';
 import CheckIcon from '@mui/icons-material/CheckCircle';
 import { IMonadicDNAVerifiedTrait } from '@/types';
 import { getResultsById } from '@/utils/signProtocol';
+import { IError } from '@/types/uploadFile';
+import ErrorModal from './errorModal';
 
 const config = require('../config.json');
 
 const ViewResults = ({ id }: { id: string; }) => {
 
     const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait | null>();
+    const [error, setError] = useState<IError | null>(null);
 
     useEffect(() => {
         (async() => {
-            const result = await getResultsById(id)
-            setAttestationData(result);
+            try {
+                const result = await getResultsById(id)
+                setAttestationData(result);
+            } catch (error) {
+                setError({
+                    isError: true,
+                    title: 'Failed to retreive results',
+                    text: 'Please ensure that an attestation has been added to this passport. Contact support if issue persits.'
+                });
+            }
         })()
     }, [id])
 
     return (
-        <Box
-            className={`w-[296px] h-[247px] flex flex-col justify-between border rounded-[20px] p-0`}
-            sx={{ borderColor: teal[900] }}
-        >
-          <Box
-              className={`w-full h-[55px] rounded-t-[18px] pt-3 pl-5 mb-11 text-white`}
-              sx={{ background: teal[900] }}
-          >
-              <Typography> { attestationData?.Trait } </Typography>
-          </Box>
+        <>
+            {error?.isError &&
+                <ErrorModal error={error} setError={setError} />
+            }
+            <Box
+                className={`w-[296px] h-[247px] flex flex-col justify-between border rounded-[20px] p-0`}
+                sx={{ borderColor: teal[900] }}
+            >
+              <Box
+                  className={`w-full h-[55px] rounded-t-[18px] pt-3 pl-5 mb-11 text-white`}
+                  sx={{ background: teal[900] }}
+              >
+                  <Typography> { attestationData?.Trait } </Typography>
+              </Box>
 
-          <Typography className='pl-5'> Result: {attestationData?.Value?.toLowerCase() === 'yes' ? ' High Risk' : ' Low Risk'}</Typography>
-          <Link
-              href={`${config.signUrl}/${id}`}
-              className='pl-5'
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: lime[800]}}
-          >
-              ID: {id}
-          </Link>
+              <Typography className='pl-5'> Result: {attestationData?.Value?.toLowerCase() === 'yes' ? ' High Risk' : ' Low Risk'}</Typography>
+              <Link
+                  href={`${config.signUrl}/${id}`}
+                  className='pl-5'
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ color: lime[800]}}
+              >
+                  ID: {id}
+              </Link>
 
-          <Box className='mt-14 pb-3 pl-5 rounded-b-[19px]' sx={{ background: grey[50] }}>
-              <Typography> Provided by: {attestationData?.Provider} </Typography>
-              <Typography className='flex items-center gap-1' color='success.main'>
-                  <span> Authorized Provider </span>
-                  <CheckIcon sx={{ width:16, height: 16 }}/>
-              </Typography>
-          </Box>
+              <Box className='mt-14 pb-3 pl-5 rounded-b-[19px]' sx={{ background: grey[50] }}>
+                  <Typography> Provided by: {attestationData?.Provider} </Typography>
+                  <Typography className='flex items-center gap-1' color='success.main'>
+                      <span> Authorized Provider </span>
+                      <CheckIcon sx={{ width:16, height: 16 }}/>
+                  </Typography>
+              </Box>
 
-        </Box>
+            </Box>
+        </>
     )
 }
 
