@@ -209,16 +209,16 @@ impl eframe::App for TemplateApp {
                         .show_separator_line(false)
                         .show_inside(ui, |ui| {                            
                             egui::SidePanel::right("aaa").show_inside(ui, |ui| {       
-                                let b = egui::Button::new("Open Passport");
-                                let br = ui.add_enabled(true, b);
+                                let b = egui::Button::new("Open Passport");                                
+                                let br = ui.add_sized([100.0,24.0], b);
                                 if br.clicked() {
-                                    if let Some(path) = rfd::FileDialog::new().pick_file() {                                
+                                    if let Some(path) = rfd::FileDialog::new().pick_file() {
                                         let path = path.display().to_string();
                                         self.load_passport(&path);
                                     }
-                                }
+                                }                                
                                 if self.passport.is_some() {
-                                    ui.add(green_tick.clone());                                    
+                                    ui.add(green_tick.clone());      
                                 }
                                 else {
                                     ui.add(blank_tick.clone());
@@ -231,7 +231,7 @@ impl eframe::App for TemplateApp {
                         ui. horizontal_wrapped( |ui| {
                         // egui::ScrollArea::vertical().show(ui, |ui| {
                             ui.label("Open your genetic passport file using the button provided. If you do not have one then head over to the");
-                            ui.hyperlink_to("MonadicDNA", "https://github.com/Cryptonomic/MonadicDNA");
+                            ui.hyperlink_to("MonadicDNA", "https://monadicdna.com");
                             ui.label("website to create one.");
                         });
                     });
@@ -265,16 +265,20 @@ impl eframe::App for TemplateApp {
                             egui::SidePanel::right("aaa").show_inside(ui, |ui| {                            
                                 let b = egui::Button::new("Open Data");
                                 if self.passport.is_some() {
-                                    let br = ui.add_enabled(true, b);
-                                    if br.clicked() {
-                                        if let Some(path) = rfd::FileDialog::new().pick_file() {                                
-                                            let path = path.display().to_string();
-                                            self.load_data(&path);
-                                        }                                        
-                                    }
+                                    ui.add_enabled_ui(true, |ui| {
+                                        let br = ui.add_sized([100.0,24.0], b);
+                                        if br.clicked() {
+                                            if let Some(path) = rfd::FileDialog::new().pick_file() {                                
+                                                let path = path.display().to_string();
+                                                self.load_data(&path);
+                                            }                                        
+                                        }
+                                    });
                                 }
                                 else {
-                                    ui.add_enabled(false, b);
+                                    ui.add_enabled_ui(false, |ui| {
+                                        ui.add_sized([100.0,24.0], b);
+                                    });
                                 }if self.data.is_some() {
                                     ui.add(green_tick.clone());                                    
                                 }
@@ -319,13 +323,17 @@ impl eframe::App for TemplateApp {
                             egui::SidePanel::right("aaa").show_inside(ui, |ui| {                                
                                 let b = egui::Button::new("Run Risc0");
                                 if self.data.is_some() {
-                                    let br = ui.add_enabled(true, b);
-                                    if br.clicked() {
-                                        self.run_prover();
-                                    }
+                                    ui.add_enabled_ui(true, |ui| {
+                                        let br = ui.add_sized([100.0,24.0], b);
+                                        if br.clicked() {
+                                            self.run_prover();
+                                        }
+                                    });                                    
                                 }
                                 else {
-                                    ui.add_enabled(false, b);
+                                    ui.add_enabled_ui(false, |ui| {
+                                        ui.add_sized([100.0,24.0], b);                                        
+                                    });   
                                 }
                                 if self.results.is_some() {
                                     ui.add(green_tick.clone());
@@ -403,14 +411,18 @@ impl eframe::App for TemplateApp {
                         .show_inside(ui, |ui| {                                    
                             egui::SidePanel::right("aaa").show_inside(ui, |ui| {                                                
                             let b = egui::Button::new("Upload").wrap(true); 
-                            if self.results.is_some() {                           
-                                let br = ui.add_enabled(true, b);
-                                if br.clicked() {
-                                    self.upload();
-                                }                
+                            if self.results.is_some() {             
+                                ui.add_enabled_ui(true, |ui| {
+                                    let br = ui.add_sized([100.0,24.0], b);                                    
+                                    if br.clicked() {
+                                        self.upload();
+                                    }                
+                                });
                             }
                             else {
-                                ui.add_enabled(false, b);
+                                ui.add_enabled_ui(false, |ui| {
+                                    ui.add_sized([100.0,24.0], b);                                    
+                                });
                             }
                             if self.upload_complete {
                                 ui.add(green_tick.clone());
@@ -425,7 +437,7 @@ impl eframe::App for TemplateApp {
                     .show_inside(ui, |ui| {
                         ui. horizontal_wrapped( |ui| {
                             ui.label("Upload your results to add attestations to your passport. You can view these results on the");
-                            ui.hyperlink_to("MonadicDNA", "https://github.com/Cryptonomic/MonadicDNA");
+                            ui.hyperlink_to("MonadicDNA", "https://monadicdna.com");
                             ui.label("website.");
                         });
                     });
@@ -444,8 +456,11 @@ fn powered_by_egui_and_eframe(ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing.x = 0.0;
         // ui.label("Powered by ");
-        ui.hyperlink_to("MonadicDNA", "https://github.com/Cryptonomic/MonadicDNA");
-        ui.label(" by ");
+        ui.label("MonadicDNA (");
+        ui.hyperlink_to("Github", "https://github.com/Cryptonomic/MonadicDNA");
+        ui.label(", ");
+        ui.hyperlink_to("Website", "https://monadicdna.com");
+        ui.label(") by ");
         ui.hyperlink_to("Cryptonomic", "https://www.cryptonomic.tech");
         ui.label(".");
     });
