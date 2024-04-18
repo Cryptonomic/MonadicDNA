@@ -41,7 +41,7 @@ async def main():
     print('Stored program_id:', program_id)
 
     # Create secrets
-    thrombosis_secret = nillion.Secrets({
+    stored_secret = nillion.Secrets({
         "snp": nillion.SecretInteger(12),
         "genotype": nillion.SecretInteger(7),
     })
@@ -50,8 +50,8 @@ async def main():
     secret_bindings.add_input_party(party_name, party_id)
 
     # Store secrets
-    thrombosis_store_id = await client.store_secrets(
-        cluster_id, secret_bindings, thrombosis_secret, None
+    store_id = await client.store_secrets(
+        cluster_id, secret_bindings, stored_secret, None
     )
 
     # Bind parties for computation
@@ -60,7 +60,7 @@ async def main():
     compute_bindings.add_output_party(party_name, party_id)
 
     print(f"Computing using program {program_id}")
-    print(f"Use secret store_id: {thrombosis_store_id}")
+    print(f"Use secret store_id: {store_id}")
 
     computation_time_secrets = nillion.Secrets({})
 
@@ -68,7 +68,7 @@ async def main():
     compute_id = await client.compute(
         cluster_id,
         compute_bindings,
-        [thrombosis_store_id],
+        [store_id],
         computation_time_secrets,
         nillion.PublicVariables({}),
     )
@@ -98,17 +98,17 @@ async def main():
     print('Stored program_id:', program_id)
 
     # Create secrets
-    muscle_perform_secret = nillion.Secrets({
-        "snp": nillion.SecretInteger(11),
-        "genotype": nillion.SecretInteger(9),
+    stored_secret = nillion.Secrets({
+        "snp1": nillion.SecretInteger(11),
+        "genotype1": nillion.SecretInteger(9),
     })
 
     secret_bindings = nillion.ProgramBindings(program_id)
     secret_bindings.add_input_party(party_name, party_id)
 
     # Store secrets
-    muscle_perform_store_id = await client.store_secrets(
-        cluster_id, secret_bindings, muscle_perform_secret, None
+    store_id = await client.store_secrets(
+        cluster_id, secret_bindings, stored_secret, None
     )
 
     # Bind parties for computation
@@ -117,7 +117,7 @@ async def main():
     compute_bindings.add_output_party(party_name, party_id)
 
     print(f"Computing using program {program_id}")
-    print(f"Use secret store_id: {muscle_perform_store_id}")
+    print(f"Use secret store_id: {store_id}")
 
     computation_time_secrets = nillion.Secrets({})
 
@@ -125,7 +125,7 @@ async def main():
     compute_id = await client.compute(
         cluster_id,
         compute_bindings,
-        [muscle_perform_store_id],
+        [store_id],
         computation_time_secrets,
         nillion.PublicVariables({}),
     )
