@@ -88,7 +88,7 @@ impl TemplateApp {
         if let Some(data) = self.data.clone() {
             println!("Starting computation");        
             let thread_join_handle = thread::spawn(move || run_prover(data));
-            // some work here
+            
             println!("Awaiting computation");
             let res = thread_join_handle.join().unwrap();
             if let Ok(results) = res { 
@@ -152,8 +152,6 @@ impl eframe::App for TemplateApp {
             .max_size(Vec2::new(24.0, 24.0));
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            // The top panel is often a good place for a menu bar:
-
             egui::menu::bar(ui, |ui| {
                 // NOTE: no File->Quit on web pages!
                 let is_web = cfg!(target_arch = "wasm32");
@@ -165,7 +163,6 @@ impl eframe::App for TemplateApp {
                     });
                     ui.add_space(16.0);
                 }
-
                 egui::widgets::global_dark_light_mode_buttons(ui);
             });
         });
@@ -204,7 +201,6 @@ impl eframe::App for TemplateApp {
                                 ui.add(image);
                             });
                     });
-        
         
                     egui::SidePanel::right("1_right_panel")
                         .resizable(true)
@@ -261,7 +257,6 @@ impl eframe::App for TemplateApp {
                             ui.add(image);
                         });
                     });
-        
         
                     egui::SidePanel::right("2_right_panel")
                         .resizable(true)
@@ -440,8 +435,6 @@ impl eframe::App for TemplateApp {
                 });           
             });
 
-           
-        
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);
                 egui::warn_if_debug_build(ui);
