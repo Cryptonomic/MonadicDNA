@@ -22,7 +22,7 @@ app.use(express.json());
 
 app.post('/sign/VerifiedTrait', async (req: Request, res: Response) => {
   try {
-    const { passport_id, provider, trait, value }: VerifiedTraitRequest = req.body;
+    const { passport_id, provider, trait, value }: VerifiedTraitRequest = req.params;
 
     const PRIVATE_KEY: typeof PrivateKey = config.privateKey as typeof PrivateKey;
     const account = privateKeyToAccount(PRIVATE_KEY);
