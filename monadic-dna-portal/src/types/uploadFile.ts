@@ -1,4 +1,4 @@
-export type ActionType = 'createPassport' | 'viewAttestation';
+export type ActionType = 'createPassport' | 'viewResults';
 
 export interface IActionData {
     type: ActionType;
@@ -14,10 +14,16 @@ export const ActionData: Record<ActionType, IActionData> = {
         buttonAction: 'createDNAPassport',
         type: 'createPassport'
     },
-    'viewAttestation': {
+    'viewResults': {
         title: 'Upload Your DNA Passport',
-        buttonTitle: 'View Attestation',
-        buttonAction: 'viewAttestation',
-        type: 'viewAttestation'
+        buttonTitle: 'View Results',
+        buttonAction: 'viewResults',
+        type: 'viewResults'
     }
+}
+
+export interface IError {
+    isError: boolean;
+    title: string;
+    text?: string;
 }

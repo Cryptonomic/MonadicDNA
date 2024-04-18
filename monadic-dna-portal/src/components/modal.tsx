@@ -17,7 +17,7 @@ const Modal = (props: IModal) => {
     return (
         <div
             onClick={props.onClose}
-            className='fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center'
+            className='fixed inset-0 z-50 bg-[#4c4a4a] bg-opacity-90 flex items-center justify-center'
        >
             <div
                 onClick={(e) => e.stopPropagation()}
@@ -28,5 +28,6 @@ const Modal = (props: IModal) => {
         </div>
     );
 }
+
 
 export default Modal;

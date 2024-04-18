@@ -5,25 +5,25 @@ import SparkMD5 from 'spark-md5';
 
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
-import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
 
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import DeleteIcon from '@mui/icons-material/Delete';
-
 import VisuallyHiddenInput from './visuallyHiddenInput';
-import { formatFileSize } from '@/utils/formatting';
 import DownLoadWallet from './downloadWallet';
-import { createAttestation } from '@/utils/attestations';
-import { ActionType, ActionData } from '@/types/uploadFile';
-import ViewAttestations from './viewAttestations';
+import ViewResults from './viewResults';
+import GetExternalDataset from './getExternalDataset';
+import FileProgressDetails from './fileProgressDetails';
+
+import { createAttestation, getAttestationId } from '@/utils/signProtocol';
+import { generateRandomUID, parsePassportFile } from '@/utils';
 import { storeOnNillion } from '@/utils/nillion';
+
+import { ActionType, ActionData, IError } from '@/types/uploadFile';
 import { IMonadicDNAPassport, IMonadicDNAValidDataset } from '@/types';
+import ErrorModal from './errorModal';
 
-
-const UploadFile = ({ type }: { type: ActionType } ) => {
+const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: boolean; } ) => {
     const currentAction = ActionData[type];
 
     const [file, setFile] = useState<File | null>(null);
@@ -32,18 +32,38 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
     const [isWallet, setIsWallet] = useState(false);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [passport, setPassport] = useState<IMonadicDNAPassport>();
-    const [isAttestation, setIsAttestation] = useState(false);
+    const [attestationId, setAttestationId] = useState<string | undefined>();
+    const [error, setError] = useState<IError | null>(null);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
-        if (selectedFile) {
-            setIsFileLoading(true);
-            setFile(selectedFile);
+        if (!selectedFile) return;
 
+        setIsFileLoading(true);
+        setFile(selectedFile);
+
+        const reader = new FileReader();
+        reader.onprogress = updateProgress;
+        reader.readAsArrayBuffer(selectedFile);
+
+        if(currentAction.type === 'viewResults') {
             const reader = new FileReader();
-            reader.onprogress = updateProgress;
-            reader.readAsArrayBuffer(selectedFile);
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+                try {
+                    const fileContent = e.target?.result as string;
+                    const parsedContent = parsePassportFile(fileContent);
+                    setPassport(parsedContent);
+                } catch (e) {
+                    console.error('Error parsing passport file', e)
+                    setError({
+                        isError: true,
+                        title: 'Error parsing passport file',
+                        text: 'Please ensure it is a Monadic DNA passport file in JSON format.'
+                    });
+                }
+            };
+            reader.readAsText(selectedFile);
         }
     };
 
@@ -67,7 +87,6 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
             const reader = new FileReader();
             reader.onload = async(e) => {
                 const fileBuffer = e.target?.result as ArrayBuffer;
-                const nillionDataBuffer = nillionData as ArrayBuffer;
                 // Convert file name to ArrayBuffer
                 const fileNameArrayBuffer = new TextEncoder().encode(file.name);
 
@@ -80,12 +99,10 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
                 // Reset SparkMD5 instance for file content hashing
                 spark.reset();
                 spark.append(fileBuffer);
-                const passportId = spark.end();
-
-                // Reset SparkMD5 instance for nillion data hashing
-                spark.reset();
-                spark.append(nillionDataBuffer);
                 const dataHash = spark.end();
+
+                const UID = generateRandomUID(6);
+                const passportId = `monadicdna_${fileHash}_${UID}`
 
                 const passportData: IMonadicDNAPassport = {
                     passport_id: passportId,
@@ -105,31 +122,54 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
                     await createAttestation(data);
                     setPassport(passportData);
                     setIsWallet(true);
-                } catch (error) {
-                    console.error('Failed to create attestation:', error);
+                } catch (e: any) {
+                    console.error('Failed to create attestation:', e);
+                    setError({
+                        isError: true,
+                        title: 'Failed to create attestation',
+                        text: e.message ?? ''
+                    });
                 } finally {
                   setIsProcessingTransaction(false);
                 }
             }
 
             reader.readAsArrayBuffer(file);
-        } catch (error) {
-            console.error('Failed to store file on Nillion:', error);
+        } catch (e: any) {
+            console.error('Failed to store file on Nillion:', e);
+            setError({
+                isError: true,
+                title: 'Failed to store file on Nillion',
+                text: e.message ?? ''
+            });
+            setIsProcessingTransaction(false);
         }
     }
 
-    const viewAttestation = async() => {
+    const viewResults = async() => {
+        if(!passport) return;
+
         setIsProcessingTransaction(true);
-        console.log('viewing attestation')
-        setTimeout(() => {
-            setIsAttestation(true);
-        }, 3000);
+
+        try {
+            const attestationId = await getAttestationId(passport.passport_id);
+            setAttestationId(attestationId);
+        } catch (e: any) {
+            console.error('Failed to retreive attestation ID:', e);
+            setError({
+                isError: true,
+                title: 'Failed to retreive attestation ID',
+                text: e.message ?? ''
+            });
+        } finally {
+            setIsProcessingTransaction(false);
+        }
     }
 
     // Mapping of function names to functions
     const actionFunctions: Record<string, () => void> = {
         'createDNAPassport': () => createDNAPassport(),
-        'viewAttestation': () => viewAttestation(),
+        'viewResults': () => viewResults(),
     }
 
     const currentActionFunction = actionFunctions[currentAction.buttonAction];
@@ -147,69 +187,65 @@ const UploadFile = ({ type }: { type: ActionType } ) => {
         />
     }
 
-    if(ActionData[type].type === 'viewAttestation' && isAttestation) {
-        return <ViewAttestations />
+    if(currentAction.type === 'viewResults' && attestationId) {
+        return <ViewResults id={attestationId} />
     }
 
     return (
-        <div className='sm:w-[552px]'>
-            <Typography variant='h5'>
-                { currentAction.title }
-            </Typography>
-            <Box
-                className='flex flex-col gap-2 px-4 py-6 mt-2 justify-center items-center border border-dashed'
-                sx={{ borderColor: 'error'}}
-            >
-                <UploadFileIcon className='w-10 h-10' />
-                <div>
-                    <Link
-                        className='p-0 cursor-pointer'
-                        component="label"
-                        variant='inherit'
-                        color='text.primary'
-                    >
-                        Click to upload
-                        <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
-                    </Link>
-                    {' '}
-                    or drag and drop
-                </div>
-
-                <Typography color='text.secondary'> Exome sequencing or genotyping data (Max X GB) </Typography>
-            </Box>
-            {file &&
-                <>
-                    <Box className='flex justify-between mt-4 mb-10'>
-                        <div className='flex items-center gap-3'>
-                            <UploadFileIcon className='w-10 h-10' />
-                            <div>
-                                <Typography color='text.primary'> { file.name } </Typography>
-                                <Typography color='text.secondary' variant='subtitle2'> {formatFileSize(file?.size ?? 0)} . Loading </Typography>
-                                <Box sx={{ width: '200px' }}>
-                                    <LinearProgress variant='determinate' value={fileProgress} />
-                                </Box>
-                            </div>
-                        </div>
-                        <IconButton
-                            onClick={() => console.log('delete file')}
-                            aria-label="remove file"
-                        >
-                            <DeleteIcon />
-                        </IconButton>
-                    </Box>
-
-                    <LoadingButton
-                        variant='contained'
-                        loading={isProcessingTransaction}
-                        disabled={fileProgress < 100}
-                        onClick={() => currentActionFunction()}
-                        className='w-[400px]'
-                    >
-                        {currentAction.buttonTitle}
-                    </LoadingButton>
-                </>
+        <>
+            {error?.isError &&
+                <ErrorModal error={error} setError={setError} />
             }
-        </div>
+            <div>
+                <Typography variant='h5'>
+                    { currentAction.title }
+                </Typography>
+                <Box
+                    className='flex flex-col gap-2 sm:w-[552px] px-4 py-6 mt-2 justify-center items-center border border-dashed'
+                    sx={{ borderColor: 'error'}}
+                >
+                    <UploadFileIcon className='w-10 h-10' />
+                    <div>
+                        <Link
+                            className='p-0 cursor-pointer'
+                            component="label"
+                            variant='inherit'
+                            color='text.primary'
+                        >
+                            Click to upload
+                            <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
+                        </Link>
+                        {' '}
+                        or drag and drop
+                    </div>
+                    {isTypeCreate &&
+                        <Typography color='text.secondary'>
+                            Exome sequencing or genotyping data (Max X GB)
+                        </Typography>
+                    }
+
+                </Box>
+                {file &&
+                    <>
+                        <FileProgressDetails {...{ file, fileProgress }} />
+                        {isTypeCreate &&
+                            <GetExternalDataset />
+                        }
+
+                        <LoadingButton
+                            variant='contained'
+                            loading={isProcessingTransaction}
+                            disabled={fileProgress < 100 || error?.isError}
+                            onClick={() => currentActionFunction()}
+                            className='sm:w-[400px]'
+                            sx={{ zIndex: error?.isError ? -5 : 1}}
+                        >
+                            {currentAction.buttonTitle}
+                        </LoadingButton>
+                    </>
+                }
+            </div>
+        </>
     )
 }
 
