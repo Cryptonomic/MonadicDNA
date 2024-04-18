@@ -116,7 +116,7 @@ impl TemplateApp {
             let result = Client::new()
                     .post(UPLOAD_URL)            
                     .body(body)                    
-                    .header("contentType", "application/json; charset=utf-8")
+                    .header("Content-Type", "application/json")
                     .header("Accept", "application/json")                    
                     .send();                    
             match result {
