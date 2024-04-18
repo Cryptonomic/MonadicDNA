@@ -232,7 +232,7 @@ impl eframe::App for TemplateApp {
                     .show_inside(ui, |ui| {
                         ui. horizontal_wrapped( |ui| {
                         // egui::ScrollArea::vertical().show(ui, |ui| {
-                            ui.label("Open your genetic passport file using the button provided below. If you do not have one then head over to the");
+                            ui.label("Open your genetic passport file using the button provided. If you do not have one then head over to the");
                             ui.hyperlink_to("MonadicDNA", "https://github.com/Cryptonomic/MonadicDNA");
                             ui.label("website to create one.");
                         });
@@ -345,7 +345,7 @@ impl eframe::App for TemplateApp {
                     egui::CentralPanel::default()                    
                     .show_inside(ui, |ui| {
                         ui. horizontal_wrapped( |ui| {
-                            ui.label("Press run to securely generate your diabetes risk profile. This step uses Risc0's zkVM to process the data and produces cryptographically verifiables proofs.");
+                            ui.label("Press run to securely generate your diabetes risk profile. This step uses Risc0's zkVM to process the data and produces results that can be cryptographicaly verified.");
                         });
                     });
                 });          
