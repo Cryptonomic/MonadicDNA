@@ -10,5 +10,5 @@
     "name": "Thrombosis",
     "id": "rs6025"
   },
-  "baseUrl": "http://165.232.74.173:8732"
+  "baseUrl": "https://api.monadicdna.com"
 }
