@@ -195,13 +195,11 @@ impl eframe::App for TemplateApp {
                         .width_range(50.0..=64.0)
                         .show_separator_line(false)
                         .show_inside(ui, |ui| {                            
-                            egui::ScrollArea::vertical().show(ui, |ui| {
-                                let image = egui::Image::new(egui::include_image!("../../assets/passport.png"))
-                                    .rounding(10.0)
-                                    .fit_to_original_size(1.0)
-                                    .max_size(Vec2::new(48.0, 48.0));
-                                ui.add(image);
-                            });
+                            let image = egui::Image::new(egui::include_image!("../../assets/passport.png"))
+                                .rounding(10.0)
+                                .fit_to_original_size(1.0)
+                                .max_size(Vec2::new(48.0, 48.0));
+                            ui.add(image);
                     });
         
                     egui::SidePanel::right("1_right_panel")
@@ -250,19 +248,17 @@ impl eframe::App for TemplateApp {
                     .default_width(64.0)
                     .width_range(50.0..=64.0)
                     .show_separator_line(false)
-                    .show_inside(ui, |ui| {                            
-                        egui::ScrollArea::vertical().show(ui, |ui| {
-                            let image = egui::Image::new(egui::include_image!("../../assets/dna.png"))
-                                .rounding(10.0)
-                                .fit_to_original_size(1.0)
-                                .max_size(Vec2::new(48.0, 48.0));
-                            ui.add(image);
-                        });
+                    .show_inside(ui, |ui| {                        
+                        let image = egui::Image::new(egui::include_image!("../../assets/dna.png"))
+                            .rounding(10.0)
+                            .fit_to_original_size(1.0)
+                            .max_size(Vec2::new(48.0, 48.0));
+                        ui.add(image);                        
                     });
         
                     egui::SidePanel::right("2_right_panel")
-                        .resizable(true)
-                        .default_width(225.0)
+                        .resizable(true)                        
+                        .default_width(150.0)
                         .width_range(80.0..=200.0)
                         .show_separator_line(false)
                         .show_inside(ui, |ui| {               
@@ -306,19 +302,17 @@ impl eframe::App for TemplateApp {
                     .default_width(64.0)
                     .width_range(50.0..=64.0)
                     .show_separator_line(false)
-                    .show_inside(ui, |ui| {                            
-                        egui::ScrollArea::vertical().show(ui, |ui| {
-                            let image = egui::Image::new(egui::include_image!("../../assets/cpu.png"))
-                                .rounding(10.0)
-                                .fit_to_original_size(1.0)
-                                .max_size(Vec2::new(48.0, 48.0));
-                            ui.add(image);
-                        });
+                    .show_inside(ui, |ui| {                        
+                        let image = egui::Image::new(egui::include_image!("../../assets/cpu.png"))
+                            .rounding(10.0)
+                            .fit_to_original_size(1.0)
+                            .max_size(Vec2::new(48.0, 48.0));
+                        ui.add(image);                        
                     });        
         
                     egui::SidePanel::right("3_right_panel")
                         .resizable(true)
-                        .default_width(250.0)
+                        .default_width(150.0)
                         .width_range(80.0..=200.0)
                         .show_separator_line(false)
                         .show_inside(ui, |ui| {                            
@@ -354,7 +348,7 @@ impl eframe::App for TemplateApp {
                     let image = egui::Image::new(egui::include_image!("../../assets/blank.png"))
                         .rounding(10.0)
                         .fit_to_original_size(1.0)
-                        .max_size(Vec2::new(66.0, 84.0));
+                        .max_size(Vec2::new(66.0, 88.0));
                     ui.add(image);                      
                     egui::Frame::default()  
                     .stroke(egui::Stroke::new(1.0, egui::Color32::GRAY))
@@ -383,6 +377,7 @@ impl eframe::App for TemplateApp {
             });
 
             
+            // Step 4
             ui.separator();
             ui.vertical(|ui| {
                 ui.heading("Step 4: Upload your results");
@@ -392,14 +387,12 @@ impl eframe::App for TemplateApp {
                     .default_width(64.0)
                     .width_range(50.0..=64.0)
                     .show_separator_line(false)
-                    .show_inside(ui, |ui| {                            
-                        egui::ScrollArea::vertical().show(ui, |ui| {
-                            let image = egui::Image::new(egui::include_image!("../../assets/upload.png"))
-                                .rounding(10.0)
-                                .fit_to_original_size(1.0)
-                                .max_size(Vec2::new(48.0, 48.0));
-                            ui.add(image);
-                        });
+                    .show_inside(ui, |ui| {                       
+                        let image = egui::Image::new(egui::include_image!("../../assets/upload.png"))
+                            .rounding(10.0)
+                            .fit_to_original_size(1.0)
+                            .max_size(Vec2::new(48.0, 48.0));
+                        ui.add(image);                        
                     });
                 
                     egui::SidePanel::right("4_right_panel")
