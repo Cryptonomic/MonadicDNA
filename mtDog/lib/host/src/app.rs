@@ -105,11 +105,13 @@ impl TemplateApp {
             let body_data = SignProtocolInteractor  {
                 passport_id : self.passport.clone().unwrap().passport_id,
                 provider: "mtDog".to_owned(),
-                t_trait: "DiabetesType1".to_owned(),
+                t_trait: "Type2Diabetes".to_owned(),
                 value
             };
 
             let body: String = serde_json::to_string(&body_data).unwrap();
+            let body = body.replace("t_trait", "trait");
+            println!("POST Data : {}", body.clone());
 
             let result = Client::new()
                     .post(UPLOAD_URL)            
