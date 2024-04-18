@@ -1,3 +1,5 @@
-# mtDog
+# mtDog 
 
-Native app for secure DNA computation using RISC Zero
+Risc0 zkVM application for genomic data analysis.
+
+Run with `cargo run --release`

@@ -180,7 +180,7 @@ impl eframe::App for TemplateApp {
                 ui.vertical(|ui| {
                     ui.heading(RichText::new("mtDog").size(36.0));
                     ui.heading(RichText::new("Genomic Analysis Tool").size(16.0));
-                    ui.label(RichText::new("* Results only for demonstration only and not fit for medical and diagnostic use.").small());
+                    ui.label(RichText::new("* Results for demonstration only and not fit for medical and diagnostic use.").small());
                 });
             });
 
@@ -232,7 +232,7 @@ impl eframe::App for TemplateApp {
                     .show_inside(ui, |ui| {
                         ui. horizontal_wrapped( |ui| {
                         // egui::ScrollArea::vertical().show(ui, |ui| {
-                            ui.label("Open your genetic passport file using the button provided below. If you do not have one you can head over the");
+                            ui.label("Open your genetic passport file using the button provided below. If you do not have one then head over to the");
                             ui.hyperlink_to("MonadicDNA", "https://github.com/Cryptonomic/MonadicDNA");
                             ui.label("website to create one.");
                         });
