@@ -10,6 +10,7 @@ import { IMonadicDNAVerifiedTrait } from '@/types';
 import { getResultsById } from '@/utils/signProtocol';
 import { IError } from '@/types/uploadFile';
 import ErrorModal from './errorModal';
+import { getRiskLevel } from '@/utils';
 
 const config = require('../config.json');
 
@@ -34,7 +35,7 @@ const ResultsCard = ({
                   <Typography> { attestationData?.Trait } </Typography>
               </Box>
 
-              <Typography className='pl-5'> Result: {attestationData?.Value?.toLowerCase() === 'yes' ? ' High Risk' : ' Low Risk'}</Typography>
+              <Typography className='pl-5'> Result: {getRiskLevel(attestationData?.Value)}</Typography>
               <Link
                   href={`${config.signUrl}/${id}`}
                   className='pl-5'

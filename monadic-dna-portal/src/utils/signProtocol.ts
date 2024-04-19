@@ -1,5 +1,6 @@
 import { IMonadicDNAValidDataset, IMonadicDNAVerifiedTrait } from "@/types";
 import { ethers } from "ethers";
+import { getValue } from ".";
 const {
     SignProtocolClient,
     SpMode,
@@ -84,7 +85,7 @@ export async function getResultsById(attestationId: string) {
           "Passport ID": decodedData[0],
           Provider: decodedData[1],
           Trait: decodedData[2],
-          Value: decodedData[3]
+          Value: getValue(decodedData[3])
         };
 
         console.log(`Attestation Result for ${attestationId}: ${results}`);
