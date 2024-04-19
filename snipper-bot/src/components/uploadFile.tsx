@@ -94,12 +94,9 @@ const UploadFile = () => {
 
               setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
-              const attestationPromises = computedResult.map(async (result) => {
-                  const tx = await createAttestation(passport.passport_id, result);
-                  return tx;
-              });
-
-              await Promise.all(attestationPromises);
+              for (const result of computedResult) {
+                  await createAttestation(passport.passport_id, result);
+              }
 
               // 30 secs delay before retreiving IDs
               await new Promise(resolve => setTimeout(resolve, 30000));
