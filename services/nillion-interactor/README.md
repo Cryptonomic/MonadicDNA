@@ -65,3 +65,7 @@ To compile all Nillion programs::
 To test a Nillion program:
 
 `nada-run -i snp=6 -i genotype=12  binaries/thrombosis.nada.bin`
+
+To test a Nillion program for muscle-performance:
+
+`nada-run -i snp=11 -i genotype=9 binaries/muscle-perform.nada.bin`
