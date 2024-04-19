@@ -96,11 +96,11 @@ const UploadFile = () => {
 
               for (const result of computedResult) {
                   await createAttestation(passport.passport_id, result);
+                  // 30 secs delay
+                  await new Promise(resolve => setTimeout(resolve, 30000));
               }
 
-              // 30 secs delay before retreiving IDs
               await new Promise(resolve => setTimeout(resolve, 30000));
-
               const retreivedIds = await getAllAttestationIds(passport.passport_id);
 
               const promises = retreivedIds.map(id => getResultsById(id));
