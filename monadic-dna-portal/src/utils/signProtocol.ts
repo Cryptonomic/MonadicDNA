@@ -52,10 +52,6 @@ export async function getAllAttestationIds(indexingValue: string) {
             indexingValue
         });
 
-        config.verifiedTraitSchemaId
-
-        // const attestationIds: string[] = res.rows.map((row: { id: string }) => row.id);
-
         const attestationIds: string[] = res.rows
             .filter((row: { schemaId: string }) => row.schemaId === config.verifiedTraitSchemaId)
             .map((row: { id: string }) => row.id);

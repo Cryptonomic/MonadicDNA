@@ -24,9 +24,6 @@ const AnalysisInsights = () => {
                     <ListItem sx={{ display: 'list-item', paddingX: 0, }}>
                         Find out whether you carry genetic risk for Thrombophilia
                     </ListItem>
-                    <ListItem sx={{ display: 'list-item', paddingX: 0, paddingY: 1 }}>
-                        Find out whether you are more likely a power or endurance athlete
-                    </ListItem>
                     <ListItem sx={{ display: 'list-item', paddingX: 0, }}>
                         More insights coming soon!
                     </ListItem>

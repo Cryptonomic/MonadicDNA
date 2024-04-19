@@ -205,6 +205,7 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                 setIsWallet(false);
                 setPassport(undefined);
                 setFile(null)
+                setFileProgress(0)
             }}
         />
     }

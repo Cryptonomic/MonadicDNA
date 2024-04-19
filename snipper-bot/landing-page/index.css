@@ -309,6 +309,16 @@
   color: var(--primary-main);
   font-family: var(--typography-h6);
 }
+.providedBy-con {
+  width: 488px;
+  height: 56px;
+}
+.providedBy-logo {
+  width: 100%;
+  height: 100%;
+}
+
+
 .snipperbot-logo-21 {
   height: 4.875rem;
   width: 5.375rem;
@@ -557,6 +567,9 @@
 @media screen and (max-width: 450px) {
   .snipperbot {
     font-size: 1.188rem;
+  }
+  .providedBy-con {
+    width: 250px;
   }
   .body1 {
     font-size: 1.813rem;

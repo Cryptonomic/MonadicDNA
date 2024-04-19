@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
-import { IMonadicDNAVerifiedTrait } from "@/types";
+import { IComputedResult, IMonadicDNAVerifiedTrait } from "@/types";
 import { createAttestationError, retreiveResultsError } from "@/types/customError";
+import { getValue } from ".";
 
 const {
     SignProtocolClient,
@@ -13,7 +14,7 @@ const { privateKeyToAccount } = require('viem/accounts');
 
 const config = require('../config.json');
 
-export async function createAttestation(passportId: string, value: string) {
+export async function createAttestation(passportId: string, computedResult: IComputedResult) {
 
     const PRIVATE_KEY=config.privateKey;
     const account = privateKeyToAccount(PRIVATE_KEY);
@@ -26,13 +27,13 @@ export async function createAttestation(passportId: string, value: string) {
     const schemaData: IMonadicDNAVerifiedTrait = {
         'Passport ID': passportId,
         'Provider': config.provider,
-        'Trait': config.trait.name,
-        'Value': value,
+        'Trait': computedResult.trait,
+        'Value': computedResult.value,
     }
 
     try {
         const tx = await client.createAttestation({
-            schemaId: config.schemaId,
+            schemaId: config.verifiedTraitSchemaId,
             data: schemaData,
             indexingValue: passportId,
             recipients: [config.signer]
@@ -47,50 +48,44 @@ export async function createAttestation(passportId: string, value: string) {
 }
 
 
-export async function getAttestationId(indexingValue: string) {
+export async function getAllAttestationIds(indexingValue: string) {
     const indexService = new IndexService('testnet');
 
     try {
         const res = await indexService.queryAttestationList( {
             indexingValue
         });
-        console.log('res.rows', res.rows)
-        const attestationId =  res.rows[0].id
 
-        console.log(`Attestation ID for ${indexingValue}: ${attestationId}`);
+        const attestationIds: string[] = res.rows
+            .filter((row: { schemaId: string }) => row.schemaId === config.verifiedTraitSchemaId)
+            .map((row: { id: string }) => row.id);
 
-        return attestationId;
+        console.log(`Attestation ID for ${indexingValue}: ${attestationIds}`);
+
+        return attestationIds;
     } catch (error) {
         console.error('Error viewing results:', error);
-        throw retreiveResultsError; // todo
+        throw retreiveResultsError;
     }
 }
 
 export async function getResultsById(attestationId: string) {
     const indexService = new IndexService('testnet');
 
-    // const id = `${config.networkId}_${attestationId}`
-    console.log("attestationId", attestationId)
-    // console.log("fullID", id);
-
-
     try {
         const res = await indexService.queryAttestation(attestationId);
         const encodedData = res.data
-        console.log("res", res)
 
         let decodedData = ethers.AbiCoder.defaultAbiCoder().decode(
             ['string', 'string', 'string', 'string'],
             encodedData
         );
 
-        console.log("decodedData", decodedData)
-
         const results: IMonadicDNAVerifiedTrait = {
           "Passport ID": decodedData[0],
           Provider: decodedData[1],
           Trait: decodedData[2],
-          Value: decodedData[3]
+          Value: getValue(decodedData[3])
         };
 
         console.log(`Attestation Result for ${attestationId}: ${results}`);
@@ -98,10 +93,9 @@ export async function getResultsById(attestationId: string) {
             id: res.id,
             data: results
         };
-        // return results;
     } catch (error) {
         console.error('Error viewing results:', error);
-        throw retreiveResultsError; // todo
+        throw retreiveResultsError;
     }
 }
 

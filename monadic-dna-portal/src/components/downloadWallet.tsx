@@ -9,6 +9,7 @@ import { blue } from '@mui/material/colors';
 import DownloadIcon from '@mui/icons-material/Download';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IMonadicDNAPassport } from '@/types';
+import PassportDetails from './passPortDetails';
 
 export default function DownLoadWallet({
     passport,
@@ -49,9 +50,11 @@ export default function DownLoadWallet({
 
             <Typography> Your genomic data is now encrypted with your passport! </Typography>
             <Typography className='pt-7'> Your DNA passport includes: </Typography>
-            <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1' />
-            <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1' />
-            <div className='bg-[#E1E1E1] sm:w-[283px] h-[24px] mt-1 mb-6' />
+
+            <Box>
+                <PassportDetails />
+            </Box>
+
             <Button
                 onClick={goBack}
                 startIcon={<ArrowBackIcon />}

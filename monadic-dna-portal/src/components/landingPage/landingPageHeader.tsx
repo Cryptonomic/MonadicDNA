@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -25,6 +26,15 @@ const LandingPageHeader = () => {
         <Box className='flex flex-col sm:flex-row justify-center items-center gap-2 mt-16'>
             <Button size='large' variant='contained' href='/passport/create'> Create a DNA PAssport </Button>
             <Button size='large' sx={{ color: blueGrey[900] }} href='/passport/results'> View Results </Button>
+        </Box>
+
+        <Box className='flex justify-center items-center mx-auto mt-4 sm:mt-14'>
+            <Image
+                src={'/poweredBy.svg'}
+                width={487}
+                height={27}
+                alt="Powered by Nillion, Sign Protocol and Risc Zero"
+            />
         </Box>
     </>
   )

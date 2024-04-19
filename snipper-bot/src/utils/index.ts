@@ -19,3 +19,27 @@ export const parsePassportFile = (fileContent: string) => {
         throw error;
     }
 };
+
+export const getRiskLevel = (value: string | number): string => {
+    if (typeof value === 'string') {
+        const lowerCaseValue = value.toLowerCase();
+        if (lowerCaseValue === 'yes') return 'high';
+        if (lowerCaseValue === 'no') return 'low';
+    } else if (typeof value === 'number') {
+        if (value >= 0 && value <= 10) return 'low';
+        if (value >= 11 && value <= 15) return 'moderate';
+        if (value >= 15) return 'high';
+    }
+    return 'Unknown';
+};
+
+
+export const getValue = (data: string) => {
+    try {
+        const parsedData = JSON.parse(data);
+        const score = parsedData.score;
+        return score;
+    } catch (error) {
+        return data;
+    }
+}

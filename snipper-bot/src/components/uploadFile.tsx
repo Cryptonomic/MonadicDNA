@@ -10,10 +10,10 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 import VisuallyHiddenInput from './visuallyHiddenInput';
 
-import { createAttestation, getAttestationId, getResultsById } from '@/utils/attestations';
+import { createAttestation, getAllAttestationIds, getResultsById } from '@/utils/attestations';
 import { computeOnNillion } from '@/utils/nillion';
 import FileProgressIndicator from './fileProgressIndicator';
-import { IMonadicDNAPassport, IMonadicDNAVerifiedTrait } from '@/types';
+import { IComputedResult, IMonadicDNAPassport, IMonadicDNAVerifiedTrait, ISNPs, IViewAttestation } from '@/types';
 import ViewAttestations from './viewAttestations';
 import AnalysisInsights from './analysisInsights';
 import AnalysisStepper from './analysisStepper';
@@ -29,10 +29,9 @@ const UploadFile = () => {
     const [fileProgress, setFileProgress] = React.useState(0);
     const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
     const [passport, setPassport] = useState<IMonadicDNAPassport | null>(null);
-    const [attestationId, setAttestationId] = useState<string | undefined>();
     const [activeStep, setActiveStep] = React.useState(-1);
     const [error, setError] = useState<CustomError>();
-    const [attestationData, setAttestationData] = useState<IMonadicDNAVerifiedTrait | null>();
+    const [attestationData, setAttestationData] = useState<IViewAttestation[] | null>();
 
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -71,26 +70,52 @@ const UploadFile = () => {
     };
 
     const analyseData = async() => {
-        if (!passport) { return };
+        if (!passport?.nillion_data) {
+          setError(invalidFileError);
+          return
+        };
 
         setIsProcessingTransaction(true);
 
         try {
-            const traitId = config.trait.id
-            const storeId = passport.nillion_data[traitId];
-            const res = await computeOnNillion(storeId);
-            const interpretation = res?.result ? 'yes' : 'no';
+            const SNPs = config.SNPs;
+            const computedResult: IComputedResult[] = await Promise.all(
+                SNPs.map(async (snp: ISNPs) => {
+                    const { id: traitId, trait } = snp;
+                    const storeId = passport.nillion_data[traitId];
 
-            const tx = await createAttestation(passport.passport_id, interpretation);
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    if (!storeId) { return };
 
-            const attestationId = await getAttestationId(passport.passport_id);
-            setAttestationId(attestationId);
+                    const res = await computeOnNillion(storeId);
+                    const interpretation = res?.result ? 'yes' : 'no';
+                    return { trait, value: interpretation };
+                })
+              );
 
-            const result = await getResultsById(attestationId)
-            setAttestationData(result.data);
+              setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+              const attestationPromises = computedResult.map(async (result) => {
+                  const tx = await createAttestation(passport.passport_id, result);
+                  return tx;
+              });
+
+              await Promise.all(attestationPromises);
+
+              // 30 secs delay before retreiving IDs
+              await new Promise(resolve => setTimeout(resolve, 30000));
+
+              const retreivedIds = await getAllAttestationIds(passport.passport_id);
+
+              const promises = retreivedIds.map(id => getResultsById(id));
+              const results = await Promise.all(promises);
+
+              const filteredResult = results.filter((item, index, self) =>
+                  index === self.findIndex((t) =>
+                      t.data.Provider === item.data.Provider && t.data.Trait === item.data.Trait
+                  )
+              );
+              setAttestationData(filteredResult);
+              setActiveStep((prevActiveStep) => prevActiveStep + 1);
           } catch (e) {
             console.error('Failed to Analyse DNA Passport:', e);
             setError(e as CustomError);
@@ -99,11 +124,11 @@ const UploadFile = () => {
         }
     }
 
-    if(activeStep >= 2 ) {
+    if(activeStep >= 2 && attestationData) {
         return (
             <Box className='pt-4 sm:pt-11'>
                 <AnalysisStepper {...{ activeStep, setActiveStep }} />
-                <ViewAttestations id={attestationId!} attestationData={attestationData!} />
+                <ViewAttestations attestationData={attestationData} />
             </Box>
         );
     }
