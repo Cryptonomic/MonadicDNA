@@ -10,8 +10,7 @@
     "name": "Thrombosis",
     "id": "rs6025"
   },
-  "baseUrl": "http://127.0.0.1:8732",
-  "baseUrl2": "https://api.monadicdna.com",
+  "baseUrl": "https://api.monadicdna.com",
   "signUrl": "https://testnet-scan.sign.global/attestation",
   "SNPs": [
       {
