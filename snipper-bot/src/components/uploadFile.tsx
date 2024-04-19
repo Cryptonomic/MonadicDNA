@@ -107,8 +107,9 @@ const UploadFile = () => {
               const results = await Promise.all(promises);
 
               const filteredResult = results.filter((item, index, self) =>
+                  item.data.Provider.toLowerCase() === config.provider.toLowerCase() &&
                   index === self.findIndex((t) =>
-                      t.data.Provider === item.data.Provider && t.data.Trait === item.data.Trait
+                      t.data.Trait === item.data.Trait
                   )
               );
               setAttestationData(filteredResult);
