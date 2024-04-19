@@ -9,7 +9,7 @@ import { blue } from '@mui/material/colors';
 import DownloadIcon from '@mui/icons-material/Download';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IMonadicDNAPassport } from '@/types';
-import PassportDetails from './passPortDetails';
+import PassportData from './passportContent';
 
 export default function DownLoadWallet({
     passport,
@@ -52,7 +52,7 @@ export default function DownLoadWallet({
             <Typography className='pt-7'> Your DNA passport includes: </Typography>
 
             <Box>
-                <PassportDetails />
+                <PassportData />
             </Box>
 
             <Button

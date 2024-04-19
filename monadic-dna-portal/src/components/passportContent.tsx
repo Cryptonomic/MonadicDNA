@@ -4,7 +4,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 
 
-const PassportDetails = () => {
+const PassportContent = () => {
     return (
         <List
               className='ml-5'
@@ -23,4 +23,4 @@ const PassportDetails = () => {
     )
 }
 
-export default PassportDetails;
+export default PassportContent;
