@@ -1,6 +1,9 @@
 from nada_dsl import *
 
-
+# Checks based on SNP rs6025 whether someone has risk for thrombosis
+# Genotype GG indicates normal risk of thrombosis
+# We arbitrarily assume elevated risk otherwise
+# This program returns 0 if normal risk, 1 if elevated risk
 def nada_main():
     party1 = Party(name="Party1")
     snp = SecretInteger(Input(name="snp", party=party1))

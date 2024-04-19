@@ -1,5 +1,10 @@
 from nada_dsl import *
 
+
+# Checks based on SNP rs1815739 whether someone is a sprinter or an endurance athelete
+# Genotype TT indicates endurance athlete
+# We arbitrarily assume sprinter otherwise
+# This program returns 0 if sprinter, 1 if endurance athelete
 def nada_main():
 
     party1 = Party(name="Party1")

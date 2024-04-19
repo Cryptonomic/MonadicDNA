@@ -82,13 +82,6 @@ async def store_on_nillion(gene_data):
     secret_bindings = nillion.ProgramBindings(program_id)
     secret_bindings.add_input_party(party_name, party_id)
 
-    program_name = "muscle-perform"
-    program_mir_path = f"binaries/muscle-perform.nada.bin"
-    program_id = f"{user_id}/{program_name}"
-
-    secret_bindings = nillion.ProgramBindings(program_id)
-    secret_bindings.add_input_party(party_name, party_id)
-
     store_ids = {}
 
     for row in gene_data:
@@ -96,10 +89,8 @@ async def store_on_nillion(gene_data):
         rsid_int = row['rsid_int']
         genotype_int = row['genotype_int']
         stored_secret = nillion.Secrets({
-        "snp": nillion.SecretInteger(12),
-        "genotype": nillion.SecretInteger(7),
-        "snp1": nillion.SecretInteger(11),
-        "genotype1": nillion.SecretInteger(9),
+        "snp": nillion.SecretInteger(6),
+        "genotype": nillion.SecretInteger(9),
          })
         store_id = await _client.store_secrets(
             cluster_id, secret_bindings, stored_secret, None
@@ -141,7 +132,7 @@ async def compute_on_nillion(store_id):
             print(f"✅  Compute complete for compute_id {compute_event.uuid}")
             print(f"🖥️  The result is {compute_event.result.value}")
             return compute_event.result.value
- 
+
 
 @app.route('/dataset', methods=['PUT'])
 async def handle_dataset():
@@ -159,20 +150,13 @@ async def handle_dataset():
 @app.route('/computations/thrombosis', methods=['POST'])
 async def thrombosis():
     store_id = request.json.get('store_id')
+
     if store_id is None:
         return jsonify({'error': 'Missing store_id'}), 400
 
     result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=120)
     return jsonify(result)
 
-@app.route('/computations/muscle-performance', methods=['POST'])
-async def muscle_perform():
-    store_id = request.json.get('store_id')
-    if store_id is None:
-        return jsonify({'error': 'Missing store_id'}), 400
-
-    result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=120)
-    return jsonify(result)
 
 @app.route('/')
 def hello_world():
