@@ -1,5 +1,5 @@
 {
-  "schemaId":"0x4f",
+  "verifiedTraitSchemaId":"0x4f",
   "contractAddress": "0x4e4af2a21ebf62850fD99Eb6253E1eFBb56098cD",
   "network":"baseSepolia",
   "networkId":"onchain_evm_84532",
@@ -10,6 +10,21 @@
     "name": "Thrombosis",
     "id": "rs6025"
   },
-  "baseUrl": "https://api.monadicdna.com",
-  "signUrl": "https://testnet-scan.sign.global/attestation"
+  "baseUrl": "http://127.0.0.1:8732",
+  "baseUrl2": "https://api.monadicdna.com",
+  "signUrl": "https://testnet-scan.sign.global/attestation",
+  "SNPs": [
+      {
+        "trait": "Muscle Performance",
+        "id": "rs1815739"
+      },
+      {
+        "trait": "Thrombosis",
+        "id": "rs6025"
+      },
+      {
+        "trait": "Type2Diabetes",
+        "id": "rs5219"
+      }
+  ]
 }

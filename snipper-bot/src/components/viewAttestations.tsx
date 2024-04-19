@@ -4,46 +4,29 @@ import Link from '@mui/material/Link';
 
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { teal, grey, pink } from '@mui/material/colors';
-import CheckIcon from '@mui/icons-material/CheckCircle';
-import { IMonadicDNAVerifiedTrait } from '@/types';
+import { grey,  } from '@mui/material/colors';
+import { IViewAttestation } from '@/types';
+import { getRiskLevel } from '@/utils';
+
+import { resultData } from '@/utils/data';
 
 const config = require('../config.json');
 
-interface IResultData {
-    title: string;
-    description: string;
-    color: any;
-    getFooterText(result: string): string;
-}
-
-const resultData: Record<string, IResultData> = {
-  'thrombosis': {
-      title: 'Genetic risk for thrombophilia',
-      description: 'Thrombophilia is a predisposition to developing harmful blood clots. The two most common genetic variants linked to an increased risk for thrombophilia are found in two genes called F5 and F2.',
-      color: pink,
-      getFooterText(result: string): string {
-          return `You have a ${result === 'no' ? 'Low' : 'High'} likelihood of genetic thrombophilia.`;
-      }
-  },
-};
-
-
-const ViewAttestations = ({
-    id,
-    attestationData
+const ViewAttestationsCard = ({
+    data
 }: {
-    id: string,
-    attestationData: IMonadicDNAVerifiedTrait
+    data: IViewAttestation
 }) => {
 
+    const attestationData = data.data;
     console.log('attestationData', attestationData);
     const trait = attestationData.Trait.toLowerCase();
 
-    const title = resultData[trait].title;
-    const description = resultData[trait].description;
-    const footerText = resultData[trait].getFooterText(attestationData.Value);
-    const color = resultData[trait].color;
+    const title = resultData[trait]?.title ?? trait;
+    const description = resultData[trait]?.description;
+    const riskLevel = getRiskLevel(attestationData.Value);
+    const footerText = resultData[trait]?.getFooterText(riskLevel);
+    const color = resultData[trait]?.color ?? grey;
 
     return (
         <Box className='pl-4 pt-11 lg:pl-[372px]'>
@@ -65,7 +48,7 @@ const ViewAttestations = ({
             <Box className='flex justify-between mt-14 pb-3 p-4' sx={{ background: `${color[900]}0D` }}>
                 <Typography>  { footerText } </Typography>
                 <Link
-                    href={`${config.signUrl}/${id}`}
+                    href={`${config.signUrl}/${data.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     color='inherit'
@@ -75,6 +58,22 @@ const ViewAttestations = ({
             </Box>
             </Box>
         </Box>
+    )
+}
+
+
+const ViewAttestations = ({
+    attestationData
+}: {
+    attestationData: IViewAttestation[]
+}) => {
+
+    return (
+        <>
+            {attestationData && attestationData?.map((data) => (
+                <ViewAttestationsCard key={data.id} data={data} />
+            ))}
+        </>
     )
 }
 

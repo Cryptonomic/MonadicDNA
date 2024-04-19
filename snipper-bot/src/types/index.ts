@@ -12,3 +12,25 @@ export interface IMonadicDNAVerifiedTrait {
   'Trait': string,
   'Value': string,
 }
+
+export interface ISNPs {
+  id: string;
+  trait: string;
+}
+
+export interface IComputedResult {
+  trait: string;
+  value: string;
+}
+
+export interface IViewAttestation {
+  id: string;
+  data: IMonadicDNAVerifiedTrait;
+}
+
+export interface IResultData {
+  title: string;
+  description: string;
+  color: any;
+  getFooterText(result: string): string;
+}
