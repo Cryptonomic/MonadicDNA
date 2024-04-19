@@ -40,28 +40,33 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
 
         if(!selectedFile) return;
 
-        if(currentAction.type === 'createPassport' && selectedFile.type !== 'text/plain') {
-            setError({
-                isError: true,
-                title: 'Invalid File',
-                text: 'Please ensure it is a genetic data.txt file'
-            });
-            return;
+        if(currentAction.type === 'createPassport') {
+            if(selectedFile.type !== 'text/plain') {
+                setError({
+                    isError: true,
+                    title: 'Invalid File',
+                    text: 'Please ensure it is a genetic data.txt file'
+                });
+                return;
+            }
+            setIsFileLoading(true);
+            setFile(selectedFile);
+
+            const reader = new FileReader();
+            reader.onprogress = updateProgress;
+            reader.readAsArrayBuffer(selectedFile);
         }
-
-        setIsFileLoading(true);
-        setFile(selectedFile);
-
-        const reader = new FileReader();
-        reader.onprogress = updateProgress;
-        reader.readAsArrayBuffer(selectedFile);
 
         if(currentAction.type === 'viewResults') {
             const reader = new FileReader();
+            reader.onprogress = updateProgress;
+
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 try {
                     const fileContent = e.target?.result as string;
                     const parsedContent = parsePassportFile(fileContent);
+                    setFile(selectedFile);
+
                     setPassport(parsedContent);
                 } catch (e) {
                     console.error('Error parsing passport file', e)
@@ -70,6 +75,7 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                         title: 'Error parsing passport file',
                         text: 'Please ensure it is a Monadic DNA passport file in JSON format.'
                     });
+                    setFileProgress(0)
                 }
             };
             reader.readAsText(selectedFile);
@@ -251,7 +257,7 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                 <LoadingButton
                     variant='contained'
                     loading={isProcessingTransaction}
-                    disabled={fileProgress < 100 || error?.isError || !file}
+                    disabled={fileProgress < 100 || error?.isError}
                     onClick={() => currentActionFunction()}
                     className='sm:w-[400px]'
                     sx={{ zIndex: error?.isError ? -5 : 1}}
