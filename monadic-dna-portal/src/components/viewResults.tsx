@@ -70,10 +70,15 @@ const ViewResults = ({ ids }: { ids: string[]; }) => {
             try {
                 const promises = ids.map(id => getResultsById(id));
                 const results = await Promise.all(promises);
-                console.log("ALL results", results)
-                setAttestationData(results);
 
-                console.log('Results for all attestation IDs:', results);
+                const filteredResult = results.filter((item, index, self) =>
+                    index === self.findIndex((t) =>
+                        t.Provider === item.Provider && t.Trait === item.Trait
+                    )
+                );
+
+                setAttestationData(filteredResult);
+
             } catch (error) {
                 setError({
                     isError: true,

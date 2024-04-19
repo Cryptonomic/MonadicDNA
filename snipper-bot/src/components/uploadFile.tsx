@@ -101,16 +101,21 @@ const UploadFile = () => {
 
               await Promise.all(attestationPromises);
 
-              // todo add delay here
+              // 30 secs delay before retreiving IDs
+              await new Promise(resolve => setTimeout(resolve, 30000));
 
               const retreivedIds = await getAllAttestationIds(passport.passport_id);
 
               const promises = retreivedIds.map(id => getResultsById(id));
               const results = await Promise.all(promises);
 
-              setAttestationData(results);
-
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+              const filteredResult = results.filter((item, index, self) =>
+                  index === self.findIndex((t) =>
+                      t.data.Provider === item.data.Provider && t.data.Trait === item.data.Trait
+                  )
+              );
+              setAttestationData(filteredResult);
+              setActiveStep((prevActiveStep) => prevActiveStep + 1);
           } catch (e) {
             console.error('Failed to Analyse DNA Passport:', e);
             setError(e as CustomError);

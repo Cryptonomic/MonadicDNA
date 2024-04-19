@@ -65,7 +65,7 @@ export async function getAllAttestationIds(indexingValue: string) {
         return attestationIds;
     } catch (error) {
         console.error('Error viewing results:', error);
-        throw retreiveResultsError; // todo
+        throw retreiveResultsError;
     }
 }
 
