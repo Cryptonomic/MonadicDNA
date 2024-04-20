@@ -36,3 +36,11 @@ RISC Zero is used for verifiable computation. Due to privacy concerns, we could 
 Sign Protocol is used for setting up a chain of trust and encoding results as onchain data. We set up three schemas mentioned above for the chain of trust. For mtDog, we set up a simplified proxy API for Sign Protocol as the software is written in Rust to support RISC Zero and porting over the Sign Protocol libraries over to rust was too heavy a lift for the hackathon. All attestations are written on Base Sepolia for now. 
 
 The apps for Monadic DNA and SnipperBot are written in TypeScript using Next.js. The mtDog Rust UI uses a GUI framework called egui We considered rendering our RISC Zero Rust program to WASM so even the mtDog UI could be written in Node.js but the effort involved would be too great for a hackathon. 
+
+## Naming
+
+Monadic DNA references the way [monads](https://en.wikipedia.org//wiki/Monad_(functional_programming) allow external inputs to be encased in a protective way and still allow a series of computations to be performed on them. Our project protects genomic data using encryption and still allows beneficial computations to be peformed on them. 
+
+SnipperBot is a reference to single nucleotide polymorhisms or SNPs (pronounced "snips"), the subjects of the datasets we process. 
+
+mtDog is a reference to mitochondrial DNA or mtDNA and a good friend of ours to whom we want send good vibes with our hard work. :)
