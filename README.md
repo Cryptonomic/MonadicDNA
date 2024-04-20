@@ -39,7 +39,7 @@ The apps for Monadic DNA and SnipperBot are written in TypeScript using Next.js.
 
 ## Naming
 
-Monadic DNA references the way [monads](https://en.wikipedia.org//wiki/Monad_(functional_programming) allow external inputs to be encased in a protective way and still allow a series of computations to be performed on them. Our project protects genomic data using encryption and still allows beneficial computations to be peformed on them. 
+Monadic DNA references the way [monads](https://en.wikipedia.org//wiki/Monad_(functional_programming)) allow external inputs to be encased in a protective way and still allow a series of computations to be performed on them. Our project protects genomic data using encryption and still allows beneficial computations to be peformed on them. 
 
 SnipperBot is a reference to single nucleotide polymorhisms or SNPs (pronounced "snips"), the subjects of the datasets we process. 
 
