@@ -1,6 +1,6 @@
-# Monadic DNA Web Portal
+# Snipper Bot
 
-Web interface for onboarding users to secure DNA computation
+Web App for an example service which uses Monadic DNA Passports and the Nillion network to perform blind computations on genomic data
 
 ## Getting Started
 
