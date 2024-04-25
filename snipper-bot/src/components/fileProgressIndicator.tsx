@@ -11,10 +11,12 @@ import { formatFileSize } from '@/utils';
 
 const FileProgressIndicator = ({
     file,
-    fileProgress
+    fileProgress,
+    handleClickDeleteFile
 }: {
     file: File;
     fileProgress: number;
+    handleClickDeleteFile: () => void;
 }) => {
   return (
     <>
@@ -23,14 +25,14 @@ const FileProgressIndicator = ({
               <UploadFileIcon className='w-10 h-10' />
               <div>
                   <Typography color='text.primary'> { file.name } </Typography>
-                  <Typography color='text.secondary' variant='subtitle2'> {formatFileSize(file?.size ?? 0)} . Loading </Typography>
+                  <Typography color='text.secondary' variant='subtitle2'> {formatFileSize(file.size ?? 0)} . { `${fileProgress < 100 ? 'Loading' : 'Complete' }` }</Typography>
                   <Box sx={{ width: '200px' }}>
                       <LinearProgress variant='determinate' value={fileProgress} />
                   </Box>
               </div>
           </div>
           <IconButton
-              onClick={() => console.log('delete file')}
+              onClick={handleClickDeleteFile}
               aria-label="remove file"
           >
               <DeleteIcon />
