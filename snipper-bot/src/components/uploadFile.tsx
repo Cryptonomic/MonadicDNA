@@ -10,7 +10,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 import VisuallyHiddenInput from './visuallyHiddenInput';
 
-import { createAttestation, getAllAttestationIds, getResultsById } from '@/utils/attestations';
+import { createAttestation } from '@/utils/attestations';
 import { computeOnNillion } from '@/utils/nillion';
 import FileProgressIndicator from './fileProgressIndicator';
 import { IComputedResult, IMonadicDNAPassport, IMonadicDNAVerifiedTrait, ISNPs, IViewAttestation } from '@/types';
@@ -19,7 +19,7 @@ import AnalysisInsights from './analysisInsights';
 import AnalysisStepper from './analysisStepper';
 import ErrorModal from './errorModal';
 import { CustomError, invalidFileError } from '@/types/customError';
-import { isValidMonadicDNAPassport } from '@/utils';
+import { getValue, isValidMonadicDNAPassport } from '@/utils';
 
 const config = require('../config.json');
 
@@ -96,25 +96,28 @@ const UploadFile = () => {
 
               setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
+              let allAttestations: IViewAttestation[] = [];
+
               for (const result of computedResult) {
-                  await createAttestation(passport.passport_id, result);
-                  // 30 secs delay
-                  await new Promise(resolve => setTimeout(resolve, 30000));
+                  const createdAttestation = await createAttestation(passport.passport_id, result);
+                  allAttestations.push({
+                      id: `${config.networkId}_${createdAttestation.attestationId}`,
+                      data: {
+                          "Passport ID": passport.passport_id,
+                          Provider: config.provider,
+                          Trait: result.trait,
+                          Value: getValue(result.value)
+                      }
+                  });
               }
 
-              await new Promise(resolve => setTimeout(resolve, 30000));
-              const retreivedIds = await getAllAttestationIds(passport.passport_id);
-
-              const promises = retreivedIds.map(id => getResultsById(id));
-              const results = await Promise.all(promises);
-
-              const filteredResult = results.filter((item, index, self) =>
+              const filteredAttestations = allAttestations.filter((item, index, self) =>
                   item.data.Provider.toLowerCase() === config.provider.toLowerCase() &&
                   index === self.findIndex((t) =>
                       t.data.Trait === item.data.Trait
                   )
               );
-              setAttestationData(filteredResult);
+              setAttestationData(filteredAttestations);
               setActiveStep((prevActiveStep) => prevActiveStep + 1);
           } catch (e) {
             console.error('Failed to Analyse DNA Passport:', e);
