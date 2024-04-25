@@ -19,7 +19,7 @@ import AnalysisInsights from './analysisInsights';
 import AnalysisStepper from './analysisStepper';
 import ErrorModal from './errorModal';
 import { CustomError, invalidFileError } from '@/types/customError';
-import { getValue } from '@/utils';
+import { getValue, isValidMonadicDNAPassport } from '@/utils';
 
 const config = require('../config.json');
 
@@ -45,6 +45,7 @@ const UploadFile = () => {
             const reader = new FileReader();
             reader.onprogress = updateProgress;
             reader.onload = parseFile;
+            reader.onloadend = updateProgress;
             reader.readAsText(selectedFile);
         }
     };
@@ -62,6 +63,9 @@ const UploadFile = () => {
         const fileContent = e.target?.result as string;
         try {
             const jsonContent = JSON.parse(fileContent) as IMonadicDNAPassport;
+            if (!isValidMonadicDNAPassport(jsonContent)) {
+                throw new Error('Parsed JSON content does not match IMonadicDNAPassport interface');
+            }
             setPassport(jsonContent);
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
           } catch (e) {
@@ -71,10 +75,7 @@ const UploadFile = () => {
     };
 
     const analyseData = async() => {
-        if (!passport?.nillion_data) {
-          setError(invalidFileError);
-          return
-        };
+        if (!passport) { return };
 
         setIsProcessingTransaction(true);
 
@@ -135,6 +136,12 @@ const UploadFile = () => {
         );
     }
 
+    const handleClickDeleteFile = () => {
+        setFile(null);
+        setFileProgress(0);
+        setIsFileLoading(false);
+    }
+
     return (
         <Box className='pt-4 sm:pt-11'>
             {error && <ErrorModal error={error} setError={setError} /> }
@@ -161,7 +168,7 @@ const UploadFile = () => {
                             color='text.primary'
                         >
                             Click to upload
-                            <VisuallyHiddenInput type='file' onChange={handleFileChange} disabled={isFileLoading} />
+                            <VisuallyHiddenInput type='file' accept='.json' onChange={handleFileChange} disabled={isFileLoading} />
                         </Link>
                         {' '}
                         or drag and drop
@@ -170,7 +177,7 @@ const UploadFile = () => {
                     <Typography color='text.secondary'> DNA Passport JSON </Typography>
                 </Box>
                 {file &&
-                    <FileProgressIndicator {...{file, fileProgress}} />
+                    <FileProgressIndicator {...{file, fileProgress, handleClickDeleteFile}} />
                 }
 
                 <AnalysisInsights />
@@ -178,7 +185,7 @@ const UploadFile = () => {
                 <LoadingButton
                     variant='contained'
                     loading={isProcessingTransaction}
-                    disabled={fileProgress < 100}
+                    disabled={fileProgress < 100 || !passport}
                     onClick={() => analyseData()}
                     className={`w-full sm:w-[400px] ${file ? 'mt-8' : 'mt-20' }`}
                 >

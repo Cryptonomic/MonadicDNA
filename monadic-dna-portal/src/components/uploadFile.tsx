@@ -54,12 +54,14 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
 
             const reader = new FileReader();
             reader.onprogress = updateProgress;
+            reader.onloadend = updateProgress;
             reader.readAsArrayBuffer(selectedFile);
         }
 
         if(currentAction.type === 'viewResults') {
             const reader = new FileReader();
             reader.onprogress = updateProgress;
+            reader.onloadend = updateProgress;
 
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 try {
@@ -231,12 +233,12 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                     <div>
                         <Link
                             className='p-0 cursor-pointer'
-                            component="label"
+                            component='label'
                             variant='inherit'
                             color='text.primary'
                         >
                             Click to upload
-                            <VisuallyHiddenInput type="file" onChange={handleFileChange} disabled={isFileLoading} />
+                            <VisuallyHiddenInput type='file' accept={currentAction.acceptedFileFormats} onChange={handleFileChange} disabled={isFileLoading} />
                         </Link>
                         {' '}
                         or drag and drop
