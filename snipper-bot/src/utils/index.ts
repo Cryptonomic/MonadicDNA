@@ -53,6 +53,7 @@ export const isValidMonadicDNAPassport = (jsonContent: any): jsonContent is IMon
         typeof data_hash === 'string' &&
         typeof nillion_data === 'object' &&
         !Array.isArray(nillion_data) &&
+        Object.keys(nillion_data).length !== 0 &&
         Object.values(nillion_data).every(value => typeof value === 'string')
     );
 };

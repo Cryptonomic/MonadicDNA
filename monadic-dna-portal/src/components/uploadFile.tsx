@@ -61,6 +61,7 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
         if(currentAction.type === 'viewResults') {
             const reader = new FileReader();
             reader.onprogress = updateProgress;
+            reader.onloadend = updateProgress;
 
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 try {
@@ -237,7 +238,7 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                             color='text.primary'
                         >
                             Click to upload
-                            <VisuallyHiddenInput type='file' accept='.txt' onChange={handleFileChange} disabled={isFileLoading} />
+                            <VisuallyHiddenInput type='file' accept={currentAction.acceptedFileFormats} onChange={handleFileChange} disabled={isFileLoading} />
                         </Link>
                         {' '}
                         or drag and drop
