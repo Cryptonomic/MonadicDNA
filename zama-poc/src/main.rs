@@ -7,6 +7,8 @@ use std::collections::HashMap;
 use std::time::Instant;
 use log::{info};
 use env_logger::{Builder, Env};
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
 
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
@@ -19,7 +21,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 5;
+    let num_lines = 500;
 
     let start = Instant::now();
     run_iteration(filename, num_lines).expect("Well, that didn't work!");
@@ -39,6 +41,7 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
 
     let processed_data = process_file(filename, num_lines)?;
     info!("Lines of processed data: {:?}", processed_data.len());
+    //println!("{:?}", processed_data.);
 
     let encrypted_genotypes = encrypt_genotypes_for_zama(processed_data, client_key)?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
@@ -46,7 +49,7 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
     return Ok(());
 }
 
-fn encrypt_genotypes_for_zama(processed_data: HashMap<u8, u8>, client_key: ClientKey) -> result::Result<HashMap<u8, FheUint8>, Error> {
+fn encrypt_genotypes_for_zama(processed_data: HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<u64, FheUint8>, Error> {
     let mut enc_data = HashMap::new();
 
     for (encoded_rsid, encoded_genotype) in processed_data {
@@ -57,7 +60,7 @@ fn encrypt_genotypes_for_zama(processed_data: HashMap<u8, u8>, client_key: Clien
     Ok(enc_data)
 }
 
-fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u8, u8>> {
+fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u64, u8>> {
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
     let mut results = HashMap::new();
@@ -75,6 +78,7 @@ fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u8, u8>>
                 // Insert into HashMap
                 results.insert(encoded_rsid, encoded_genotype);
                 if results.len() == num_lines {
+                    info!("Reached the limit of lines to process: {:?}", num_lines);
                     break;
                 }
             }
@@ -84,22 +88,29 @@ fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u8, u8>>
     Ok(results)
 }
 
-fn encode_rsid(rsid: &str) -> u8 {
-    rsid.trim_start_matches("rs").parse::<u8>().unwrap_or(0)
+fn encode_rsid(rsid: &str) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    rsid.trim_start_matches("rs").hash(&mut hasher);
+    return hasher.finish();
 }
 
 fn encode_genotype(genotype: &str) -> u8 {
     match genotype {
         "AA" => 1,
-        "AC" => 2,
-        "AG" => 3,
-        "AT" => 4,
+        "AC" | "CA" => 2,
+        "AG" | "GA" => 3,
+        "AT" | "TA" => 4,
         "CC" => 5,
-        "CG" => 6,
-        "CT" => 7,
+        "CG" | "GC" => 6,
+        "CT" | "TC" => 7,
         "GG" => 8,
-        "GT" => 9,
+        "GT" | "TG" => 9,
         "TT" => 10,
-        _ => 0,  // For unexpected or incomplete genotypes
+        // Optionally handle degenerate cases or mixed calls, often seen in some genetic data
+        "NN" => 11,  // 'N' often represents an unknown or not determined base
+        // Handle cases where genotype is not provided or is erroneous
+        "" | "???" => 12,  // This can be expanded based on the data set's specifics
+        _ => 0,  // For any other unexpected or incomplete genotypes
     }
 }
+
