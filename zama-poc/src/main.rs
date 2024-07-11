@@ -21,7 +21,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 500;
+    let num_lines = 1000000;
 
     let start = Instant::now();
     run_iteration(filename, num_lines).expect("Well, that didn't work!");
@@ -43,22 +43,24 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
     info!("Lines of processed data: {:?}", processed_data.len());
     //println!("{:?}", processed_data.);
 
-    let encrypted_genotypes = encrypt_genotypes_for_zama(processed_data, client_key)?;
+    let encrypted_genotypes = encrypt_genotypes_for_zama(&processed_data, &client_key)?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
 
     return Ok(());
 }
 
-fn encrypt_genotypes_for_zama(processed_data: HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<u64, FheUint8>, Error> {
+fn encrypt_genotypes_for_zama(processed_data: &HashMap<u64, u8>, client_key: &ClientKey) -> result::Result<HashMap<u64, FheUint8>, std::io::Error> {
     let mut enc_data = HashMap::new();
 
-    for (encoded_rsid, encoded_genotype) in processed_data {
-        let genotype_encrypted = FheUint8::try_encrypt(encoded_genotype, &client_key).unwrap();
+    for (&encoded_rsid, &encoded_genotype) in processed_data.iter() {
+        let genotype_encrypted = FheUint8::try_encrypt(encoded_genotype, client_key)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;  // Convert tfhe::Error to std::io::Error
         enc_data.insert(encoded_rsid, genotype_encrypted);
     }
 
     Ok(enc_data)
 }
+
 
 fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u64, u8>> {
     let file = File::open(filename)?;
