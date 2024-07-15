@@ -9,6 +9,7 @@ use log::{info};
 use env_logger::{Builder, Env};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+use std::mem::size_of;
 
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
@@ -21,7 +22,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 500;
+    let num_lines = 100000;
 
     let start = Instant::now();
     run_iteration(filename, num_lines).expect("Well, that didn't work!");
@@ -41,10 +42,12 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
 
     let processed_data = process_file(filename, num_lines)?;
     info!("Lines of processed data: {:?}", processed_data.len());
+    info!("Memory usage of processed data: {:?}", calculate_memory_usage(&processed_data));
     //println!("{:?}", processed_data.);
 
     let encrypted_genotypes = encrypt_genotypes_for_zama(processed_data, client_key)?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
+    info!("Memory usage of encrypted data: {:?}", calculate_memory_usage(&encrypted_genotypes));
 
     return Ok(());
 }
@@ -114,3 +117,21 @@ fn encode_genotype(genotype: &str) -> u8 {
     }
 }
 
+fn calculate_memory_usage<K, V>(map: &HashMap<K, V>) -> usize {
+    let mut total_size = 0;
+
+    // Size of the HashMap structure itself
+    total_size += size_of::<HashMap<K, V>>();
+
+    // Size of each key-value pair
+    for (key, value) in map.iter() {
+        total_size += size_of::<K>() + size_of::<V>();
+        total_size += calculate_key_value_size(key) + calculate_key_value_size(value);
+    }
+
+    total_size
+}
+
+fn calculate_key_value_size<T>(value: &T) -> usize {
+    size_of::<T>()
+}
