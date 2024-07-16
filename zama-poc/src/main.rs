@@ -9,7 +9,6 @@ use log::{info};
 use env_logger::{Builder, Env};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
-use std::mem::size_of;
 
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
@@ -46,8 +45,6 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
 
     let encrypted_genotypes = encrypt_genotypes_for_zama(processed_data, client_key)?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
-
-    wait_for_keypress();
 
     return Ok(());
 }
@@ -117,8 +114,3 @@ fn encode_genotype(genotype: &str) -> u8 {
     }
 }
 
-fn wait_for_keypress() {
-    println!("Press any key to continue...");
-    let mut buffer = [0; 1]; // Buffer to hold a single byte
-    io::stdin().read_exact(&mut buffer).unwrap(); // Read one byte from stdin
-}
