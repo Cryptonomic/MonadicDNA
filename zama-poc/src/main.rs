@@ -1,7 +1,7 @@
-use tfhe::{ConfigBuilder, generate_keys, set_server_key, CompressedFheUint8, ClientKey};
+use tfhe::{ConfigBuilder, generate_keys, set_server_key, CompressedFheUint8, FheUint8, ClientKey};
 use tfhe::prelude::*;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader, Error, Read};
+use std::io::{self, BufRead, BufReader, Error};
 use std::result;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -21,7 +21,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 1000000;
+    let num_lines = 100;
 
     let start = Instant::now();
     run_iteration(filename, num_lines).expect("Well, that didn't work!");
@@ -43,17 +43,37 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
     info!("Lines of processed data: {:?}", processed_data.len());
     //println!("{:?}", processed_data.);
 
-    let encrypted_genotypes = encrypt_genotypes_for_zama(processed_data, client_key)?;
+    let encrypted_genotypes = encrypt_genotypes_for_zama(&processed_data, client_key.clone())?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
+
+    let lookup_result = check_genotype(&encrypted_genotypes, "rs75333668", "CC", client_key.clone())?;
+    info!("Lookup result: {:?}", lookup_result);
 
     return Ok(());
 }
 
-fn encrypt_genotypes_for_zama(processed_data: HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<u64, CompressedFheUint8>, Error> {
+
+fn check_genotype(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
+                  rsid: &str,
+                  genotype: &str,
+                  client_key: ClientKey
+    ) -> result::Result<bool, Error> {
+    let encoded_rsid = encode_rsid(rsid);
+    let encoded_genotype = encode_genotype(genotype);
+
+    let encrypted_genotype = encrypted_genotypes.get(&encoded_rsid).unwrap();
+    let decompressed_encrypted_genotype = encrypted_genotype.decompress();
+
+    let encrypted_target = FheUint8::try_encrypt(encoded_genotype, &client_key).unwrap();
+
+    Ok(decompressed_encrypted_genotype.eq(encrypted_target).decrypt(&client_key))
+}
+
+fn encrypt_genotypes_for_zama(processed_data: &HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<&u64, CompressedFheUint8>, Error> {
     let mut enc_data = HashMap::new();
 
     for (encoded_rsid, encoded_genotype) in processed_data {
-        let genotype_encrypted = CompressedFheUint8::try_encrypt(encoded_genotype, &client_key).unwrap();
+        let genotype_encrypted = CompressedFheUint8::try_encrypt(*encoded_genotype, &client_key).unwrap();
         enc_data.insert(encoded_rsid, genotype_encrypted);
     }
 
