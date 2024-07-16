@@ -21,7 +21,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 100;
+    let num_lines = 1000000;
 
     let start = Instant::now();
     run_iteration(filename, num_lines).expect("Well, that didn't work!");
@@ -46,12 +46,35 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
     let encrypted_genotypes = encrypt_genotypes_for_zama(&processed_data, client_key.clone())?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
 
-    let lookup_result = check_genotype(&encrypted_genotypes, "rs75333668", "CC", client_key.clone())?;
-    info!("Lookup result: {:?}", lookup_result);
+    let lookup_result1 = check_genotype(&encrypted_genotypes, "rs75333668", "CC", client_key.clone())?;
+    info!("Lookup result: {:?}", lookup_result1);
+
+    let lookup_result2 = check_genotype(&encrypted_genotypes, "rs75333668", "AA", client_key.clone())?;
+    info!("Lookup result: {:?}", lookup_result2);
+
+    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, client_key.clone());
+    info!("Genotype frequencies: {:?}", genotype_frequencies);
 
     return Ok(());
 }
 
+// Iterate through encrypted_genotypes and get the frequency of each genotype
+fn get_genotype_frequencies(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
+    client_key: ClientKey
+    )
+    -> HashMap<u64, u64> {
+    let mut genotype_frequencies = HashMap::new();
+
+    for (_encoded_rsid, encrypted_genotype) in encrypted_genotypes {
+        let decompressed_encrypted_genotype = encrypted_genotype.decompress();
+        let decrypted_genotype = decompressed_encrypted_genotype.decrypt(&client_key);
+
+        let count = genotype_frequencies.entry(decrypted_genotype).or_insert(0);
+        *count += 1;
+    }
+
+    genotype_frequencies
+}
 
 fn check_genotype(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
                   rsid: &str,
