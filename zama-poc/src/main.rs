@@ -1,7 +1,7 @@
-use tfhe::{ConfigBuilder, generate_keys, set_server_key, FheUint8, ClientKey};
+use tfhe::{ConfigBuilder, generate_keys, set_server_key, CompressedFheUint8, ClientKey};
 use tfhe::prelude::*;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader, Error};
+use std::io::{self, BufRead, BufReader, Error, Read};
 use std::result;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -22,7 +22,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 100000;
+    let num_lines = 1000000;
 
     let start = Instant::now();
     run_iteration(filename, num_lines).expect("Well, that didn't work!");
@@ -42,21 +42,21 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
 
     let processed_data = process_file(filename, num_lines)?;
     info!("Lines of processed data: {:?}", processed_data.len());
-    info!("Memory usage of processed data: {:?}", calculate_memory_usage(&processed_data));
     //println!("{:?}", processed_data.);
 
     let encrypted_genotypes = encrypt_genotypes_for_zama(processed_data, client_key)?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
-    info!("Memory usage of encrypted data: {:?}", calculate_memory_usage(&encrypted_genotypes));
+
+    wait_for_keypress();
 
     return Ok(());
 }
 
-fn encrypt_genotypes_for_zama(processed_data: HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<u64, FheUint8>, Error> {
+fn encrypt_genotypes_for_zama(processed_data: HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<u64, CompressedFheUint8>, Error> {
     let mut enc_data = HashMap::new();
 
     for (encoded_rsid, encoded_genotype) in processed_data {
-        let genotype_encrypted = FheUint8::try_encrypt(encoded_genotype, &client_key).unwrap();
+        let genotype_encrypted = CompressedFheUint8::try_encrypt(encoded_genotype, &client_key).unwrap();
         enc_data.insert(encoded_rsid, genotype_encrypted);
     }
 
@@ -117,21 +117,8 @@ fn encode_genotype(genotype: &str) -> u8 {
     }
 }
 
-fn calculate_memory_usage<K, V>(map: &HashMap<K, V>) -> usize {
-    let mut total_size = 0;
-
-    // Size of the HashMap structure itself
-    total_size += size_of::<HashMap<K, V>>();
-
-    // Size of each key-value pair
-    for (key, value) in map.iter() {
-        total_size += size_of::<K>() + size_of::<V>();
-        total_size += calculate_key_value_size(key) + calculate_key_value_size(value);
-    }
-
-    total_size
-}
-
-fn calculate_key_value_size<T>(value: &T) -> usize {
-    size_of::<T>()
+fn wait_for_keypress() {
+    println!("Press any key to continue...");
+    let mut buffer = [0; 1]; // Buffer to hold a single byte
+    io::stdin().read_exact(&mut buffer).unwrap(); // Read one byte from stdin
 }
