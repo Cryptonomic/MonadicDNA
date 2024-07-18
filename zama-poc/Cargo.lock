@@ -809,5 +809,6 @@ dependencies = [
  "chrono",
  "env_logger",
  "log",
+ "rayon",
  "tfhe",
 ]

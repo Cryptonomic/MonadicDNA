@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.38"
 env_logger = "0.11.3"
+rayon = "1.5"
 log = "0.4.22"
-tfhe = { version = "0.7.1", features = [ "boolean", "shortint", "integer", "aarch64-unix" ] }
+tfhe = { version = "0.7.1", features = [ "boolean", "shortint", "integer", "x86_64-unix" ] }
