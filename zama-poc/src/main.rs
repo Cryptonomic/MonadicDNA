@@ -1,15 +1,14 @@
-use tfhe::{ConfigBuilder, generate_keys, set_server_key, CompressedFheUint8, FheUint8, ClientKey};
-use tfhe::prelude::*;
-use std::fs::File;
-use std::io::{self, BufRead, BufReader, Error};
-use std::result;
-use std::collections::HashMap;
 use std::time::Instant;
-use log::{info};
+use log::info;
 use env_logger::{Builder, Env};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use rayon::prelude::*;
+
+
+mod genome_file_processing;
+mod zama_compute;
+
 
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
@@ -25,12 +24,13 @@ fn main() {
     let num_lines = 1000000;
 
     let start = Instant::now();
-    run_iteration(filename, num_lines).expect("Well, that didn't work!");
+    zama_compute::run_iteration(filename, num_lines).expect("Well, that didn't work!");
     let duration = start.elapsed();
     info!("run_iteration took: {:?}", duration);
 
     info!("Bye, Zama!");
 }
+
 
 fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error> {
     info!("Setting up Zama env");
@@ -153,3 +153,4 @@ fn encode_genotype(genotype: &str) -> u8 {
         _ => 0,
     }
 }
+
