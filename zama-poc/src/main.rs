@@ -1,14 +1,9 @@
-use tfhe::{ConfigBuilder, generate_keys, set_server_key, CompressedFheUint8, FheUint8, ClientKey};
-use tfhe::prelude::*;
-use std::fs::File;
-use std::io::{self, BufRead, BufReader, Error};
-use std::result;
-use std::collections::HashMap;
 use std::time::Instant;
-use log::{info};
+use log::info;
 use env_logger::{Builder, Env};
-use std::hash::{Hash, Hasher};
-use std::collections::hash_map::DefaultHasher;
+
+mod genome_file_processing;
+mod zama_compute;
 
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
@@ -24,136 +19,10 @@ fn main() {
     let num_lines = 1000000;
 
     let start = Instant::now();
-    run_iteration(filename, num_lines).expect("Well, that didn't work!");
+    zama_compute::run_iteration(filename, num_lines).expect("Well, that didn't work!");
     let duration = start.elapsed();
     info!("run_iteration took: {:?}", duration);
 
     info!("Bye, Zama!");
-}
-
-fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
-    info!("Setting up Zama env");
-    let config = ConfigBuilder::default().build();
-    let (client_key, server_key) = generate_keys(config);
-    set_server_key(server_key);
-
-    info!("Number of lines to process: {:?}", num_lines);
-
-    let processed_data = process_file(filename, num_lines)?;
-    info!("Lines of processed data: {:?}", processed_data.len());
-    //println!("{:?}", processed_data.);
-
-    let encrypted_genotypes = encrypt_genotypes_for_zama(&processed_data, client_key.clone())?;
-    info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
-
-    let lookup_result1 = check_genotype(&encrypted_genotypes, "rs75333668", "CC", client_key.clone())?;
-    info!("Lookup result: {:?}", lookup_result1);
-
-    let lookup_result2 = check_genotype(&encrypted_genotypes, "rs75333668", "AA", client_key.clone())?;
-    info!("Lookup result: {:?}", lookup_result2);
-
-    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, client_key.clone());
-    info!("Genotype frequencies: {:?}", genotype_frequencies);
-
-    return Ok(());
-}
-
-// Iterate through encrypted_genotypes and get the frequency of each genotype
-fn get_genotype_frequencies(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
-    client_key: ClientKey
-    )
-    -> HashMap<u64, u64> {
-    let mut genotype_frequencies = HashMap::new();
-
-    for (_encoded_rsid, encrypted_genotype) in encrypted_genotypes {
-        let decompressed_encrypted_genotype = encrypted_genotype.decompress();
-        let decrypted_genotype = decompressed_encrypted_genotype.decrypt(&client_key);
-
-        let count = genotype_frequencies.entry(decrypted_genotype).or_insert(0);
-        *count += 1;
-    }
-
-    genotype_frequencies
-}
-
-fn check_genotype(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
-                  rsid: &str,
-                  genotype: &str,
-                  client_key: ClientKey
-    ) -> result::Result<bool, Error> {
-    let encoded_rsid = encode_rsid(rsid);
-    let encoded_genotype = encode_genotype(genotype);
-
-    let encrypted_genotype = encrypted_genotypes.get(&encoded_rsid).unwrap();
-    let decompressed_encrypted_genotype = encrypted_genotype.decompress();
-
-    let encrypted_target = FheUint8::try_encrypt(encoded_genotype, &client_key).unwrap();
-
-    Ok(decompressed_encrypted_genotype.eq(encrypted_target).decrypt(&client_key))
-}
-
-fn encrypt_genotypes_for_zama(processed_data: &HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<&u64, CompressedFheUint8>, Error> {
-    let mut enc_data = HashMap::new();
-
-    for (encoded_rsid, encoded_genotype) in processed_data {
-        let genotype_encrypted = CompressedFheUint8::try_encrypt(*encoded_genotype, &client_key).unwrap();
-        enc_data.insert(encoded_rsid, genotype_encrypted);
-    }
-
-    Ok(enc_data)
-}
-
-fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u64, u8>> {
-    let file = File::open(filename)?;
-    let reader = BufReader::new(file);
-    let mut results = HashMap::new();
-
-    for line in reader.lines().filter_map(|line| line.ok()) {
-        if !line.starts_with('#') {
-            let parts: Vec<&str> = line.split('\t').collect();
-            if parts.len() >= 4 {
-                let rsid = parts[0].to_string();
-                let genotype = parts[3];
-
-                let encoded_rsid = encode_rsid(&rsid);
-                let encoded_genotype = encode_genotype(genotype);
-
-                // Insert into HashMap
-                results.insert(encoded_rsid, encoded_genotype);
-                if results.len() == num_lines {
-                    info!("Reached the limit of lines to process: {:?}", num_lines);
-                    break;
-                }
-            }
-        }
-    }
-
-    Ok(results)
-}
-
-fn encode_rsid(rsid: &str) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    rsid.trim_start_matches("rs").hash(&mut hasher);
-    return hasher.finish();
-}
-
-fn encode_genotype(genotype: &str) -> u8 {
-    match genotype {
-        "AA" => 1,
-        "AC" | "CA" => 2,
-        "AG" | "GA" => 3,
-        "AT" | "TA" => 4,
-        "CC" => 5,
-        "CG" | "GC" => 6,
-        "CT" | "TC" => 7,
-        "GG" => 8,
-        "GT" | "TG" => 9,
-        "TT" => 10,
-        // Optionally handle degenerate cases or mixed calls, often seen in some genetic data
-        "NN" => 11,  // 'N' often represents an unknown or not determined base
-        // Handle cases where genotype is not provided or is erroneous
-        "" | "???" => 12,  // This can be expanded based on the data set's specifics
-        _ => 0,  // For any other unexpected or incomplete genotypes
-    }
 }
 
