@@ -5,6 +5,7 @@ use env_logger::{Builder, Env};
 mod genome_file_processing;
 mod zama_compute;
 mod server;
+mod client;
 
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
