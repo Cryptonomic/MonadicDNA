@@ -1,17 +1,21 @@
-use std::hash::{DefaultHasher, Hash, Hasher};
-use std::io;
-use std::collections::HashMap;
+// src/genome_file_processing.rs
+
 use std::fs::File;
-use std::io::{BufRead, BufReader};
-use log::info;
+use std::io::{self, BufRead, BufReader};
+use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
+use rayon::prelude::*;
 
 pub fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u64, u8>> {
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
-    let mut results = HashMap::new();
+    let lines: Vec<String> = reader.lines().take(num_lines).filter_map(Result::ok).collect();
 
-    for line in reader.lines().filter_map(|line| line.ok()) {
-        if !line.starts_with('#') {
+    let results: HashMap<u64, u8> = lines
+        .par_iter()
+        .filter(|line| !line.starts_with('#'))
+        .filter_map(|line| {
             let parts: Vec<&str> = line.split('\t').collect();
             if parts.len() >= 4 {
                 let rsid = parts[0].to_string();
@@ -20,26 +24,23 @@ pub fn process_file(filename: &str, num_lines: usize) -> io::Result<HashMap<u64,
                 let encoded_rsid = encode_rsid(&rsid);
                 let encoded_genotype = encode_genotype(genotype);
 
-                // Insert into HashMap
-                results.insert(encoded_rsid, encoded_genotype);
-                if results.len() == num_lines {
-                    info!("Reached the limit of lines to process: {:?}", num_lines);
-                    break;
-                }
+                Some((encoded_rsid, encoded_genotype))
+            } else {
+                None
             }
-        }
-    }
+        })
+        .collect();
 
     Ok(results)
 }
 
-pub fn encode_rsid(rsid: &str) -> u64 {
+pub fn encode_rsid(rsid: &str) -> u64 { // Made public
     let mut hasher = DefaultHasher::new();
     rsid.trim_start_matches("rs").hash(&mut hasher);
-    return hasher.finish();
+    hasher.finish()
 }
 
-pub fn encode_genotype(genotype: &str) -> u8 {
+pub fn encode_genotype(genotype: &str) -> u8 { // Made public
     match genotype {
         "AA" => 1,
         "AC" | "CA" => 2,
@@ -51,10 +52,8 @@ pub fn encode_genotype(genotype: &str) -> u8 {
         "GG" => 8,
         "GT" | "TG" => 9,
         "TT" => 10,
-        // Optionally handle degenerate cases or mixed calls, often seen in some genetic data
-        "NN" => 11,  // 'N' often represents an unknown or not determined base
-        // Handle cases where genotype is not provided or is erroneous
-        "" | "???" => 12,  // This can be expanded based on the data set's specifics
-        _ => 0,  // For any other unexpected or incomplete genotypes
+        "NN" => 11,
+        "" | "???" => 12,
+        _ => 0,
     }
 }
