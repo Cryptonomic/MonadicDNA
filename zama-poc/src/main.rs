@@ -7,10 +7,19 @@ use std::collections::HashMap;
 use std::time::Instant;
 use log::{info};
 use env_logger::{Builder, Env};
+
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
+
+
+mod genome_file_processing;
+mod zama_compute;
+mod server;
+mod client;
+
+
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
         .format(|buf, record| {
