@@ -1,15 +1,16 @@
+use tfhe::{ConfigBuilder, generate_keys, set_server_key, CompressedFheUint8, FheUint8, ClientKey};
+use tfhe::prelude::*;
+use std::fs::File;
+use std::io::{self, BufRead, BufReader, Error};
+use std::result;
+use std::collections::HashMap;
 use std::time::Instant;
-use log::info;
+use log::{info};
 use env_logger::{Builder, Env};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use rayon::prelude::*;
-
-
-mod genome_file_processing;
-mod zama_compute;
-
-
+use std::sync::{Arc, Mutex};
 fn main() {
     Builder::from_env(Env::default().default_filter_or("info"))
         .format(|buf, record| {
@@ -20,17 +21,16 @@ fn main() {
 
     info!("Hello, Zama!");
 
-    let filename = "/home/amardeep/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
+    let filename = "GFGFilteredUnphasedGenotypes23andMe.txt";
     let num_lines = 1000000;
 
     let start = Instant::now();
-    zama_compute::run_iteration(filename, num_lines).expect("Well, that didn't work!");
+    run_iteration(filename, num_lines).expect("Well, that didn't work!");
     let duration = start.elapsed();
     info!("run_iteration took: {:?}", duration);
 
     info!("Bye, Zama!");
 }
-
 
 fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error> {
     info!("Setting up Zama env");
@@ -58,23 +58,36 @@ fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error> 
     Ok(())
 }
 
-fn get_genotype_frequencies(encrypted_genotypes: &HashMap<u64, CompressedFheUint8>,
+
+fn get_genotype_frequencies(
+    encrypted_genotypes: &HashMap<u64, CompressedFheUint8>,
     client_key: ClientKey
 ) -> HashMap<u64, u64> {
-    encrypted_genotypes.par_iter()
-        .map(|(_encoded_rsid, encrypted_genotype)| {
-            let decompressed_encrypted_genotype = encrypted_genotype.decompress();
-            let decrypted_genotype = decompressed_encrypted_genotype.decrypt(&client_key);
-            (decrypted_genotype, 1u64)
-        })
-        .collect::<HashMap<u64, u64>>()
-        .into_iter()
-        .fold(HashMap::new(), |mut acc, (genotype, count)| {
-            *acc.entry(genotype).or_insert(0) += count;
-            acc
-        })
-}
+    // Wrap the HashMap in an Arc and Mutex for thread-safe access
+    let genotype_frequencies = Arc::new(Mutex::new(HashMap::new()));
 
+    // Convert the HashMap into a Vec of tuples for parallel processing
+    let items: Vec<(u64, &CompressedFheUint8)> = encrypted_genotypes
+        .iter()
+        .map(|(&key, value)| (key, value))
+        .collect();
+
+    items.into_par_iter().for_each(|(_encoded_rsid, encrypted_genotype)| {
+        let decompressed_encrypted_genotype = encrypted_genotype.decompress();
+        let decrypted_genotype = decompressed_encrypted_genotype.decrypt(&client_key);
+
+        // Lock the Mutex before updating the HashMap
+        let mut genotype_frequencies = genotype_frequencies.lock().unwrap();
+        let count = genotype_frequencies.entry(decrypted_genotype).or_insert(0);
+        *count += 1;
+    });
+
+    // Convert the Arc<Mutex<HashMap<...>>> back to HashMap
+    Arc::try_unwrap(genotype_frequencies)
+        .unwrap()
+        .into_inner()
+        .unwrap()
+}
 fn check_genotype(encrypted_genotypes: &HashMap<u64, CompressedFheUint8>,
                   rsid: &str,
                   genotype: &str,
@@ -153,4 +166,3 @@ fn encode_genotype(genotype: &str) -> u8 {
         _ => 0,
     }
 }
-
