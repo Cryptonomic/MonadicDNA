@@ -3,14 +3,27 @@ use std::error::Error;
 use std::fs;
 use reqwest::Client;
 use serde_json::Value;
-
+use tfhe::{ConfigBuilder, generate_keys, set_server_key};
+use crate::genome_file_processing;
+use crate::zama_compute::encrypt_genotypes_for_zama;
 
 // Work in progress!!
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+
     let client = Client::new();
     let base_url = "http://localhost:6174";
     let user_id = "user123";
+
+    let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
+    let num_lines = 1000000;
+
+    let config = ConfigBuilder::default().build();
+    let (client_key, server_key) = generate_keys(config);
+    set_server_key(server_key);
+
+    let processed_data = genome_file_processing::process_file(filename, num_lines)?;
+    let encrypted_genotypes = encrypt_genotypes_for_zama(&processed_data, client_key.clone())?;
 
     // PUT /dataset
     let data = fs::read("data.bin")?;
