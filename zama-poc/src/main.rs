@@ -2,7 +2,7 @@ use std::time::Instant;
 use log::info;
 use env_logger::{Builder, Env};
 
-mod genome_file_processing;
+mod genome_processing;
 mod zama_compute;
 mod server;
 mod client;
@@ -17,7 +17,7 @@ fn main() {
 
     info!("Hello, Zama!");
 
-    let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
+    let filename = "GFGFilteredUnphasedGenotypes23andMe.txt";
     let num_lines = 1000000;
 
     let start = Instant::now();
