@@ -7,20 +7,17 @@ use log::info;
 use crate::genome_processing;
 use bincode;
 use std::io::Cursor;
-use crate::genome_processing::encode_genotype;
+use crate::genome_processing::{encode_genotype, get_genotype_encoding_map};
 
 // Iterate through encrypted_genotypes and get the frequency of each genotype
-pub fn get_genotype_frequencies(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
-    client_key: ClientKey
-    )
-    -> HashMap<u64, u64> {
+pub fn get_genotype_frequencies(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>) -> HashMap<CompressedFheUint8, u64> 
+{
     let mut genotype_frequencies = HashMap::new();
 
     for (_encoded_rsid, encrypted_genotype) in encrypted_genotypes {
         let decompressed_encrypted_genotype = encrypted_genotype.decompress();
-        let decrypted_genotype = decompressed_encrypted_genotype.decrypt(&client_key);
-
-        let count = genotype_frequencies.entry(decrypted_genotype).or_insert(0);
+        let genotype_key = format!("{:?}", encrypted_genotype);
+        let count = genotype_frequencies.entry(decompressed_encrypted_genotype).or_insert(0);
         *count += 1;
     }
 
@@ -105,3 +102,14 @@ fn check_genotype_client(client_key: &ClientKey, encrypted_genotypes: &HashMap<&
     Ok(decoded_result)
 }
 
+pub fn get_encrypted_genotype_encoding_map(client_key: &ClientKey) -> HashMap<&'static str, FheUint8> {
+    let genotype_encoding_map = get_genotype_encoding_map();
+
+    genotype_encoding_map
+        .into_iter()
+        .map(|(genotype, encoding)| {
+            let encrypted_encoding = FheUint8::try_encrypt(encoding, client_key).unwrap(); 
+            (genotype, encrypted_encoding)
+        })
+        .collect()
+}

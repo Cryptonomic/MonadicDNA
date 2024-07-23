@@ -39,22 +39,24 @@ pub fn encode_rsid(rsid: &str) -> u64 {
     return hasher.finish();
 }
 
+pub fn get_genotype_encoding_map() -> HashMap<&'static str, u8> {
+    HashMap::from([
+        ("AA", 1),
+        ("AC", 2), ("CA", 2),
+        ("AG", 3), ("GA", 3),
+        ("AT", 4), ("TA", 4),
+        ("CC", 5),
+        ("CG", 6), ("GC", 6),
+        ("CT", 7), ("TC", 7),
+        ("GG", 8),
+        ("GT", 9), ("TG", 9),
+        ("TT", 10),
+        ("NN", 11),
+        ("", 12), ("???", 12),
+    ])
+}
+
 pub fn encode_genotype(genotype: &str) -> u8 {
-    match genotype {
-        "AA" => 1,
-        "AC" | "CA" => 2,
-        "AG" | "GA" => 3,
-        "AT" | "TA" => 4,
-        "CC" => 5,
-        "CG" | "GC" => 6,
-        "CT" | "TC" => 7,
-        "GG" => 8,
-        "GT" | "TG" => 9,
-        "TT" => 10,
-        // Optionally handle degenerate cases or mixed calls, often seen in some genetic data
-        "NN" => 11,  // 'N' often represents an unknown or not determined base
-        // Handle cases where genotype is not provided or is erroneous
-        "" | "???" => 12,  // This can be expanded based on the data set's specifics
-        _ => 0,  // For any other unexpected or incomplete genotypes
-    }
+    let encoding_map = get_genotype_encoding_map();
+    *encoding_map.get(genotype).unwrap_or(&0)
 }

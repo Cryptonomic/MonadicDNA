@@ -3,6 +3,7 @@ use rusqlite::{params, Connection, Result as SqliteResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use crate::zama_compute::deserialize_encrypted_genotypes;
 
 struct AppState {
     db: Mutex<Connection>,
@@ -23,6 +24,19 @@ struct FrequenciesResponse {
     frequencies: HashMap<String, i32>,
 }
 
+#[derive(Serialize)]
+struct ThrombosisResponse {
+    thrombosis: bool,
+}
+
+fn load_dataset(conn: &Connection, user_id: &str) -> SqliteResult<Vec<u8>> {
+    conn.query_row(
+        "SELECT data FROM datasets WHERE user_id = ?1",
+        params![user_id],
+        |row| row.get(0),
+    )
+}
+
 async fn put_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>, body: web::Bytes) -> impl Responder {
     let conn = state.db.lock().unwrap();
     let result: SqliteResult<()> = conn.execute(
@@ -38,30 +52,40 @@ async fn put_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>, bo
 
 async fn get_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>) -> impl Responder {
     let conn = state.db.lock().unwrap();
-    let result: SqliteResult<Vec<u8>> = conn.query_row(
-        "SELECT data FROM datasets WHERE user_id = ?1",
-        params![user_id.user_id],
-        |row| row.get(0),
-    );
-
-    match result {
+    match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => HttpResponse::Ok().body(data),
         Err(_) => HttpResponse::NotFound().finish(),
     }
 }
 
 async fn get_thrombosis(state: web::Data<AppState>, user_id: web::Query<UserId>) -> impl Responder {
-    // This is a placeholder implementation. You should replace it with actual logic.
-    HttpResponse::Ok().json(false)
+    let conn = state.db.lock().unwrap();
+    match load_dataset(&conn, &user_id.user_id) {
+        Ok(data) => {
+            // This is a placeholder implementation. Replace with actual thrombosis calculation logic.
+            let thrombosis = data.len() % 2 == 0; // Example: even data length means thrombosis
+            HttpResponse::Ok().json(ThrombosisResponse { thrombosis })
+
+            //let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
+            
+        },
+        Err(_) => HttpResponse::NotFound().finish(),
+    }
 }
 
 async fn get_frequencies(state: web::Data<AppState>, user_id: web::Query<UserId>) -> impl Responder {
-    // This is a placeholder implementation. You should replace it with actual logic.
-    let frequencies = HashMap::from([
-        ("example".to_string(), 1),
-        ("placeholder".to_string(), 2),
-    ]);
-    HttpResponse::Ok().json(FrequenciesResponse { frequencies })
+    let conn = state.db.lock().unwrap();
+    match load_dataset(&conn, &user_id.user_id) {
+        Ok(data) => {
+            // This is a placeholder implementation. Replace with actual frequency calculation logic.
+            let mut frequencies = HashMap::new();
+            for &byte in &data {
+                *frequencies.entry(byte.to_string()).or_insert(0) += 1;
+            }
+            HttpResponse::Ok().json(FrequenciesResponse { frequencies })
+        },
+        Err(_) => HttpResponse::NotFound().finish(),
+    }
 }
 
 #[actix_web::main]
