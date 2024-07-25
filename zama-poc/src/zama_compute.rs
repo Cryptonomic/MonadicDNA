@@ -10,15 +10,17 @@ use std::io::Cursor;
 use crate::genome_processing::{encode_genotype, get_genotype_encoding_map};
 
 // Iterate through encrypted_genotypes and get the frequency of each genotype
-pub fn get_genotype_frequencies(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>) -> HashMap<CompressedFheUint8, u64> 
-{
-    let mut genotype_frequencies = HashMap::new();
+pub fn get_genotype_frequencies(
+    encrypted_genotypes: &HashMap<u64, FheUint8>
+) -> Vec<(FheUint8, u64)> {
+    let mut genotype_frequencies: Vec<(FheUint8, u64)> = Vec::new();
 
     for (_encoded_rsid, encrypted_genotype) in encrypted_genotypes {
-        let decompressed_encrypted_genotype = encrypted_genotype.decompress();
-        let genotype_key = format!("{:?}", encrypted_genotype);
-        let count = genotype_frequencies.entry(decompressed_encrypted_genotype).or_insert(0);
-        *count += 1;
+        if let Some(pair) = genotype_frequencies.iter_mut().find(|(g, _)| g == encrypted_genotype) {
+            pair.1 += 1;
+        } else {
+            genotype_frequencies.push((encrypted_genotype.clone(), 1));
+        }
     }
 
     genotype_frequencies
@@ -72,11 +74,11 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
 
     let encrypted_genotypes = encrypt_genotypes_for_zama(&processed_data, client_key.clone())?;
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
-    
+
     let target_genotype = "CC";
     let decoded_result = check_genotype_client(&client_key, &encrypted_genotypes, target_genotype)?;
     info!("Lookup result: {:?}", decoded_result);
-    
+
     let target_genotype = "AA";
     let decoded_result = check_genotype_client(&client_key, &encrypted_genotypes, target_genotype)?;
     info!("Lookup result: {:?}", decoded_result);
@@ -108,7 +110,7 @@ pub fn get_encrypted_genotype_encoding_map(client_key: &ClientKey) -> HashMap<&'
     genotype_encoding_map
         .into_iter()
         .map(|(genotype, encoding)| {
-            let encrypted_encoding = FheUint8::try_encrypt(encoding, client_key).unwrap(); 
+            let encrypted_encoding = FheUint8::try_encrypt(encoding, client_key).unwrap();
             (genotype, encrypted_encoding)
         })
         .collect()
