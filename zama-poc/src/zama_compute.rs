@@ -8,22 +8,23 @@ use crate::genome_processing;
 use bincode;
 use std::io::Cursor;
 use crate::genome_processing::{encode_genotype, get_genotype_encoding_map};
+use tfhe::prelude::*;
 
 // Iterate through encrypted_genotypes and get the frequency of each genotype
 pub fn get_genotype_frequencies(
-    encrypted_genotypes: &HashMap<u64, FheUint8>
-) -> Vec<(FheUint8, u64)> {
-    let mut genotype_frequencies: Vec<(FheUint8, u64)> = Vec::new();
+    encrypted_genotypes: &HashMap<u64, FheUint8>,
+    max_genotype_value: u8
+) -> Vec<FheUint8> {
+    let mut frequencies = vec![FheUint8::try_encrypt_trivial(0u8).unwrap(); max_genotype_value as usize + 1];
 
-    for (_encoded_rsid, encrypted_genotype) in encrypted_genotypes {
-        if let Some(pair) = genotype_frequencies.iter_mut().find(|(g, _)| g == encrypted_genotype) {
-            pair.1 += 1;
-        } else {
-            genotype_frequencies.push((encrypted_genotype.clone(), 1));
+    for encrypted_genotype in encrypted_genotypes.values() {
+        for i in 0..=max_genotype_value {
+            let is_match = encrypted_genotype.eq(&FheUint8::try_encrypt_trivial(i).unwrap());
+            frequencies[i as usize] += is_match.if_then_else(&FheUint8::try_encrypt_trivial(1u8).unwrap(), &FheUint8::try_encrypt_trivial(0u8).unwrap());
         }
     }
 
-    genotype_frequencies
+    frequencies
 }
 
 pub fn check_genotype_server(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
