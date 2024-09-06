@@ -12,14 +12,14 @@ use tfhe::prelude::*;
 
 // Iterate through encrypted_genotypes and get the frequency of each genotype
 pub fn get_genotype_frequencies(
-    encrypted_genotypes: &HashMap<u64, FheUint8>,
+    encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
     max_genotype_value: u8
 ) -> Vec<FheUint8> {
     let mut frequencies = vec![FheUint8::try_encrypt_trivial(0u8).unwrap(); max_genotype_value as usize + 1];
 
     for encrypted_genotype in encrypted_genotypes.values() {
         for i in 0..=max_genotype_value {
-            let is_match = encrypted_genotype.eq(&FheUint8::try_encrypt_trivial(i).unwrap());
+            let is_match = encrypted_genotype.decompress().eq(&FheUint8::try_encrypt_trivial(i).unwrap());
             frequencies[i as usize] += is_match.if_then_else(&FheUint8::try_encrypt_trivial(1u8).unwrap(), &FheUint8::try_encrypt_trivial(0u8).unwrap());
         }
     }
@@ -84,8 +84,13 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     let decoded_result = check_genotype_client(&client_key, &encrypted_genotypes, target_genotype)?;
     info!("Lookup result: {:?}", decoded_result);
 
-    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, client_key.clone());
-    info!("Genotype frequencies: {:?}", genotype_frequencies);
+    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, 10);
+    info!("Genotype frequencies:");
+    //Iterate through genotype_frequencies and print the frequency of each genotype
+    for (i, frequency) in genotype_frequencies.iter().enumerate() {
+        let decrypted_frequency:u8 = frequency.decrypt(&client_key);
+        info!("{:?}: {:?}", i, decrypted_frequency);
+    }
 
     let mut serialized_data = Vec::new();
     serialize_encrypted_genotypes(&cloned_server_key, &encrypted_genotypes, &mut serialized_data);
