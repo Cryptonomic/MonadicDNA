@@ -15,12 +15,23 @@ pub fn get_genotype_frequencies(
     encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
     max_genotype_value: u8
 ) -> Vec<FheUint8> {
-    let mut frequencies = vec![FheUint8::try_encrypt_trivial(0u8).unwrap(); max_genotype_value as usize + 1];
+    info!("Caching encrypted numbers");
+    // Create a cache for encrypted values
+    let encrypted_values: Vec<FheUint8> = (0..=max_genotype_value)
+        .map(|i| FheUint8::try_encrypt_trivial(i).unwrap())
+        .collect();
+
+    let encrypted_zero = FheUint8::try_encrypt_trivial(0u8).unwrap();
+    let encrypted_one = FheUint8::try_encrypt_trivial(1u8).unwrap();
+
+    info!("Calculating genotype frequencies");
+    let mut frequencies = vec![encrypted_zero.clone(); max_genotype_value as usize + 1];
 
     for encrypted_genotype in encrypted_genotypes.values() {
-        for i in 0..=max_genotype_value {
-            let is_match = encrypted_genotype.decompress().eq(&FheUint8::try_encrypt_trivial(i).unwrap());
-            frequencies[i as usize] += is_match.if_then_else(&FheUint8::try_encrypt_trivial(1u8).unwrap(), &FheUint8::try_encrypt_trivial(0u8).unwrap());
+        let decompressed = encrypted_genotype.decompress();
+        for (i, encrypted_value) in encrypted_values.iter().enumerate() {
+            let is_match = decompressed.eq(encrypted_value);
+            frequencies[i] += is_match.if_then_else(&encrypted_one, &encrypted_zero);
         }
     }
 
