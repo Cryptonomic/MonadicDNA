@@ -1,19 +1,25 @@
-use std::collections::HashMap;
-use tfhe::{ClientKey, CompressedFheUint8, ConfigBuilder, FheBool, FheUint8, generate_keys, ServerKey, set_server_key};
-use std::result;
-use std::io::Error;
-use tfhe::prelude::{FheDecrypt, FheEq, FheTryEncrypt};
-use log::info;
 use crate::genome_processing;
-use bincode;
-use std::io::Cursor;
 use crate::genome_processing::{encode_genotype, get_genotype_encoding_map};
+use actix_web::cookie::time::Duration;
+use bincode;
+use log::info;
+use std::collections::HashMap;
+use std::io::Error;
+use std::io::{self, Cursor};
+use std::io::{stdout, Write};
+use std::result;
+use std::time::Instant;
 use tfhe::prelude::*;
+use tfhe::prelude::{FheDecrypt, FheEq, FheTryEncrypt};
+use tfhe::{
+    generate_keys, set_server_key, ClientKey, CompressedFheUint8, ConfigBuilder, FheBool, FheUint8,
+    ServerKey,
+};
 
 // Iterate through encrypted_genotypes and get the frequency of each genotype
 pub fn get_genotype_frequencies(
     encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
-    max_genotype_value: u8
+    max_genotype_value: u8,
 ) -> Vec<FheUint8> {
     info!("Caching encrypted numbers");
     // Create a cache for encrypted values
@@ -26,52 +32,86 @@ pub fn get_genotype_frequencies(
 
     info!("Calculating genotype frequencies");
     let mut frequencies = vec![encrypted_zero.clone(); max_genotype_value as usize + 1];
-
+    let n = encrypted_genotypes.len();
+    let mut cnt: usize = 0;
+    let mut start = Instant::now();
     for encrypted_genotype in encrypted_genotypes.values() {
+        if cnt % 10 == 0 {
+            let d = start.elapsed();
+            let mut lock = stdout().lock();
+
+            write!(
+                lock,
+                "Processing item {}/{}, rate: {:?} \r",
+                cnt,
+                n,
+                d.div_f32(10.0)
+            )
+            .unwrap();
+            let _ = io::stdout().flush();
+            start = Instant::now();
+        }
+
         let decompressed = encrypted_genotype.decompress();
         for (i, encrypted_value) in encrypted_values.iter().enumerate() {
             let is_match = decompressed.eq(encrypted_value);
             frequencies[i] += is_match.if_then_else(&encrypted_one, &encrypted_zero);
         }
+        cnt += 1;
     }
 
     frequencies
 }
 
-pub fn check_genotype_server(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
-                             rsid: &str,
-                             encrypted_target: FheUint8
-    ) -> result::Result<FheBool, Error> {
+pub fn check_genotype_server(
+    encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
+    rsid: &str,
+    encrypted_target: FheUint8,
+) -> result::Result<FheBool, Error> {
     let encoded_rsid = genome_processing::encode_rsid(rsid);
     let encrypted_genotype = encrypted_genotypes.get(&encoded_rsid).unwrap();
     let decompressed_encrypted_genotype = encrypted_genotype.decompress();
     Ok(decompressed_encrypted_genotype.eq(encrypted_target))
 }
 
-pub fn encrypt_genotypes_for_zama(processed_data: &HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<&u64, CompressedFheUint8>, Error> {
+pub fn encrypt_genotypes_for_zama(
+    processed_data: &HashMap<u64, u8>,
+    client_key: ClientKey,
+) -> result::Result<HashMap<&u64, CompressedFheUint8>, Error> {
     let mut enc_data = HashMap::new();
 
     for (encoded_rsid, encoded_genotype) in processed_data {
-        let genotype_encrypted = CompressedFheUint8::try_encrypt(*encoded_genotype, &client_key).unwrap();
+        let genotype_encrypted =
+            CompressedFheUint8::try_encrypt(*encoded_genotype, &client_key).unwrap();
         enc_data.insert(encoded_rsid, genotype_encrypted);
     }
 
     Ok(enc_data)
 }
 
-pub fn serialize_encrypted_genotypes(server_key: &ServerKey, encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>, mut serialized_data: &mut Vec<u8>) {
-    bincode::serialize_into(&mut serialized_data, &server_key.clone()).expect("Could not serialize server key");
-    bincode::serialize_into(&mut serialized_data, &encrypted_genotypes).expect("Could not serialize encrypted genotypes");
+pub fn serialize_encrypted_genotypes(
+    server_key: &ServerKey,
+    encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
+    mut serialized_data: &mut Vec<u8>,
+) {
+    bincode::serialize_into(&mut serialized_data, &server_key.clone())
+        .expect("Could not serialize server key");
+    bincode::serialize_into(&mut serialized_data, &encrypted_genotypes)
+        .expect("Could not serialize encrypted genotypes");
 }
 
-pub fn deserialize_encrypted_genotypes(mut serialized_data: Vec<u8>) -> HashMap<u64, CompressedFheUint8> {
+pub fn deserialize_encrypted_genotypes(
+    mut serialized_data: Vec<u8>,
+) -> HashMap<u64, CompressedFheUint8> {
     let mut deserialized_data = Cursor::new(serialized_data);
-    let deserialized_server_key: ServerKey = bincode::deserialize_from(&mut deserialized_data).unwrap();
-    let deserialized_encrypted_genome: HashMap<u64, CompressedFheUint8> = bincode::deserialize_from(&mut deserialized_data).unwrap();
+    let deserialized_server_key: ServerKey =
+        bincode::deserialize_from(&mut deserialized_data).unwrap();
+    let deserialized_encrypted_genome: HashMap<u64, CompressedFheUint8> =
+        bincode::deserialize_from(&mut deserialized_data).unwrap();
     deserialized_encrypted_genome
 }
 
-pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
+pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error> {
     info!("Setting up Zama env");
     let config = ConfigBuilder::default().build();
     let (client_key, server_key) = generate_keys(config);
@@ -99,29 +139,47 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     info!("Genotype frequencies:");
     //Iterate through genotype_frequencies and print the frequency of each genotype
     for (i, frequency) in genotype_frequencies.iter().enumerate() {
-        let decrypted_frequency:u8 = frequency.decrypt(&client_key);
+        let decrypted_frequency: u8 = frequency.decrypt(&client_key);
         info!("{:?}: {:?}", i, decrypted_frequency);
     }
 
     let mut serialized_data = Vec::new();
-    serialize_encrypted_genotypes(&cloned_server_key, &encrypted_genotypes, &mut serialized_data);
+    serialize_encrypted_genotypes(
+        &cloned_server_key,
+        &encrypted_genotypes,
+        &mut serialized_data,
+    );
     info!("Serialized data: {:?}", serialized_data.len());
 
     let deserialized_encrypted_genome = deserialize_encrypted_genotypes(serialized_data);
-    info!("Deserialized data: {:?}", deserialized_encrypted_genome.len());
+    info!(
+        "Deserialized data: {:?}",
+        deserialized_encrypted_genome.len()
+    );
 
     return Ok(());
 }
 
-fn check_genotype_client(client_key: &ClientKey, encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>, target_genotype: &str) -> Result<bool, Error> {
+fn check_genotype_client(
+    client_key: &ClientKey,
+    encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
+    target_genotype: &str,
+) -> Result<bool, Error> {
     let encoded_target_genotype = encode_genotype(target_genotype);
-    let encrypted_target_genotype = FheUint8::try_encrypt(encoded_target_genotype, client_key).unwrap();
-    let encoded_result = check_genotype_server(&encrypted_genotypes, "rs75333668", encrypted_target_genotype)?;
+    let encrypted_target_genotype =
+        FheUint8::try_encrypt(encoded_target_genotype, client_key).unwrap();
+    let encoded_result = check_genotype_server(
+        &encrypted_genotypes,
+        "rs75333668",
+        encrypted_target_genotype,
+    )?;
     let decoded_result = encoded_result.decrypt(&client_key);
     Ok(decoded_result)
 }
 
-pub fn get_encrypted_genotype_encoding_map(client_key: &ClientKey) -> HashMap<&'static str, FheUint8> {
+pub fn get_encrypted_genotype_encoding_map(
+    client_key: &ClientKey,
+) -> HashMap<&'static str, FheUint8> {
     let genotype_encoding_map = get_genotype_encoding_map();
 
     genotype_encoding_map
