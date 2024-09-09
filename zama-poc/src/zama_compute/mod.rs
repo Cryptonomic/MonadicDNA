@@ -38,16 +38,6 @@ pub fn get_genotype_frequencies(
     frequencies
 }
 
-pub fn check_genotype_server(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>,
-                             rsid: &str,
-                             encrypted_target: FheUint8
-    ) -> result::Result<FheBool, Error> {
-    let encoded_rsid = genome_processing::encode_rsid(rsid);
-    let encrypted_genotype = encrypted_genotypes.get(&encoded_rsid).unwrap();
-    let decompressed_encrypted_genotype = encrypted_genotype.decompress();
-    Ok(decompressed_encrypted_genotype.eq(encrypted_target))
-}
-
 pub fn encrypt_genotypes_for_zama(processed_data: &HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<&u64, CompressedFheUint8>, Error> {
     let mut enc_data = HashMap::new();
 
@@ -88,20 +78,24 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     info!("Lines of encrypted data: {:?}", encrypted_genotypes.len());
 
     let target_genotype = "CC";
-    let decoded_result = check_genotype_client(&client_key, &encrypted_genotypes, target_genotype)?;
+    let target_rsid = "rs75333668";
+    let encoded_result = check_genotype( &encrypted_genotypes, target_rsid, target_genotype)?;
+    let decoded_result = encoded_result.decrypt(&client_key);
     info!("Lookup result: {:?}", decoded_result);
 
     let target_genotype = "AA";
-    let decoded_result = check_genotype_client(&client_key, &encrypted_genotypes, target_genotype)?;
+    let target_rsid = "rs75333668";
+    let encoded_result = check_genotype( &encrypted_genotypes, target_rsid, target_genotype)?;
+    let decoded_result = encoded_result.decrypt(&client_key);
     info!("Lookup result: {:?}", decoded_result);
 
-    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, 10);
+    /*let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, 10);
     info!("Genotype frequencies:");
     //Iterate through genotype_frequencies and print the frequency of each genotype
     for (i, frequency) in genotype_frequencies.iter().enumerate() {
         let decrypted_frequency:u8 = frequency.decrypt(&client_key);
         info!("{:?}: {:?}", i, decrypted_frequency);
-    }
+    }*/
 
     let mut serialized_data = Vec::new();
     serialize_encrypted_genotypes(&cloned_server_key, &encrypted_genotypes, &mut serialized_data);
@@ -113,13 +107,15 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     return Ok(());
 }
 
-fn check_genotype_client(client_key: &ClientKey, encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>, target_genotype: &str) -> Result<bool, Error> {
+pub fn check_genotype(encrypted_genotypes: &HashMap<&u64, CompressedFheUint8>, target_rsid: &str, target_genotype: &str) -> Result<FheBool, Error> {
     let encoded_target_genotype = encode_genotype(target_genotype);
-    let encrypted_target_genotype = FheUint8::try_encrypt(encoded_target_genotype, client_key).unwrap();
-    let encoded_result = check_genotype_server(&encrypted_genotypes, "rs75333668", encrypted_target_genotype)?;
-    let decoded_result = encoded_result.decrypt(&client_key);
-    Ok(decoded_result)
+    let encrypted_target_genotype = FheUint8::try_encrypt_trivial(encoded_target_genotype).unwrap();
+    let encoded_rsid = genome_processing::encode_rsid(target_rsid);
+    let encrypted_genotype = encrypted_genotypes.get(&encoded_rsid).unwrap();
+    let decompressed_encrypted_genotype = encrypted_genotype.decompress();
+    Ok(decompressed_encrypted_genotype.eq(encrypted_target_genotype))
 }
+
 
 pub fn get_encrypted_genotype_encoding_map(client_key: &ClientKey) -> HashMap<&'static str, FheUint8> {
     let genotype_encoding_map = get_genotype_encoding_map();
