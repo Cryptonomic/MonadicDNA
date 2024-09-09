@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 use std::error::Error;
-use std::fs;
 use reqwest::Client;
 use serde_json::Value;
 use tfhe::{ConfigBuilder, generate_keys, set_server_key};
-use crate::genome_processing;
-use crate::zama_compute::{encrypt_genotypes_for_zama, serialize_encrypted_genotypes};
+use zama_poc::genome_processing;
+use zama_poc::zama_compute::{encrypt_genotypes_for_zama, serialize_encrypted_genotypes};
 
 // Work in progress!!
 #[tokio::main]

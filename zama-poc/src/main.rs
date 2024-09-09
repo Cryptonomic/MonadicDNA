@@ -18,7 +18,7 @@ fn main() {
     info!("Hello, Zama!");
 
     let filename = "GFGFilteredUnphasedGenotypes23andMe.txt";
-    let num_lines = 1000000;
+    let num_lines = 10;
 
     let start = Instant::now();
     zama_compute::run_iteration(filename, num_lines).expect("Well, that didn't work!");

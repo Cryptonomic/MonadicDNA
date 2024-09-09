@@ -3,7 +3,6 @@ use rusqlite::{params, Connection, Result as SqliteResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
-use crate::zama_compute::deserialize_encrypted_genotypes;
 
 struct AppState {
     db: Mutex<Connection>,
@@ -67,7 +66,7 @@ async fn get_thrombosis(state: web::Data<AppState>, user_id: web::Query<UserId>)
             HttpResponse::Ok().json(ThrombosisResponse { thrombosis })
 
             //let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
-            
+
         },
         Err(_) => HttpResponse::NotFound().finish(),
     }
