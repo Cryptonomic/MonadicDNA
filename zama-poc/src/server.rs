@@ -40,6 +40,7 @@ fn load_dataset(conn: &Connection, user_id: &str) -> SqliteResult<Vec<u8>> {
 }
 
 async fn put_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>, body: web::Bytes) -> impl Responder {
+    println!("Storing a dataset..");
     let conn = state.db.lock().unwrap();
     let result: SqliteResult<()> = conn.execute(
         "INSERT OR REPLACE INTO datasets (user_id, data) VALUES (?1, ?2)",
@@ -53,6 +54,7 @@ async fn put_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>, bo
 }
 
 async fn get_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>) -> impl Responder {
+    println!("Fetching a dataset..");
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => HttpResponse::Ok().body(data),
@@ -61,6 +63,7 @@ async fn get_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>) ->
 }
 
 async fn get_thrombosis(state: web::Data<AppState>, user_id: web::Query<UserId>) -> impl Responder {
+    println!("Performing thrombosis calc..");
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => {
@@ -77,6 +80,7 @@ async fn get_thrombosis(state: web::Data<AppState>, user_id: web::Query<UserId>)
 }
 
 async fn get_frequencies(state: web::Data<AppState>, user_id: web::Query<UserId>) -> impl Responder {
+    println!("Performing frequency calc..");
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => {
@@ -111,7 +115,7 @@ async fn main() -> std::io::Result<()> {
             .route("/thrombosis", web::get().to(get_thrombosis))
             .route("/frequencies", web::get().to(get_frequencies))
     })
-        .bind("127.0.0.1:6174")?
+        .bind("localhost:6174")?
         .run()
         .await
 }
