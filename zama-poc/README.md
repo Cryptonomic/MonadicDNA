@@ -2,6 +2,20 @@
 
 This codebase serves as a proof of concept for implementing MonadicDNA functionality using [Zama's fully homomorphic encryption](https://docs.zama.ai/tfhe-rs) capabilities. 
 
+The prooject does the folllwing:
+
+🧬 Loads a 23andMe dataset 
+
+🔢 Integer-encodes the SNPs and genotypes in the dataset
+
+㊙️ Encrypts genotypes as Zama secrets
+
+🔍 Runs lookups for various medical conditions for benchmarking
+
+⏺️ Persists encrypted data to disk and reads it back for benchmarking
+
+☎️ Provides a client / server model to understand client-side encryption and general latency
+
 ## Components
 
 - `src/main.rs` : A single end to end program to test all functionality. 
