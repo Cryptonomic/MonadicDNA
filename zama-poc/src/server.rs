@@ -3,6 +3,9 @@ use rusqlite::{params, Connection, Result as SqliteResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use tfhe::{FheBool, FheUint8};
+use tfhe::prelude::FheDecrypt;
+use zama_poc::zama_compute::{deserialize_encrypted_genotypes, check_genotype, get_genotype_frequencies};
 
 struct AppState {
     db: Mutex<Connection>,
@@ -20,12 +23,12 @@ struct SuccessResponse {
 
 #[derive(Serialize)]
 struct FrequenciesResponse {
-    frequencies: HashMap<String, i32>,
+    frequencies: Vec<FheUint8>,
 }
 
 #[derive(Serialize)]
 struct ThrombosisResponse {
-    thrombosis: bool,
+    thrombosis: FheBool,
 }
 
 fn load_dataset(conn: &Connection, user_id: &str) -> SqliteResult<Vec<u8>> {
@@ -61,12 +64,13 @@ async fn get_thrombosis(state: web::Data<AppState>, user_id: web::Query<UserId>)
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => {
-            // This is a placeholder implementation. Replace with actual thrombosis calculation logic.
-            let thrombosis = data.len() % 2 == 0; // Example: even data length means thrombosis
-            HttpResponse::Ok().json(ThrombosisResponse { thrombosis })
-
-            //let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
-
+            let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
+            let target_genotype = "CC";
+            let target_rsid = "rs75333668";
+            match check_genotype(&deserialized_encrypted_genome, target_rsid, target_genotype) {
+                Ok(thrombosis) => HttpResponse::Ok().json(ThrombosisResponse { thrombosis }),
+                Err(_) => HttpResponse::InternalServerError().finish(),
+            }
         },
         Err(_) => HttpResponse::NotFound().finish(),
     }
@@ -76,11 +80,8 @@ async fn get_frequencies(state: web::Data<AppState>, user_id: web::Query<UserId>
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => {
-            // This is a placeholder implementation. Replace with actual frequency calculation logic.
-            let mut frequencies = HashMap::new();
-            for &byte in &data {
-                *frequencies.entry(byte.to_string()).or_insert(0) += 1;
-            }
+            let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
+            let frequencies = get_genotype_frequencies(&deserialized_encrypted_genome, 10);
             HttpResponse::Ok().json(FrequenciesResponse { frequencies })
         },
         Err(_) => HttpResponse::NotFound().finish(),
