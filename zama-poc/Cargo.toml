@@ -17,6 +17,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tfhe = { version = "0.7.1", features = [ "boolean", "shortint", "integer", "aarch64-unix" ] }
 tokio = { version = "1", features = ["full"] }
+futures = "0.3"
 
 
 [[bin]]

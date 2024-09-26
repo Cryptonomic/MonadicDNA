@@ -1,11 +1,11 @@
-use actix_web::{web, App, HttpServer, Responder, HttpResponse};
+use actix_web::{web, App, HttpServer, Responder, HttpResponse, Error};
 use rusqlite::{params, Connection, Result as SqliteResult};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::sync::Mutex;
 use tfhe::{FheBool, FheUint8};
-use tfhe::prelude::FheDecrypt;
 use zama_poc::zama_compute::{deserialize_encrypted_genotypes, check_genotype, get_genotype_frequencies};
+
+use futures::StreamExt; // Required for stream handling methods like next()
 
 struct AppState {
     db: Mutex<Connection>,
@@ -39,17 +39,24 @@ fn load_dataset(conn: &Connection, user_id: &str) -> SqliteResult<Vec<u8>> {
     )
 }
 
-async fn put_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>, body: web::Bytes) -> impl Responder {
-    println!("Storing a dataset..");
+async fn put_dataset(state: web::Data<AppState>, user_id: web::Query<UserId>, mut body: web::Payload) -> Result<impl Responder, Error> {
+    println!("Storing a dataset...");
     let conn = state.db.lock().unwrap();
+
+    let mut accumulated_chunks = Vec::new();
+    while let Some(chunk) = body.next().await {
+        let chunk = chunk?;
+        accumulated_chunks.extend_from_slice(&chunk);
+    }
+
     let result: SqliteResult<()> = conn.execute(
         "INSERT OR REPLACE INTO datasets (user_id, data) VALUES (?1, ?2)",
-        params![user_id.user_id, body.to_vec()],
+        params![user_id.user_id, accumulated_chunks],
     ).map(|_| ());
 
     match result {
-        Ok(_) => HttpResponse::Ok().json(SuccessResponse { success: true }),
-        Err(_) => HttpResponse::InternalServerError().json(SuccessResponse { success: false }),
+        Ok(_) => Ok(HttpResponse::Ok().json(SuccessResponse { success: true })),
+        Err(_) => Ok(HttpResponse::InternalServerError().json(SuccessResponse { success: false })),
     }
 }
 
