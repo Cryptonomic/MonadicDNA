@@ -1,11 +1,14 @@
 use actix_web::{web, App, HttpServer, Responder, HttpResponse, Error};
 use rusqlite::{params, Connection, Result as SqliteResult};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::sync::Mutex;
 use tfhe::{FheBool, FheUint8};
 use zama_poc::zama_compute::{deserialize_encrypted_genotypes, check_genotype, get_genotype_frequencies};
+use tfhe::prelude::FheDecrypt;
 
-use futures::StreamExt; // Required for stream handling methods like next()
+use tokio_stream::StreamExt; // Required for stream handling methods like next()
+
 
 struct AppState {
     db: Mutex<Connection>,
