@@ -1,25 +1,16 @@
+mod structs;
+
 use std::error::Error;
 use reqwest::Client;
 use serde_json::Value;
 
 use tfhe::prelude::{FheDecrypt};
-use tfhe::{FheBool, FheUint8};
-use serde::Deserialize;
 
 use tfhe::{ConfigBuilder, generate_keys, set_server_key};
 use zama_poc::genome_processing;
 use zama_poc::zama_compute::{encrypt_genotypes_for_zama, serialize_encrypted_genotypes};
 
-
-#[derive(Deserialize)]
-struct ThrombosisResponse {
-    thrombosis: FheBool,
-}
-
-#[derive(Deserialize)]
-struct FrequenciesResponse {
-    frequencies: Vec<FheUint8>,
-}
+use structs::client::{ThrombosisResponse, FrequenciesResponse};
 
 // Work in progress!!
 #[tokio::main]
@@ -28,10 +19,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let base_url = "http://localhost:6174";
 
-    let filename = "/Users/aisha/Desktop/cryptonomic/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
-
-    let num_lines = 2;
-    // let num_lines = 100;
+    let filename = "/Users/vishakh/dev/MonadicDNA/zama-poc/GFGFilteredUnphasedGenotypes23andMe.txt";
+    let num_lines = 100;
 
     println!("Settings up keys..");
 
