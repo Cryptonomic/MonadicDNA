@@ -57,6 +57,7 @@ pub fn serialize_encrypted_genotypes(server_key: &ServerKey, encrypted_genotypes
 pub fn deserialize_encrypted_genotypes(mut serialized_data: Vec<u8>) -> HashMap<u64, CompressedFheUint8> {
     let mut deserialized_data = Cursor::new(serialized_data);
     let deserialized_server_key: ServerKey = bincode::deserialize_from(&mut deserialized_data).unwrap();
+    set_server_key(deserialized_server_key);
     let deserialized_encrypted_genome: HashMap<u64, CompressedFheUint8> = bincode::deserialize_from(&mut deserialized_data).unwrap();
     deserialized_encrypted_genome
 }
