@@ -1,5 +1,3 @@
-mod structs;
-
 use std::error::Error;
 use reqwest::Client;
 use serde_json::Value;
@@ -9,8 +7,7 @@ use tfhe::prelude::{FheDecrypt};
 use tfhe::{ConfigBuilder, generate_keys, set_server_key};
 use zama_poc::genome_processing;
 use zama_poc::zama_compute::{encrypt_genotypes_for_zama, serialize_encrypted_genotypes};
-
-use structs::client::{ThrombosisResponse, FrequenciesResponse};
+use zama_poc::structs::client::{ThrombosisResponse, FrequenciesResponse};
 
 // Work in progress!!
 #[tokio::main]

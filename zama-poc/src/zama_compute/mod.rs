@@ -54,12 +54,11 @@ pub fn serialize_encrypted_genotypes(server_key: &ServerKey, encrypted_genotypes
     bincode::serialize_into(&mut serialized_data, &encrypted_genotypes).expect("Could not serialize encrypted genotypes");
 }
 
-pub fn deserialize_encrypted_genotypes(mut serialized_data: Vec<u8>) -> HashMap<u64, CompressedFheUint8> {
+pub fn deserialize_encrypted_genotypes(serialized_data: Vec<u8>) -> (HashMap<u64, CompressedFheUint8>, ServerKey) {
     let mut deserialized_data = Cursor::new(serialized_data);
     let deserialized_server_key: ServerKey = bincode::deserialize_from(&mut deserialized_data).unwrap();
-    set_server_key(deserialized_server_key);
     let deserialized_encrypted_genome: HashMap<u64, CompressedFheUint8> = bincode::deserialize_from(&mut deserialized_data).unwrap();
-    deserialized_encrypted_genome
+    (deserialized_encrypted_genome, deserialized_server_key)
 }
 
 pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Error>{
@@ -102,7 +101,7 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     serialize_encrypted_genotypes(&cloned_server_key, &encrypted_genotypes, &mut serialized_data);
     info!("Serialized data: {:?}", serialized_data.len());
 
-    let deserialized_encrypted_genome = deserialize_encrypted_genotypes(serialized_data);
+    let (deserialized_encrypted_genome, _) = deserialize_encrypted_genotypes(serialized_data);
     info!("Deserialized data: {:?}", deserialized_encrypted_genome.len());
 
     return Ok(());
