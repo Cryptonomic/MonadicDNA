@@ -3,9 +3,9 @@ use rusqlite::{params, Connection, Result as SqliteResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
-use tfhe::{FheBool, FheUint8};
-use zama_poc::zama_compute::{deserialize_encrypted_genotypes, check_genotype, get_genotype_frequencies};
+use tfhe::{FheBool, FheUint8, set_server_key};
 use tfhe::prelude::FheDecrypt;
+use zama_poc::zama_compute::{deserialize_encrypted_genotypes, check_genotype, get_genotype_frequencies};
 
 use tokio_stream::StreamExt; // Required for stream handling methods like next()
 
@@ -77,7 +77,8 @@ async fn get_thrombosis(state: web::Data<AppState>, user_id: web::Query<UserId>)
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => {
-            let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
+            let (deserialized_encrypted_genome, deserialized_server_key) = deserialize_encrypted_genotypes(data);
+            set_server_key(deserialized_server_key);
             let target_genotype = "CC";
             let target_rsid = "rs75333668";
             match check_genotype(&deserialized_encrypted_genome, target_rsid, target_genotype) {
@@ -94,7 +95,8 @@ async fn get_frequencies(state: web::Data<AppState>, user_id: web::Query<UserId>
     let conn = state.db.lock().unwrap();
     match load_dataset(&conn, &user_id.user_id) {
         Ok(data) => {
-            let deserialized_encrypted_genome = deserialize_encrypted_genotypes(data);
+            let (deserialized_encrypted_genome, deserialized_server_key) = deserialize_encrypted_genotypes(data);
+            set_server_key(deserialized_server_key);
             let frequencies = get_genotype_frequencies(&deserialized_encrypted_genome, 10);
             HttpResponse::Ok().json(FrequenciesResponse { frequencies })
         },
