@@ -12,3 +12,7 @@ time pynadac --target-dir binaries --generate-mir-json programs/muscle-perform-a
 
 echo "Compiling double.py"
 time pynadac --target-dir binaries --generate-mir-json programs/double.py
+
+echo "Compiling snp-test.py"
+time pynadac --target-dir binaries --generate-mir-json programs/snp-test.py
+
