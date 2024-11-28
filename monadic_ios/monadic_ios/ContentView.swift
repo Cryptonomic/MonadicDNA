@@ -36,7 +36,7 @@ struct ContentView: View {
                 resultText = "\(sum)"
                 
             }) {
-                Text("Rust On!")
+                Text("Add up!")
                     .padding()
                     .background(Color.yellow)
                     .foregroundColor(.white)
