@@ -8,43 +8,28 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var num1: String = ""
-    @State private var num2: String = ""
+    @State private var statusText: String = ""
     
-    @State private var resultText = "Result will appear here"
-
     var body: some View {
         VStack {
-            // Input fields
-            TextField("Enter first number", text: $num1)
-                .keyboardType(.numberPad)
+            Text(statusText)
                 .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
             
-            TextField("Enter second number", text: $num2)
-                .keyboardType(.numberPad)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        
-            Button(action: {
-                print("Rust to the rescue..")
-                guard let num1 = Int32(num1), let num2 = Int32(num2) else {
-                    resultText = "Please enter valid numbers."
-                    return
+            Button("Run Zama Code") {
+                if let result = zama_run() {
+                    let resultString = String(cString: result)
+                    statusText = resultString
+                    print("Rust function output: \(resultString)")
                 }
-                let sum = add_numbers(num1, num2)
-                resultText = "\(sum)"
                 
-            }) {
-                Text("Add up!")
-                    .padding()
-                    .background(Color.yellow)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                if let clientKey = zama_get_client_key() {
+                    let clientKeyString = String(cString: clientKey)
+                    let length = strlen(clientKeyString)
+                    statusText = statusText + "\nLength of the client key: \(length)"
+                    print("Length of the client key: \(length)")
+                }
             }
-            Text("Result from Rust: \(resultText)")
         }
-        .padding()
     }
 }
 

@@ -1,10 +1,11 @@
-use std::ffi::{CStr, CString, c_void};
+use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 use tfhe::prelude::*;
 use tfhe::{ConfigBuilder, FheUint8, FheUint32, generate_keys, set_server_key};
+use bincode; // Make sure to add bincode to Cargo.toml
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn zama_run() -> *mut c_char {
     // Basic configuration to use homomorphic integers
     let config = ConfigBuilder::default().build();
@@ -18,11 +19,11 @@ pub extern "C" fn zama_run() -> *mut c_char {
 
     // Encrypting the input data using the (private) client_key
     // FheUint32: Encrypted equivalent to u32
-    let mut encrypted_a = FheUint32::try_encrypt(clear_a, &client_key)?;
-    let encrypted_b = FheUint32::try_encrypt(clear_b, &client_key)?;
+    let mut encrypted_a = FheUint32::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint32::try_encrypt(clear_b, &client_key).unwrap();
 
     let mut serialized_data = Vec::new();
-    bincode::serialize_into(&mut serialized_data, &server_keys)?;
+    bincode::serialize_into(&mut serialized_data, &server_keys).unwrap();
 
     println!(
         "Server Keys Json Len = {}",
@@ -32,7 +33,7 @@ pub extern "C" fn zama_run() -> *mut c_char {
     println!("Server Keys Bin Len  = {}", serialized_data.len());
 
     // FheUint8: Encrypted equivalent to u8
-    let encrypted_c = FheUint8::try_encrypt(clear_c, &client_key)?;
+    let encrypted_c = FheUint8::try_encrypt(clear_c, &client_key).unwrap();
 
     // On the server side:
     set_server_key(server_keys);
@@ -62,7 +63,7 @@ pub extern "C" fn zama_run() -> *mut c_char {
         .into_raw()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn zama_get_client_key() -> *mut c_char {
     // Basic configuration to use homomorphic integers
     let config = ConfigBuilder::default().build();
