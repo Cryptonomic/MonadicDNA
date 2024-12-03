@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CA445A852CFE803400BF9EFC /* libzama.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA445A842CFE802B00BF9EFC /* libzama.a */; };
+		CA445A8B2CFE855A00BF9EFC /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CA445A8A2CFE855A00BF9EFC /* KeychainSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA445A8B2CFE855A00BF9EFC /* KeychainSwift in Frameworks */,
 				CA445A852CFE803400BF9EFC /* libzama.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -129,6 +131,7 @@
 			);
 			name = monadic_ios;
 			packageProductDependencies = (
+				CA445A8A2CFE855A00BF9EFC /* KeychainSwift */,
 			);
 			productName = monadic_ios;
 			productReference = CA98B90A2CF5E864006ABA9E /* monadic_ios.app */;
@@ -212,6 +215,9 @@
 			);
 			mainGroup = CA98B9012CF5E864006ABA9E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CA445A892CFE855A00BF9EFC /* XCRemoteSwiftPackageReference "keychain-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CA98B90B2CF5E864006ABA9E /* Products */;
 			projectDirPath = "";
@@ -593,6 +599,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CA445A892CFE855A00BF9EFC /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CA445A8A2CFE855A00BF9EFC /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CA445A892CFE855A00BF9EFC /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CA98B9022CF5E864006ABA9E /* Project object */;
 }
