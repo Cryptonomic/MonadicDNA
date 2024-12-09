@@ -1,9 +1,6 @@
 #ifndef RUST_SWIFT_BRIDGE_H
 #define RUST_SWIFT_BRIDGE_H
 
-// #ifndef ZAMA_H
-// #define ZAMA_H
-
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
