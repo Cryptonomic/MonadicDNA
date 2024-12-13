@@ -1,0 +1,623 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CA445A852CFE803400BF9EFC /* libzama.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA445A842CFE802B00BF9EFC /* libzama.a */; };
+		CA445A8B2CFE855A00BF9EFC /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CA445A8A2CFE855A00BF9EFC /* KeychainSwift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CA98B91B2CF5E866006ABA9E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA98B9022CF5E864006ABA9E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA98B9092CF5E864006ABA9E;
+			remoteInfo = monadic_ios;
+		};
+		CA98B9252CF5E866006ABA9E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA98B9022CF5E864006ABA9E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA98B9092CF5E864006ABA9E;
+			remoteInfo = monadic_ios;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		CA445A842CFE802B00BF9EFC /* libzama.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libzama.a; path = libs/libzama.a; sourceTree = "<group>"; };
+		CA98B90A2CF5E864006ABA9E /* monadic_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = monadic_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA98B91A2CF5E866006ABA9E /* monadic_iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = monadic_iosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA98B9242CF5E866006ABA9E /* monadic_iosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = monadic_iosUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA98BA822CF876B8006ABA9E /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CA98B90C2CF5E864006ABA9E /* monadic_ios */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = monadic_ios;
+			sourceTree = "<group>";
+		};
+		CA98B91D2CF5E866006ABA9E /* monadic_iosTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = monadic_iosTests;
+			sourceTree = "<group>";
+		};
+		CA98B9272CF5E866006ABA9E /* monadic_iosUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = monadic_iosUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CA98B9072CF5E864006ABA9E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA445A8B2CFE855A00BF9EFC /* KeychainSwift in Frameworks */,
+				CA445A852CFE803400BF9EFC /* libzama.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA98B9172CF5E866006ABA9E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA98B9212CF5E866006ABA9E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CA98B9012CF5E864006ABA9E = {
+			isa = PBXGroup;
+			children = (
+				CA98BA822CF876B8006ABA9E /* Bridging-Header.h */,
+				CA98B90C2CF5E864006ABA9E /* monadic_ios */,
+				CA98B91D2CF5E866006ABA9E /* monadic_iosTests */,
+				CA98B9272CF5E866006ABA9E /* monadic_iosUITests */,
+				CA98BA7D2CF87545006ABA9E /* Frameworks */,
+				CA98B90B2CF5E864006ABA9E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CA98B90B2CF5E864006ABA9E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA98B90A2CF5E864006ABA9E /* monadic_ios.app */,
+				CA98B91A2CF5E866006ABA9E /* monadic_iosTests.xctest */,
+				CA98B9242CF5E866006ABA9E /* monadic_iosUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA98BA7D2CF87545006ABA9E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CA445A842CFE802B00BF9EFC /* libzama.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CA98B9092CF5E864006ABA9E /* monadic_ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA98B92E2CF5E866006ABA9E /* Build configuration list for PBXNativeTarget "monadic_ios" */;
+			buildPhases = (
+				CA98B9062CF5E864006ABA9E /* Sources */,
+				CA98B9072CF5E864006ABA9E /* Frameworks */,
+				CA98B9082CF5E864006ABA9E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CA98B90C2CF5E864006ABA9E /* monadic_ios */,
+			);
+			name = monadic_ios;
+			packageProductDependencies = (
+				CA445A8A2CFE855A00BF9EFC /* KeychainSwift */,
+			);
+			productName = monadic_ios;
+			productReference = CA98B90A2CF5E864006ABA9E /* monadic_ios.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CA98B9192CF5E866006ABA9E /* monadic_iosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA98B9312CF5E866006ABA9E /* Build configuration list for PBXNativeTarget "monadic_iosTests" */;
+			buildPhases = (
+				CA98B9162CF5E866006ABA9E /* Sources */,
+				CA98B9172CF5E866006ABA9E /* Frameworks */,
+				CA98B9182CF5E866006ABA9E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA98B91C2CF5E866006ABA9E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CA98B91D2CF5E866006ABA9E /* monadic_iosTests */,
+			);
+			name = monadic_iosTests;
+			packageProductDependencies = (
+			);
+			productName = monadic_iosTests;
+			productReference = CA98B91A2CF5E866006ABA9E /* monadic_iosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		CA98B9232CF5E866006ABA9E /* monadic_iosUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA98B9342CF5E866006ABA9E /* Build configuration list for PBXNativeTarget "monadic_iosUITests" */;
+			buildPhases = (
+				CA98B9202CF5E866006ABA9E /* Sources */,
+				CA98B9212CF5E866006ABA9E /* Frameworks */,
+				CA98B9222CF5E866006ABA9E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA98B9262CF5E866006ABA9E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CA98B9272CF5E866006ABA9E /* monadic_iosUITests */,
+			);
+			name = monadic_iosUITests;
+			packageProductDependencies = (
+			);
+			productName = monadic_iosUITests;
+			productReference = CA98B9242CF5E866006ABA9E /* monadic_iosUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CA98B9022CF5E864006ABA9E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1610;
+				LastUpgradeCheck = 1610;
+				TargetAttributes = {
+					CA98B9092CF5E864006ABA9E = {
+						CreatedOnToolsVersion = 16.1;
+					};
+					CA98B9192CF5E866006ABA9E = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = CA98B9092CF5E864006ABA9E;
+					};
+					CA98B9232CF5E866006ABA9E = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = CA98B9092CF5E864006ABA9E;
+					};
+				};
+			};
+			buildConfigurationList = CA98B9052CF5E864006ABA9E /* Build configuration list for PBXProject "monadic_ios" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CA98B9012CF5E864006ABA9E;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CA445A892CFE855A00BF9EFC /* XCRemoteSwiftPackageReference "keychain-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CA98B90B2CF5E864006ABA9E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CA98B9092CF5E864006ABA9E /* monadic_ios */,
+				CA98B9192CF5E866006ABA9E /* monadic_iosTests */,
+				CA98B9232CF5E866006ABA9E /* monadic_iosUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CA98B9082CF5E864006ABA9E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA98B9182CF5E866006ABA9E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA98B9222CF5E866006ABA9E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CA98B9062CF5E864006ABA9E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA98B9162CF5E866006ABA9E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA98B9202CF5E866006ABA9E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CA98B91C2CF5E866006ABA9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA98B9092CF5E864006ABA9E /* monadic_ios */;
+			targetProxy = CA98B91B2CF5E866006ABA9E /* PBXContainerItemProxy */;
+		};
+		CA98B9262CF5E866006ABA9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA98B9092CF5E864006ABA9E /* monadic_ios */;
+			targetProxy = CA98B9252CF5E866006ABA9E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		CA98B92C2CF5E866006ABA9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CA98B92D2CF5E866006ABA9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CA98B92F2CF5E866006ABA9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"monadic_ios/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(PROJECT_DIR)/includes";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/libs";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = "$(PROJECT_DIR)/libs";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aisha.monadic-ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = "$(PROJECT_DIR)/Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CA98B9302CF5E866006ABA9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"monadic_ios/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(PROJECT_DIR)/includes";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/libs";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = "$(PROJECT_DIR)/libs";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aisha.monadic-ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = "$(PROJECT_DIR)/Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CA98B9322CF5E866006ABA9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aisha.monadic-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/monadic_ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/monadic_ios";
+			};
+			name = Debug;
+		};
+		CA98B9332CF5E866006ABA9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aisha.monadic-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/monadic_ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/monadic_ios";
+			};
+			name = Release;
+		};
+		CA98B9352CF5E866006ABA9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aisha.monadic-iosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = monadic_ios;
+			};
+			name = Debug;
+		};
+		CA98B9362CF5E866006ABA9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aisha.monadic-iosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = monadic_ios;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CA98B9052CF5E864006ABA9E /* Build configuration list for PBXProject "monadic_ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA98B92C2CF5E866006ABA9E /* Debug */,
+				CA98B92D2CF5E866006ABA9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA98B92E2CF5E866006ABA9E /* Build configuration list for PBXNativeTarget "monadic_ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA98B92F2CF5E866006ABA9E /* Debug */,
+				CA98B9302CF5E866006ABA9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA98B9312CF5E866006ABA9E /* Build configuration list for PBXNativeTarget "monadic_iosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA98B9322CF5E866006ABA9E /* Debug */,
+				CA98B9332CF5E866006ABA9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA98B9342CF5E866006ABA9E /* Build configuration list for PBXNativeTarget "monadic_iosUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA98B9352CF5E866006ABA9E /* Debug */,
+				CA98B9362CF5E866006ABA9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CA445A892CFE855A00BF9EFC /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CA445A8A2CFE855A00BF9EFC /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CA445A892CFE855A00BF9EFC /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = CA98B9022CF5E864006ABA9E /* Project object */;
+}
