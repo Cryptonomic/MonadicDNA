@@ -17,6 +17,6 @@ def nada_main():
     total = eq1 + eq2
 
     isSuccess = (total >= Integer(2)).if_else((Integer(2) >= total).if_else(Integer(1), Integer(0)), Integer(0))
-    result = isSuccess.reveal()
+    result = isSuccess
 
     return [Output(result, "Result", party1)]

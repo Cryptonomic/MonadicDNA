@@ -1,6 +1,7 @@
 python-dotenv==1.0.0
-nada-dsl==0.6.0
-py-nillion-client==0.6.0
 pytest-asyncio>=0.23.6
 Flask[async]==3.0.3
 flask-cors==4.0.0
+cryptography>=44.0.0
+nillion-client==0.1.1
+nada-dsl==0.7.2
