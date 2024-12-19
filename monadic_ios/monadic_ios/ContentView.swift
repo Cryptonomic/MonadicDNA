@@ -10,12 +10,16 @@ import SwiftUI
 struct ContentView: View {
     @State private var statusText: String = ""
     @State private var clientKeyText: String = ""
-    // Define the filename and number of lines
-    @State private var filename = "/Users/aisha/Desktop/cryptonomic/MonadicDNA/zama-poc/genomeData.txt" // TODO: upload via input
-    @State private var numLines = 25
+    
+    // Define the number of lines
+    @State private var numLines = 20
+    
+    @State private var presentImporter = false
+    
 
     var body: some View {
         VStack {
+            
             Text(statusText)
                 .padding()
 
@@ -28,9 +32,10 @@ struct ContentView: View {
                 storeClientKey()
             }
 
-            Button("Process genome data") {
-                processGenomeData(filename: filename, numLines: 10)
-
+            Button("Upload Genome Data") {
+                presentImporter = true
+            }.fileImporter(isPresented: $presentImporter, allowedContentTypes: [.text]) { result in
+                uploadAndProcessGenomeData(result: result)
             }
             .padding()
             .background(Color.blue)
@@ -61,6 +66,26 @@ struct ContentView: View {
 
             }
         }
+    }
+    
+    func uploadAndProcessGenomeData(result: Result<URL, Error>) {
+        guard let url = try? result.get() else {
+            print("File upload failed:", result)
+            return
+        }
+        
+        guard url.startAccessingSecurityScopedResource() else {
+            print("Failed to access file resource.")
+            return
+        }
+        defer { url.stopAccessingSecurityScopedResource() }
+        
+        guard let filename = url.path.removingPercentEncoding else {
+            print("Filename is invalid.")
+            return
+        }
+        
+        processGenomeData(filename: filename, numLines: numLines)
     }
 }
 
