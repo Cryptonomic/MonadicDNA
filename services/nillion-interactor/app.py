@@ -1,25 +1,23 @@
-import asyncio
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from quart import Quart, request, jsonify
+from quart_cors import cors
 import os
-import py_nillion_client as nillion
 import sys
-import werkzeug
 
-import socket
 import random
 import string
+from uuid import UUID
 
 from dotenv import load_dotenv
 
+from nillion_client import (VmClient, UserId, InputPartyBinding, OutputPartyBinding, SecretInteger, Permissions)
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from helpers.nillion_client_helper import create_nillion_client
-from helpers.nillion_keypath_helper import getUserKeyFromFile, getNodeKeyFromFile
 
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+app = Quart(__name__)
+app = cors(app, allow_origin="*")
 
 def get_random_node_key():
         # hostname = socket.gethostname()
@@ -30,9 +28,35 @@ def get_random_node_key():
         print("Node key: ", result)
         return result
 
-_userkey = getUserKeyFromFile(os.getenv("NILLION_USERKEY_PATH_PARTY_1"))
-_nodekey = nillion.NodeKey.from_seed(get_random_node_key())
-_client = create_nillion_client(_userkey, _nodekey)
+_keys = {
+    "monadic" : bytes.fromhex(os.getenv("MONADIC_PRIVKEY")),
+    "snipperBot" : bytes.fromhex(os.getenv("SNIPPER_BOT_PRIVKEY"))
+}
+_clients:dict[str, VmClient] = None
+
+_default_client = "monadic"
+
+_program_id = os.getenv("THROMBOSIS_PROGRAM_ID")
+
+async def initialize_client():
+    global _clients, _program_id
+    if _clients is None:
+        _clients = {}
+        print("initializing clients")
+        for key in _keys :
+          _clients[key] = await create_nillion_client(_keys[key])
+        print("done initializing clients")
+    if _program_id == '' or _program_id is None:
+        print("uploading thrombosis program")
+        _program_id = await upload_thrombosis_program()
+        print("thrombosis program uploaded, id "+_program_id)
+
+async def upload_thrombosis_program():
+    program_name = "thrombosis"
+    program_mir_path = f"binaries/thrombosis.nada.bin"
+    program = open(program_mir_path, "rb").read()
+    return await _clients[_default_client].store_program(program_name, program,).invoke()
+
 
 def read_and_filter_23andme(file_storage):
     # Define the SNPs of interest and their deterministic integer values
@@ -70,17 +94,10 @@ def read_and_filter_23andme(file_storage):
     return results
 
 async def store_on_nillion(gene_data):
-    cluster_id = os.getenv("NILLION_CLUSTER_ID")
-    party_id = _client.party_id()
-    user_id = _client.user_id()
-    party_name = "Party1"
-
-    program_name = "thrombosis"
-    program_mir_path = f"binaries/thrombosis.nada.bin"
-    program_id = f"{user_id}/{program_name}"
-
-    secret_bindings = nillion.ProgramBindings(program_id)
-    secret_bindings.add_input_party(party_name, party_id)
+    # Set permissions for the client to compute on the program
+    permissions = Permissions.defaults_for_user(_clients[_default_client].user_id).allow_compute(
+                _clients[_default_client].user_id, _program_id
+            )
 
     store_ids = {}
 
@@ -88,79 +105,110 @@ async def store_on_nillion(gene_data):
         rsid = row['rsid']
         rsid_int = row['rsid_int']
         genotype_int = row['genotype_int']
-        stored_secret = nillion.Secrets({
-        "snp": nillion.SecretInteger(6),
-        "genotype": nillion.SecretInteger(9),
-         })
-        store_id = await _client.store_secrets(
-            cluster_id, secret_bindings, stored_secret, None
-        )
+        stored_secret = {
+            "snp": SecretInteger(rsid_int),
+            "genotype": SecretInteger(genotype_int),
+        }
+        store_id = await _clients[_default_client].store_values(
+                values=stored_secret, ttl_days=5, permissions=permissions
+            ).invoke()
+
         store_ids[rsid] = store_id
 
     return store_ids
 
-async def compute_on_nillion(store_id):
-    cluster_id = os.getenv("NILLION_CLUSTER_ID")
-    party_id = _client.party_id()
-    user_id = _client.user_id()
+async def compute_on_nillion(client_id, store_id):
+
     party_name = "Party1"
-    program_name = "thrombosis"
-    program_mir_path = f"binaries/thrombosis.nada.bin"
 
-    program_id = f"{user_id}/{program_name}"
+    input_bindings = [InputPartyBinding(party_name, _clients[client_id].user_id)]
+    output_bindings = [OutputPartyBinding(party_name, [_clients[client_id].user_id])]
 
-    compute_bindings = nillion.ProgramBindings(program_id)
-    compute_bindings.add_input_party(party_name, party_id)
-    compute_bindings.add_output_party(party_name, party_id)
-
-    computation_time_secrets = nillion.Secrets({})
+    computation_time_secrets = {}
 
     # Compute on the secret
-    compute_id = await _client.compute(
-        cluster_id,
-        compute_bindings,
-        [store_id],
-        computation_time_secrets,
-        nillion.PublicVariables({}),
-    )
+    compute_id = await _clients[client_id].compute(
+        _program_id,
+        input_bindings,
+        output_bindings,
+        values=computation_time_secrets,
+        value_ids=[UUID(f"urn:uuid:{store_id}")]
+    ).invoke()
 
     # Print compute result
     print(f"The computation was sent to the network. compute_id: {compute_id}")
-    while True:
-        compute_event = await _client.next_compute_event()
-        if isinstance(compute_event, nillion.ComputeFinishedEvent):
-            print(f"✅  Compute complete for compute_id {compute_event.uuid}")
-            print(f"🖥️  The result is {compute_event.result.value}")
-            return compute_event.result.value
+    result = await _clients[client_id].retrieve_compute_results(compute_id).invoke()
+    return result['Result'].value
 
+async def fund_user(user_id):
+    try:
+      uid = UserId.parse(user_id)
+    except Exception:
+      return "Invalid UserID" 
+    try:
+        await _clients[_default_client].add_funds(500000, target_user=uid)
+    except Exception:
+      return "Failed to add funds"
 
 @app.route('/dataset', methods=['PUT'])
 async def handle_dataset():
-    if 'file' not in request.files:
+    files = await request.files
+    if 'file' not in files :
         return jsonify({'error': 'No file part'}), 400
-    file = request.files['file']
+    file = files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     if file:
-        filtered_data = read_and_filter_23andme(file)
-        results = await asyncio.wait_for(store_on_nillion(filtered_data), timeout=120)
-        return jsonify(results)
+        try:
+            filtered_data = read_and_filter_23andme(file)
+            results = await store_on_nillion(filtered_data)
+            return jsonify(results)
+        except Exception as e:
+            print(e)
+            return jsonify({'error': 'internal error'}), 500
     return jsonify({'error': 'File processing failed'}), 500
 
 @app.route('/computations/thrombosis', methods=['POST'])
 async def thrombosis():
-    store_id = request.json.get('store_id')
-
+    store_id = (await request.json).get('store_id')
     if store_id is None:
         return jsonify({'error': 'Missing store_id'}), 400
-
-    result = await asyncio.wait_for(compute_on_nillion(store_id), timeout=120)
+    client_id = (await request.json).get('client_id')
+    if client_id is None:
+        client_id = _default_client
+    elif client_id not in _clients:
+        return jsonify({'error': 'Invalid client_id'}), 400
+    try:
+        result = await compute_on_nillion(client_id, store_id)
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'internal error'}), 500
     return jsonify(result)
+
+@app.route('/fund', methods=['POST'])
+async def fund():
+    user_id = (await request.json).get('user_id')
+    if user_id is None:
+        return jsonify({'error': 'Missing user_id'}), 400
+    try:
+        result = await fund_user(user_id)
+        if result.__contains__("Invalid UserID"):
+            return jsonify({'error': result}), 400
+        elif result.__ne__(""):
+            return jsonify({'error': result}), 500
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'internal error'}), 500
+    return jsonify({'message': f"funded {user_id}"})
 
 
 @app.route('/')
 def hello_world():
     return "Hello, world!"
+
+@app.before_serving
+async def startup():
+    await initialize_client()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=8732)

@@ -1,15 +1,16 @@
 import os
-import py_nillion_client as nillion
-from helpers.nillion_payments_helper import create_payments_config
+from nillion_client import (Network, NilChainPrivateKey, NilChainPayer, PrivateKey, VmClient)
 
-def create_nillion_client(userkey, nodekey):
-    bootnodes = [os.getenv("NILLION_BOOTNODE_MULTIADDRESS")]
-    payments_config = create_payments_config()
-
-    return nillion.NillionClient(
-        nodekey,
-        bootnodes,
-        nillion.ConnectionMode.relay(),
-        userkey,
-        payments_config,
+async def create_nillion_client(priv_key):
+    network = Network(
+        chain_grpc_endpoint=os.getenv("NILLION_BLOCKCHAIN_RPC_ENDPOINT"),
+        chain_id=os.getenv("NILLION_CHAIN_ID"),
+        nilvm_grpc_endpoint=os.getenv("NILLION_BOOTNODE_MULTIADDRESS"),  
+        )
+    wallet_private_key=NilChainPrivateKey(priv_key)
+    payer = NilChainPayer(
+    network,
+    wallet_private_key=wallet_private_key,
+    gas_limit=10000000,
     )
+    return  await VmClient.create(PrivateKey(priv_key), network, payer)
