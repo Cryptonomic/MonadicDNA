@@ -14,7 +14,7 @@ const Footer = () => {
             {' '}
             <span>
                 <Link
-                    href='https://cryptonomic.tech/contact.html'
+                    href='mailto:hello@monadicdna.com'
                     target="_blank"
                     rel="noopener noreferrer"
                     color='inherit'
