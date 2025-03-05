@@ -21,11 +21,11 @@ const HowItWorks = () => {
                 <li className='py-3'>
                     <b> 2. Get Insights: </b>
                     <span>
-                        This secure DNA passport can be used on privacy-respecting tools like
-                        <Link href='https://snipperbot.xyz' target='_blank' rel='noopener noreferrer' color='inherit'> SnipperBot </Link>
-                        and
-                        <Link href='https://mtdog.xyz' target='_blank' rel='noopener noreferrer' color='inherit'> mtDog </Link>
-                        to learn about health and ancestry insights in an anonymous and private way.
+                        This secure DNA passport can be used on privacy-respecting tools like{' '}
+                        <Link href='https://snipperbot.xyz' target='_blank' rel='noopener noreferrer' color='inherit'>SnipperBot</Link>
+                        {' '}and{' '}
+                        <Link href='https://mtdog.xyz' target='_blank' rel='noopener noreferrer' color='inherit'>mtDog</Link>
+                        {' '}to learn about health and ancestry insights in an anonymous and private way.
                     </span>
                 </li>
                 <li className='py-3'>

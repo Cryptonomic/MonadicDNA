@@ -16,8 +16,8 @@ const GetExternalDataset = () => {
                   <InfoIcon sx={{color: lime[400]}} />
               </span>
               <Typography className='text-xs sm:text-base '>
-                  Don’t have your own 23andMe data? Use this
-                  <Link target="_blank" rel="noopener noreferrer" color="inherit" href={config.dataSetUrl} > link </Link> to find example datasets.
+                  Don't have your own 23andMe data? {' '}
+                  <Link target="_blank" rel="noopener noreferrer" color="inherit" href={config.dataSetUrl}>Get an example dataset</Link>
               </Typography>
           </Box>
         </>

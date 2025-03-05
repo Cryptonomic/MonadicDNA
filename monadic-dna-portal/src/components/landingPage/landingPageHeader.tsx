@@ -19,7 +19,7 @@ const LandingPageHeader = () => {
             >
                 <Typography variant='h4'> 👩‍💻 </Typography>
                 <Typography color='primary'>
-                    This is a prototype created for the Scaling Ethereum 2024 hackathon and is not intended for any healthcare application nor does it provide any healthcare advice.
+                    This prototype was created for the Scaling Ethereum 2024 hackathon and is for demonstration purposes only. It is not intended for any healthcare application and does not provide medical advice.
                 </Typography>
             </Box>
         </Box>
