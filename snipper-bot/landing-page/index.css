@@ -178,7 +178,7 @@
   background: var(--orange-50, #FFF3E0);
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 3em; /* Adjust max-height to fit two lines */
+  padding: .5rem;
 }
 .icon-area-parent {
   flex: 1;
