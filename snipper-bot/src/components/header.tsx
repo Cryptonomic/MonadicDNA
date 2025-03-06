@@ -11,9 +11,8 @@ const Header = () => {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position='static' color='transparent' sx={{ boxShadow: 0 }}>
-                <Toolbar variant='dense'>
+                <Toolbar variant='dense' sx={{ justifyContent: 'center' }}>
                     <IconButton
-                        edge='start'
                         color='inherit'
                         href='/'
                         aria-label='menu'

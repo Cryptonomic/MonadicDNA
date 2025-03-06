@@ -152,7 +152,7 @@ const UploadFile = () => {
                 </Typography>
                 {!file &&
                     <Typography className='pb-4'>
-                            Upload your DNA Passport to run an analysis. Attestations of the results will be added to your DNA passport.
+                            Upload your Monadic DNA Passport to run an analysis. Attestations of the results will be added to your DNA passport.
                     </Typography>
                 }
                 <Box

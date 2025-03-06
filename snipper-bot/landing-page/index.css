@@ -119,6 +119,9 @@
   font-family: inherit;
 }
 .snipperbot-logo-1-parent {
+  width: 100%;
+  max-width: 42.625rem;
+  margin: 0 auto;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -127,6 +130,8 @@
   font-size: 2rem;
   color: var(--orange-800);
   font-family: var(--font-sarpanch);
+  padding: 0 0.875rem;
+  box-sizing: border-box;
 }
 .iconamoonattention-circle {
   width: 1.5rem;
@@ -147,6 +152,8 @@
 .body1 {
   align-self: stretch;
   line-height: 116.7%;
+  text-align: left;
+  max-width: 100%;
 }
 .h1 {
   letter-spacing: 0.25px;
@@ -178,7 +185,7 @@
   background: var(--orange-50, #FFF3E0);
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 3em; /* Adjust max-height to fit two lines */
+  padding: .5rem;
 }
 .icon-area-parent {
   flex: 1;
@@ -189,16 +196,17 @@
   justify-content: flex-start;
   gap: 1rem;
   max-width: 100%;
+  text-align: left;
 }
 .prototype-info {
   align-self: stretch;
   flex-direction: row;
-  padding: 0 var(--padding-5xs) 0 var(--padding-9xs);
+  padding: 1rem;
   box-sizing: border-box;
   font-size: var(--typography-h4-size);
   color: var(--color-black);
   background: var(--orange-50, #FFF3E0);
-
+  width: 100%;
 }
 .navigation-item,
 .navigation-items,
@@ -212,12 +220,14 @@
   flex: 1;
   flex-direction: column;
   gap: 2.625rem;
+  text-align: left;
 }
 .navigation-items {
   align-self: stretch;
   flex-direction: row;
-  padding: 0 0 0 var(--padding-9xs);
+  padding: 0;
   box-sizing: border-box;
+  width: 100%;
 }
 .masked-icon4 {
   height: 1.375rem;
@@ -272,6 +282,7 @@
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
+  margin: 1rem 0;
 }
 .frame-parent,
 .navigation-area,
@@ -291,19 +302,22 @@
   box-sizing: border-box;
 }
 .navigation-area {
-  width: 42.625rem;
+  width: 100%;
+  max-width: 42.625rem;
+  margin: 0 auto;
   flex-direction: row;
   padding: 0 0.875rem;
   font-size: var(--typography-h3-size);
   color: var(--text-primary);
+  box-sizing: border-box;
 }
 .frame-parent {
   align-self: stretch;
   background-color: rgba(255, 243, 224, 0.25);
   overflow: hidden;
   flex-direction: column;
-  padding: var(--padding-24xl) 5rem 4.125rem;
-  gap: 7.125rem;
+  padding: var(--padding-24xl) 1rem 4.125rem;
+  gap: 3rem;
   text-align: left;
   font-size: var(--button-large-size);
   color: var(--primary-main);
@@ -311,7 +325,12 @@
 }
 .providedBy-con {
   width: 488px;
+  max-width: 100%;
   height: 56px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 0;
 }
 .providedBy-logo {
   width: 100%;
@@ -411,7 +430,6 @@
 }
 .create-a-dna-container {
   align-self: stretch;
-  height: 18rem;
   position: relative;
   font-size: var(--typography-body1-size);
   letter-spacing: 0.15px;
@@ -515,9 +533,6 @@
   letter-spacing: normal;
 }
 @media screen and (max-width: 850px) {
-  .snipperbot {
-    font-size: 1.625rem;
-  }
   .body1 {
     font-size: 2.375rem;
     line-height: 2.813rem;
@@ -565,9 +580,6 @@
   }
 }
 @media screen and (max-width: 450px) {
-  .snipperbot {
-    font-size: 1.188rem;
-  }
   .providedBy-con {
     width: 250px;
   }

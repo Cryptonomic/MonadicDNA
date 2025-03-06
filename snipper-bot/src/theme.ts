@@ -9,14 +9,29 @@ const roboto = Roboto({
     display: 'swap',
 });
 
+const darkText = 'rgba(0, 0, 0, 0.87)';
+const darkTextSecondary = 'rgba(0, 0, 0, 0.6)';
+
 const theme = createTheme({
     palette: {
+        mode: 'light', // Force light mode
         primary: {
             main: orange[800],
+        },
+        text: {
+            primary: darkText,
+            secondary: darkTextSecondary,
+        },
+        background: {
+            default: '#ffffff',
+            paper: '#ffffff',
         }
     },
     typography: {
         fontFamily: roboto.style.fontFamily,
+        allVariants: {
+            color: darkText,
+        },
     },
 });
 
