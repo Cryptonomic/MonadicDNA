@@ -148,7 +148,7 @@ const UploadFile = () => {
             <AnalysisStepper {...{ activeStep, setActiveStep }} />
             <div className='sm:w-[552px] mt-12 mx-auto'>
                 <Typography variant='h5'>
-                    Upload Your DNA Passport
+                    Upload Your Monadic DNA Passport
                 </Typography>
                 {!file &&
                     <Typography className='pb-4'>
