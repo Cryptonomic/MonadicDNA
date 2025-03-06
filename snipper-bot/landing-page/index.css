@@ -411,7 +411,6 @@
 }
 .create-a-dna-container {
   align-self: stretch;
-  height: 18rem;
   position: relative;
   font-size: var(--typography-body1-size);
   letter-spacing: 0.15px;
