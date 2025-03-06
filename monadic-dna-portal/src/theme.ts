@@ -9,10 +9,47 @@ const roboto = Roboto({
     display: 'swap',
 });
 
+const darkText = 'rgba(0, 0, 0, 0.87)';
+const darkTextSecondary = 'rgba(0, 0, 0, 0.6)';
+
 const theme = createTheme({
     palette: {
         primary: {
             main: teal[800],
+        },
+        text: {
+            primary: darkText,
+            secondary: darkTextSecondary,
+        },
+    },
+    components: {
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    color: `${darkText}`,
+                }
+            }
+        },
+        MuiSvgIcon: {
+            styleOverrides: {
+                root: {
+                    color: `${darkText}`,
+                }
+            }
+        },
+        MuiList: {
+            styleOverrides: {
+                root: {
+                    color: `${darkText}`,
+                }
+            }
+        },
+        MuiListItem: {
+            styleOverrides: {
+                root: {
+                    color: `${darkText}`,
+                }
+            }
         }
     },
     typography: {
