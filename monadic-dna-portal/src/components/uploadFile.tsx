@@ -240,8 +240,6 @@ const UploadFile = ({ type, isTypeCreate }: { type: ActionType; isTypeCreate?: b
                             Click to upload
                             <VisuallyHiddenInput type='file' accept={currentAction.acceptedFileFormats} onChange={handleFileChange} disabled={isFileLoading} />
                         </Link>
-                        {' '}
-                        or drag and drop
                     </div>
                     {isTypeCreate &&
                         <Typography color='text.secondary'>
