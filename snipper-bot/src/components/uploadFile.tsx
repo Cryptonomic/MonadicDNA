@@ -170,8 +170,6 @@ const UploadFile = () => {
                             Click to upload
                             <VisuallyHiddenInput type='file' accept='.json' onChange={handleFileChange} disabled={isFileLoading} />
                         </Link>
-                        {' '}
-                        or drag and drop
                     </div>
 
                     <Typography color='text.secondary'> DNA Passport JSON </Typography>
