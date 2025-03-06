@@ -27,6 +27,22 @@ const theme = createTheme({
             paper: '#ffffff',
         }
     },
+    components: {
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    color: `${darkText}`,
+                }
+            }
+        },
+        MuiSvgIcon: {
+            styleOverrides: {
+                root: {
+                    color: `${darkText}`,
+                }
+            }
+        }
+    },
     typography: {
         fontFamily: roboto.style.fontFamily,
         allVariants: {
