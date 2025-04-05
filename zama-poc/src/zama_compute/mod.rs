@@ -107,10 +107,16 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     return Ok(());
 }
 
+
 pub fn check_genotype(encrypted_genotypes: &HashMap<u64, CompressedFheUint8>, target_rsid: &str, target_genotype: &str) -> Result<FheBool, Error> {
     let encoded_target_genotype = encode_genotype(target_genotype);
     let encrypted_target_genotype = FheUint8::try_encrypt_trivial(encoded_target_genotype).unwrap();
     let encoded_rsid = genome_processing::encode_rsid(target_rsid);
+    let encrypted_false = FheBool::try_encrypt_trivial(false).unwrap();
+    match encrypted_genotypes.get(&encoded_rsid) {
+        Some(_) => {}
+        None => return Ok(encrypted_false),
+    }
     let encrypted_genotype = encrypted_genotypes.get(&encoded_rsid).unwrap();
     let decompressed_encrypted_genotype = encrypted_genotype.decompress();
     Ok(decompressed_encrypted_genotype.eq(encrypted_target_genotype))

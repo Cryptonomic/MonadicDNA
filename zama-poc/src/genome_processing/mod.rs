@@ -53,6 +53,7 @@ pub fn get_genotype_encoding_map() -> HashMap<&'static str, u8> {
         ("TT", 10),
         ("NN", 11),
         ("", 12), ("???", 12),
+        ("--", 12), 
     ])
 }
 
