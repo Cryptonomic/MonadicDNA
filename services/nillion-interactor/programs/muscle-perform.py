@@ -24,6 +24,6 @@ def nada_main():
 
     is_successful = (total >= Integer(2)).if_else((Integer(2) >= total).if_else(Integer(1), Integer(0)), Integer(0))
 
-    result = is_successful.reveal()
+    result = is_successful
 
     return [Output(result, "Result", party1)]
