@@ -9,6 +9,7 @@ use bincode;
 use std::io::Cursor;
 use crate::genome_processing::{encode_genotype, get_genotype_encoding_map};
 use tfhe::prelude::*;
+use tfhe::integer::fpga::BelfortServerKey;
 
 // Iterate through encrypted_genotypes and get the frequency of each genotype
 pub fn get_genotype_frequencies(
@@ -65,8 +66,10 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     info!("Setting up Zama env");
     let config = ConfigBuilder::default().build();
     let (client_key, server_key) = generate_keys(config);
+    let mut fpga_key = BelfortServerKey::from(&server_key);
     let cloned_server_key = server_key.clone();
-    set_server_key(server_key);
+    fpga_key.connect();
+    set_server_key(fpga_key.clone());
 
     info!("Number of lines to process: {:?}", num_lines);
 
