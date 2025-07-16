@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tfhe::{ClientKey, CompressedFheUint8, ConfigBuilder, FheBool, FheUint8, generate_keys, ServerKey, set_server_key};
+use tfhe::{ClientKey, CompressedFheUint8, ConfigBuilder, FheBool, FheUint8, generate_keys, ServerKey, set_server_key, CpuFheUint8Array, CpuFheBoolArray};
 use std::result;
 use std::io::Error;
 use tfhe::prelude::{FheDecrypt, FheEq, FheTryEncrypt};
@@ -13,29 +13,32 @@ use tfhe::prelude::*;
 // Iterate through encrypted_genotypes and get the frequency of each genotype
 pub fn get_genotype_frequencies(
     encrypted_genotypes: &HashMap<u64, CompressedFheUint8>,
-    max_genotype_value: u8
-) -> Vec<FheUint8> {
+    max_genotype_value: u8,
+    client_key: &ClientKey
+) -> Result<CpuFheUint8Array, Error> {
+    
     info!("Caching encrypted numbers");
-    // Create a cache for encrypted values
-    let encrypted_values: Vec<FheUint8> = (0..=max_genotype_value)
-        .map(|i| FheUint8::try_encrypt_trivial(i).unwrap())
-        .collect();
-
-    let encrypted_zero = FheUint8::try_encrypt_trivial(0u8).unwrap();
-    let encrypted_one = FheUint8::try_encrypt_trivial(1u8).unwrap();
+    //Create a cache for encrypted values
+    let clear_values: Vec<u8> = (0..=max_genotype_value).collect();
+    let encrypted_values = CpuFheUint8Array::try_encrypt(clear_values.as_slice(), &client_key).unwrap();
 
     info!("Calculating genotype frequencies");
-    let mut frequencies = vec![encrypted_zero.clone(); max_genotype_value as usize + 1];
+    let mut frequencies: CpuFheUint8Array = CpuFheUint8Array::try_encrypt(vec![0u8; max_genotype_value as usize].as_slice(), &client_key).unwrap();
 
     for encrypted_genotype in encrypted_genotypes.values() {
         let decompressed = encrypted_genotype.decompress();
-        for (i, encrypted_value) in encrypted_values.iter().enumerate() {
-            let is_match = decompressed.eq(encrypted_value);
-            frequencies[i] += is_match.if_then_else(&encrypted_one, &encrypted_zero);
-        }
+        let is_match: CpuFheBoolArray = encrypted_values.eq(&decompressed);
+        let ones_array: CpuFheUint8Array = CpuFheUint8Array::try_encrypt(vec![1u8; max_genotype_value as usize].as_slice(), &client_key).unwrap(); 
+        let zeros_array: CpuFheUint8Array = CpuFheUint8Array::try_encrypt(vec![0u8; max_genotype_value as usize].as_slice(), &client_key).unwrap(); 
+        let encrypted_increment_mask: CpuFheUint8Array = is_match.if_then_else_uint8_array(
+            &ones_array,
+            &zeros_array,
+            &client_key, 
+        );
+        frequencies = &frequencies + encrypted_increment_mask;
     }
 
-    frequencies
+    Ok(frequencies)
 }
 
 pub fn encrypt_genotypes_for_zama(processed_data: &HashMap<u64, u8>, client_key: ClientKey) -> result::Result<HashMap<u64, CompressedFheUint8>, Error> {
@@ -89,11 +92,12 @@ pub fn run_iteration(filename: &str, num_lines: usize) -> result::Result<(), Err
     let decoded_result = encoded_result.decrypt(&client_key);
     info!("Lookup result: {:?}", decoded_result);
 
-    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, 10);
+    let genotype_frequencies = get_genotype_frequencies(&encrypted_genotypes, 10, &client_key);
     info!("Genotype frequencies:");
-    //Iterate through genotype_frequencies and print the frequency of each genotype
-    for (i, frequency) in genotype_frequencies.iter().enumerate() {
-        let decrypted_frequency:u8 = frequency.decrypt(&client_key);
+    //Decrypting first as a whole array
+    let decrypted_frequencies: Vec<u8> = genotype_frequencies?.decrypt(&client_key);
+    //Iterate through decrypted_frequencies and print the frequency of each genotype
+    for (i, decrypted_frequency) in decrypted_frequencies.iter().enumerate() {
         info!("{:?}: {:?}", i, decrypted_frequency);
     }
 
