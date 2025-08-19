@@ -155,28 +155,28 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
         except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"❌ Failed to read profile: {e}")
 
-        # Step 8: Create collection
-        print("\n8️⃣ Creating collection...")
-        collection_id = str(uuid.uuid4())
-
-        # Load the standard collection schema
-        try:
-            with open("load_test_schema.json", "r", encoding="utf-8") as f:
-                schema_data = json.load(f)
-
-            create_request = CreateCollectionRequest(
-                id=collection_id,
-                type=schema_data["type"],
-                name="monadic-dna_load_test",
-                schema=schema_data["schema"],
-            )
-
-            await builder_client.create_collection(create_request)
-            print(f"✅ Collection created with ID: {collection_id}")
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            print(f"❌ Failed to create collection: {e}")
-            return
+        # # Step 8: Create collection
+        # print("\n8️⃣ Creating collection...")
+        # collection_id = str(uuid.uuid4())
+        #
+        # # Load the standard collection schema
+        # try:
+        #     with open("load_test_schema.json", "r", encoding="utf-8") as f:
+        #         schema_data = json.load(f)
+        #
+        #     create_request = CreateCollectionRequest(
+        #         id=collection_id,
+        #         type=schema_data["type"],
+        #         name="monadic-dna_load_test",
+        #         schema=schema_data["schema"],
+        #     )
+        #
+        #     await builder_client.create_collection(create_request)
+        #     print(f"✅ Collection created with ID: {collection_id}")
+        #
+        # except Exception as e:  # pylint: disable=broad-exception-caught
+        #     print(f"❌ Failed to create collection: {e}")
+        #     return
 
         # Step 9: Create standard data
         print("\n9️⃣ Creating standard data...")

@@ -1,6 +1,6 @@
 {
   "_id": "",
-  "type": "standard",
+  "type": "owned",
   "name": "Monadic DNA Load Test",
   "schema": {
     "$schema": "http://json-schema.org/draft-07/schema#",
