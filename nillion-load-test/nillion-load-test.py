@@ -155,38 +155,60 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
         except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"❌ Failed to read profile: {e}")
 
-        # # Step 8: Create collection
-        # print("\n8️⃣ Creating collection...")
-        # collection_id = str(uuid.uuid4())
-        #
-        # # Load the standard collection schema
-        # try:
-        #     with open("load_test_schema.json", "r", encoding="utf-8") as f:
-        #         schema_data = json.load(f)
-        #
-        #     create_request = CreateCollectionRequest(
-        #         id=collection_id,
-        #         type=schema_data["type"],
-        #         name="monadic-dna_load_test",
-        #         schema=schema_data["schema"],
-        #     )
-        #
-        #     await builder_client.create_collection(create_request)
-        #     print(f"✅ Collection created with ID: {collection_id}")
-        #
-        # except Exception as e:  # pylint: disable=broad-exception-caught
-        #     print(f"❌ Failed to create collection: {e}")
-        #     return
+        # Step 8: Create collection
+        print("\n8️⃣ Creating collection...")
+        collection_id = str(uuid.uuid4())
+
+        # Load the standard collection schema
+        try:
+            with open("load_test_schema.json", "r", encoding="utf-8") as f:
+                schema_data = json.load(f)
+
+            create_request = CreateCollectionRequest(
+                id=collection_id,
+                type=schema_data["type"],
+                name="monadic-dna_load_test",
+                schema=schema_data["schema"],
+            )
+
+            await builder_client.create_collection(create_request)
+            print(f"✅ Collection created with ID: {collection_id}")
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            print(f"❌ Failed to create collection: {e}")
+            return
 
         # Step 9: Create standard data
         print("\n9️⃣ Creating standard data...")
         try:
+            genetic_data = []
+            file_path = "../services/nillion-interactor/testdata/hu278AF5_20210124151934.txt"
+
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+
+            # Skip the header line and process the data
+            for line in lines[1:50]:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    parts = line.split('\t')
+                    if len(parts) >= 4:  # rsid, chromosome, position, genotype
+                        rsid = parts[0]
+                        genotype = parts[3]
+                        genetic_data.append({
+                            "rsid": rsid,
+                            "genotype": genotype
+                        })
+
+            print("Num records of genetic data:", len(genetic_data))
+
             # Sample data that matches the standard schema
-            sample_data = [
-                {"_id": str(uuid.uuid4()), "name": "Sample Item 1", "country_code": {"%allot": "US"}},
-                {"_id": str(uuid.uuid4()), "name": "Sample Item 2", "country_code": {"%allot": "GB"}},
-                {"_id": str(uuid.uuid4()), "name": "Sample Item 3", "country_code": {"%allot": "AU"}},
-            ]
+            sample_data = [{
+                "_id": str(uuid.uuid4()),
+                "user_id": "1",
+                "profile_name": "primary",
+                "genetic_info": genetic_data,
+            }]
 
             create_data_request = CreateStandardDataRequest(collection=collection_id, data=sample_data)
 
@@ -197,65 +219,6 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
             print(f"❌ Failed to create data: {e}")
             return
 
-        # Step 10: Find and display the created data
-        print("\n🔟 Finding created data...")
-        try:
-            find_request = FindDataRequest(collection=collection_id, filter={})
-            find_response = await builder_client.find_data(find_request)
-
-            # Display find response nicely
-            if find_response:
-                data_records = find_response
-                print(f"\n📋 Found {len(data_records)} data records:")
-                print("=" * 60)
-
-                for i, record in enumerate(data_records, 1):
-                    print(f"\n{i}. Data Record:")
-
-                    # Handle both dict and object records
-                    if isinstance(record, dict):
-                        # For dictionary records, iterate through all key-value pairs
-                        for key, value in record.items():
-                            # Format the key nicely
-                            if key == "_id":
-                                print(f"   🆔 ID: {value}")
-                            elif key == "name":
-                                print(f"   📝 Name: {value}")
-                            elif key == "country_code":
-                                print(f"   🌍 Country Code: {value}")
-                            else:
-                                # Handle other data fields
-                                print(f"   📋 {key}: {value}")
-                    else:
-                        # For object records, get all attributes
-                        for attr_name in dir(record):
-                            # Skip private attributes and methods
-                            if not attr_name.startswith("_") or attr_name == "_id":
-                                try:
-                                    value = getattr(record, attr_name)
-                                    if not callable(value):  # Skip methods
-                                        if attr_name == "_id":
-                                            print(f"   🆔 ID: {value}")
-                                        elif attr_name == "name":
-                                            print(f"   📝 Name: {value}")
-                                        elif attr_name == "country_code":
-                                            print(f"   🌍 Country Code: {value}")
-                                        else:
-                                            print(f"   📋 {attr_name}: {value}")
-                                except Exception:  # pylint: disable=broad-exception-caught
-                                    pass  # Skip attributes that can't be accessed
-
-                    print("-" * 40)  # pylint: disable=too-many-nested-blocks
-
-                print(f"\n✅ Successfully found {len(data_records)} data records")
-            else:
-                print("❌ No data records found")
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            print(f"❌ Failed to find data: {e}")
-
-        print("\n🎉 Standard data example finished successfully!")
-        print("=" * 60)
 
 
 if __name__ == "__main__":
