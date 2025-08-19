@@ -1,0 +1,52 @@
+{
+  "_id": "",
+  "type": "standard",
+  "name": "Monadic DNA Load Test",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "array",
+    "uniqueItems": true,
+    "items": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "format": "uuid",
+          "coerce": true
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "profile_name": {
+          "type": "string"
+        },
+        "genetic_info": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rsid": {
+                "type": "string"
+              },
+              "genotype": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "rsid",
+              "genotype"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "_id",
+        "user_id",
+        "genetic_info",
+        "profile_name"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

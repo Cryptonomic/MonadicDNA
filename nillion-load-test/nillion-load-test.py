@@ -113,32 +113,32 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
         except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"⚠️  Could not check subscription status: {e}")
 
-        # Step 6: Register builder
-        print("\n6️⃣ Registering builder...")
-        try:
-            register_request = RegisterBuilderRequest(
-                did=builder_client.keypair.to_did_string(), name=Name("standard-data-example-builder")
-            )
-            register_response = await builder_client.register(register_request)
-
-            # Check if the response contains errors (any non-201 status codes)
-            if hasattr(register_response, "root"):
-                has_errors = False
-                for node_id, response in register_response.root.items():  # pylint: disable=unused-variable
-                    if hasattr(response, "status") and response.status != 201:
-                        has_errors = True
-                        break
-
-                if has_errors:
-                    print("ℹ️  Builder appears to already be registered.")
-                    print("   This is normal if the builder was previously registered.")
-                else:
-                    print("✅ Builder registered successfully!")
-            else:
-                print("✅ Builder registered successfully!")
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            print(f"ℹ️  Builder appears to already be registered: {e}")
+        # # Step 6: Register builder
+        # print("\n6️⃣ Registering builder...")
+        # try:
+        #     register_request = RegisterBuilderRequest(
+        #         did=builder_client.keypair.to_did_string(), name=Name("monadicdna-load-test")
+        #     )
+        #     register_response = await builder_client.register(register_request)
+        #
+        #     # Check if the response contains errors (any non-201 status codes)
+        #     if hasattr(register_response, "root"):
+        #         has_errors = False
+        #         for node_id, response in register_response.root.items():  # pylint: disable=unused-variable
+        #             if hasattr(response, "status") and response.status != 201:
+        #                 has_errors = True
+        #                 break
+        #
+        #         if has_errors:
+        #             print("ℹ️  Builder appears to already be registered.")
+        #             print("   This is normal if the builder was previously registered.")
+        #         else:
+        #             print("✅ Builder registered successfully!")
+        #     else:
+        #         print("✅ Builder registered successfully!")
+        #
+        # except Exception as e:  # pylint: disable=broad-exception-caught
+        #     print(f"ℹ️  Builder appears to already be registered: {e}")
 
         # Step 7: Read builder profile
         print("\n7️⃣ Reading builder profile...")
@@ -161,13 +161,13 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
 
         # Load the standard collection schema
         try:
-            with open("examples/data/collection.json", "r", encoding="utf-8") as f:
+            with open("load_test_schema.json", "r", encoding="utf-8") as f:
                 schema_data = json.load(f)
 
             create_request = CreateCollectionRequest(
                 id=collection_id,
                 type=schema_data["type"],
-                name="standard-data-example-collection",
+                name="monadic-dna_load_test",
                 schema=schema_data["schema"],
             )
 
