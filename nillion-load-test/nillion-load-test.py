@@ -188,7 +188,7 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
                 lines = file.readlines()
 
             # Skip the header line and process the data
-            for line in lines[1:50]:
+            for line in lines[1:500000]:
                 line = line.strip()
                 if line and not line.startswith('#'):
                     parts = line.split('\t')
@@ -216,8 +216,53 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
             print(f"✅ Created {len(sample_data)} data records")
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            print(f"❌ Failed to create data: {e}")
+            print(f"❌ Failed to create data: {str(e)[:500]}")
             return
+
+        # Step 10: Find and display the created data
+        print("\n🔟 Finding created data...")
+        if False:
+            try:
+                find_request = FindDataRequest(collection=collection_id, filter={})
+                find_response = await builder_client.find_data(find_request)
+
+                # Display find response nicely
+                if find_response:
+                    data_records = find_response
+                    print(f"\n📋 Found {len(data_records)} data records:")
+                    print("=" * 60)
+
+                    for i, record in enumerate(data_records, 1):
+                        print(f"\n{i}. Data Record:")
+
+                        # Handle both dict and object records
+                        if isinstance(record, dict):
+                            # For dictionary records, iterate through all key-value pairs
+                            for key, value in record.items():
+                                print(f"   📋 {key}: {value}")
+                        else:
+                            # For object records, get all attributes
+                            for attr_name in dir(record):
+                                # Skip private attributes and methods
+                                if not attr_name.startswith("_") or attr_name == "_id":
+                                    try:
+                                        value = getattr(record, attr_name)
+                                        if not callable(value):  # Skip methods
+                                            print(f"   📋 {attr_name}: {value}")
+                                    except Exception:  # pylint: disable=broad-exception-caught
+                                        pass  # Skip attributes that can't be accessed
+
+                        print("-" * 40)  # pylint: disable=too-many-nested-blocks
+
+                    print(f"\n✅ Successfully found {len(data_records)} data records")
+                else:
+                    print("❌ No data records found")
+
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                print(f"❌ Failed to find data: {e}")
+
+            print("\n🎉 Standard data example finished successfully!")
+            print("=" * 60)
 
 
 
