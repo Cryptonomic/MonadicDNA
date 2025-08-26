@@ -157,26 +157,26 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
 
         # Step 8: Create collection
         print("\n8️⃣ Creating collection...")
-        collection_id = str(uuid.uuid4())
+        collection_id = '18cfe6e2-e64d-4f07-976c-b872fa71172f' #str(uuid.uuid4())
 
-        # Load the standard collection schema
-        try:
-            with open("load_test_schema.json", "r", encoding="utf-8") as f:
-                schema_data = json.load(f)
-
-            create_request = CreateCollectionRequest(
-                id=collection_id,
-                type=schema_data["type"],
-                name="monadic-dna_load_test",
-                schema=schema_data["schema"],
-            )
-
-            await builder_client.create_collection(create_request)
-            print(f"✅ Collection created with ID: {collection_id}")
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            print(f"❌ Failed to create collection: {e}")
-            return
+        # # Load the standard collection schema
+        # try:
+        #     with open("load_test_schema.json", "r", encoding="utf-8") as f:
+        #         schema_data = json.load(f)
+        #
+        #     create_request = CreateCollectionRequest(
+        #         id=collection_id,
+        #         type=schema_data["type"],
+        #         name="monadic-dna_load_test",
+        #         schema=schema_data["schema"],
+        #     )
+        #
+        #     await builder_client.create_collection(create_request)
+        #     print(f"✅ Collection created with ID: {collection_id}")
+        #
+        # except Exception as e:  # pylint: disable=broad-exception-caught
+        #     print(f"❌ Failed to create collection: {e}")
+        #     return
 
         # Step 9: Create standard data
         print("\n9️⃣ Creating standard data...")
@@ -188,7 +188,7 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
                 lines = file.readlines()
 
             # Skip the header line and process the data
-            for line in lines[1:500000]:
+            for line in lines[1:100000]:
                 line = line.strip()
                 if line and not line.startswith('#'):
                     parts = line.split('\t')
@@ -196,24 +196,19 @@ async def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-
                         rsid = parts[0]
                         genotype = parts[3]
                         genetic_data.append({
+                            "_id": str(uuid.uuid4()),
+                            "user_id": "1",
+                            "profile_name": "primary",
                             "rsid": rsid,
-                            "genotype": genotype
+                            "genotype": genotype,
                         })
 
             print("Num records of genetic data:", len(genetic_data))
 
-            # Sample data that matches the standard schema
-            sample_data = [{
-                "_id": str(uuid.uuid4()),
-                "user_id": "1",
-                "profile_name": "primary",
-                "genetic_info": genetic_data,
-            }]
-
-            create_data_request = CreateStandardDataRequest(collection=collection_id, data=sample_data)
+            create_data_request = CreateStandardDataRequest(collection=collection_id, data=genetic_data)
 
             await builder_client.create_standard_data(create_data_request)
-            print(f"✅ Created {len(sample_data)} data records")
+            print(f"✅ Created {len(genetic_data)} data records")
 
         except Exception as e:  # pylint: disable=broad-exception-caught
             print(f"❌ Failed to create data: {str(e)[:500]}")

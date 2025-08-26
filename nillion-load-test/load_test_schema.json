@@ -20,31 +20,18 @@
         "profile_name": {
           "type": "string"
         },
-        "genetic_info": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "rsid": {
-                "type": "string"
-              },
-              "genotype": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "rsid",
-              "genotype"
-            ],
-            "additionalProperties": false
-          }
+        "rsid": {
+          "type": "string"
+        },
+        "genotype": {
+          "type": "string"
         }
       },
       "required": [
         "_id",
         "user_id",
-        "genetic_info",
-        "profile_name"
+        "rsid",
+        "genotype"
       ],
       "additionalProperties": false
     }
