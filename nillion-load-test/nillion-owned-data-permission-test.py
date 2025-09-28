@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Owned Data Permission Test Example
-
-This script demonstrates the 'owned' data workflow, including a user revoking
-permission for the builder to access their data.
-"""
-
 import os
 import asyncio
 import json
