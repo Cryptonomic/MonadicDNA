@@ -20,7 +20,7 @@ from secretvaults.common.utils import into_seconds_from_now
 from secretvaults.dto.builders import RegisterBuilderRequest
 from secretvaults.dto.collections import CreateCollectionRequest
 from secretvaults.dto.data import CreateOwnedDataRequest, FindDataRequest
-from secretvaults.dto.users import AclDto, RevokeAccessToDataRequest
+from secretvaults.dto.users import AclDto, GrantAccessToDataRequest
 from secretvaults.dto.common import Name
 
 # Load .env file
@@ -130,7 +130,7 @@ async def main():
                     collection=collection_id,
                     owner=user_client.id,
                     data=[record_to_upload],
-                    acl=AclDto(grantee=builder_client.id, read=True, write=False, execute=False),
+                    acl=AclDto(grantee=builder_client.id, read=False, write=False, execute=True),
                 )
                 
                 create_response = await user_client.create_data(delegation=delegation_token, body=create_data_request)
@@ -156,17 +156,21 @@ async def main():
                 await last_user_client_for_revoke.close()
             return
 
-        print(f"\n4️⃣ Revoking builder's access from the last user's (user {USER_COUNT}) record...")
+        print(f"\n4️⃣ Removing builder's read access from the last user's (user {USER_COUNT}) record...")
         try:
-            revoke_request = RevokeAccessToDataRequest(
-                grantee=builder_client.id,
+            # Create the ACL
+            acl = AclDto(grantee=builder_client.id, read=False, write=False, execute=True)
+
+            # Create the grant request
+            grant_request = GrantAccessToDataRequest(
                 collection=collection_id,
                 document=last_user_doc_id,
+                acl=acl
             )
-            await last_user_client_for_revoke.revoke_access(revoke_request)
-            print(f"✅ Access revoked for builder from user {USER_COUNT}'s record.")
+            await last_user_client_for_revoke.grant_access(grant_request)
+            print(f"✅ Read access removed for builder from user {USER_COUNT}'s record.")
         except Exception as e:
-            print(f"❌ Failed to revoke access: {e}")
+            print(f"❌ Failed to remove read access: {e}")
         finally:
             if last_user_client_for_revoke:
                 await last_user_client_for_revoke.close()
@@ -182,6 +186,12 @@ async def main():
             if find_response:
                 num_records = len(find_response)
                 print(f"\n✅ Query successful! Found {num_records} records.")
+                print("📄 Document IDs found:")
+                for record in find_response:
+                    # record can be a dict or an object, handle both
+                    doc_id = record.get('_id') if isinstance(record, dict) else getattr(record, '_id', 'N/A')
+                    print(f"   - {doc_id}")
+
                 if num_records == USER_COUNT - 1:
                     print("✅ Correctly found 99 records, confirming the builder's access was successfully revoked by one user.")
                 else:
