@@ -37,6 +37,30 @@ Sign Protocol is used for setting up a chain of trust and encoding results as on
 
 The apps for Monadic DNA and SnipperBot are written in TypeScript using Next.js. The mtDog Rust UI uses a GUI framework called egui We considered rendering our RISC Zero Rust program to WASM so even the mtDog UI could be written in Node.js but the effort involved would be too great for a hackathon. 
 
+## Backend API Endpoints
+
+Monadic DNA provides several backend services with REST APIs that can be used by third-party developers. These services enable secure processing of genomic data using confidential computing and zero-knowledge technologies.
+
+### Available APIs
+
+| Service | Method | Path | Description |
+|--------|--------|------|-------------|
+| **Nillion Interactor** | PUT | `/dataset` | Process and upload genomic data from a 23andMe file to Nillion for secure storage |
+| **Nillion Interactor** | POST | `/computations/thrombosis` | Perform thrombosis risk computation using stored genomic data |
+| **Sign Protocol Interactor** | POST | `/sign/VerifiedTrait` | Create a blockchain attestation for a verified trait using Sign Protocol |
+| **Zama PoC** | PUT | `/dataset` | Store an encrypted genomic dataset for a user in the database |
+| **Zama PoC** | GET | `/dataset` | Retrieve an encrypted genomic dataset for a user from the database |
+| **Zama PoC** | GET | `/thrombosis` | Perform thrombosis risk computation on encrypted data |
+| **Zama PoC** | GET | `/frequencies` | Calculate the frequency of each genotype in the dataset |
+
+### Usage Example
+
+To get started with the services:
+
+1. Clone the repository and navigate to the specific service you want to use in the `services/` directory
+2. Install dependencies and run the service according to the individual README files
+3. Use the appropriate API endpoints with your client application
+
 ## Naming
 
 Monadic DNA references the way [monads](https://en.wikipedia.org//wiki/Monad_(functional_programming)) allow external inputs to be encased in a protective way and still allow a series of computations to be performed on them. Our project protects genomic data using encryption and still allows beneficial computations to be peformed on them. 
